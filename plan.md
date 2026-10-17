@@ -54,7 +54,7 @@ pages（页面编排）
 | M0 | 项目基线 | 一 | P0 | — | 可启动应用、路由、主题基线 | ✅ | 2026-10-17 | build + dev 200 |
 | M1 | 题库解析 | 一 | P0 | M0 | `BankData`、`banks.json`、异常报告 | ✅ | 2026-10-17 | 336 有效题；重复执行一致；build 通过 |
 | M2 | 数据与存储 | 二 | P0 | M1 | Session 类型、Dexie API | ✅ | 2026-10-17 | 11 项测试通过；build 通过 |
-| M3 | 判分与统计 | 二 | P0 | M2 | `scoring` 纯函数 | ⬜ | | |
+| M3 | 判分与统计 | 二 | P0 | M2 | `scoring` 纯函数 | ✅ | 2026-10-17 | 27 项测试通过；build 通过 |
 | M4 | 题库选择 | 二 | P0 | M1, M2 | 题库卡片、创建/继续会话 | ⬜ | | |
 | M5 | 答题核心 | 二 | P0 | M2, M3, M4 | 答题页、判分、翻题、题号侧栏 | ⬜ | | |
 | M6 | 结果页 | 二 | P0 | M2, M3, M5 | 成绩、错题/未答题号、异常数 | ⬜ | | |
@@ -173,22 +173,22 @@ feedback:  '++id, questionId, createdAt'
 
 ### M3 判分与统计
 
-- [ ] `src/lib/scoring.ts`：
+- [x] `src/lib/scoring.ts`：
   - `isAnswerCorrect(question, selected)`
   - `getSessionStats(session, questions)`
   - `getQuestionStatus(session, questionId)`
-- [ ] 规则：
+- [x] 规则：
   - 单选/判断：集合完全一致。
   - 多选：集合相等即正确，少选/多选均错，顺序无关。
   - 未作答：交卷时按错误计入正确率。
   - 正确率 = 答对数 / 有效题总数。
   - 首次提交计分；后续提交直接返回。
   - “本次错题”只统计本 session；“错题本”跨 session 累计。
-- [ ] 纯函数，不 import React、Dexie、页面组件。
-- [ ] 验收用例：单选对/错、多选全对/少选/多选/顺序不同、判断题、未作答、重复提交。
-- [ ] 验收：结果与预期一致，构建通过。
+- [x] 纯函数，不 import React、Dexie、页面组件。
+- [x] 验收用例：单选对/错、多选全对/少选/多选/顺序不同、判断题、未作答、重复提交。
+- [x] 验收：结果与预期一致，构建通过。
 
-**完成标记**：⬜ 未开始｜日期：____｜验证：____｜接口变更：无
+**完成标记**：✅ 已完成｜日期：2026-10-17｜涉及文件：`src/lib/scoring.ts`、`src/lib/scoring.test.ts`｜验证：Vitest 27 项全部通过（其中判分/统计 16 项：单选、判断、多选全对/少选/多选/乱序、大小写与重复、空答案、未答计入分母、快照外记录忽略、空会话、重复提交幂等、题目不在快照报错、题目状态）；`npm run build` 通过｜接口变更：新增并冻结 `isAnswerCorrect` / `getSessionStats` / `getQuestionStatus`，另提供 `submitAnswer`（首次提交幂等，返回新 session）、`normalizeSelected`、`isMultiChoice`；`getSessionStats` 第二参数为可选题目表，统计口径始终以 session 快照为准｜影响模块：M5、M6、M7、T2
 
 ### M4 题库选择
 
