@@ -82,3 +82,58 @@ export interface BankData {
   /** 仅包含有效题；键为 `${bankId}:${number}`。 */
   questions: Record<string, Question>
 }
+
+/* ------------------------------------------------------------------ */
+/* 会话与记录（M2 冻结）                                                */
+/* ------------------------------------------------------------------ */
+
+export interface AnswerRecord {
+  questionId: string
+  /** 已提交的选项字母，统一大写、排序、去重。 */
+  selected: string[]
+  correct: boolean
+  /** 首次提交时间（毫秒时间戳）。 */
+  answeredAt: number
+}
+
+export interface PracticeSession {
+  id: string
+  bankId: string
+  startedAt: number
+  /** null 表示进行中。 */
+  finishedAt: number | null
+  /** 开始练习时冻结的题目 ID 快照；统计以快照为准。 */
+  questionIds: string[]
+  /** 首次提交即写入；键为 questionId，后续提交不再覆盖。 */
+  answers: Record<string, AnswerRecord>
+  /** 当前题在 questionIds 中的下标，用于刷新后恢复。 */
+  currentIndex: number
+}
+
+export interface WrongEntry {
+  /** 作为主键，一题一条。 */
+  questionId: string
+  bankId: string
+  /** 最近一次答错时的选择，用于错题本对照。 */
+  selected: string[]
+  /** 首次答错时间；重复答错不覆盖。 */
+  firstWrongAt: number
+  lastWrongAt: number
+  wrongCount: number
+}
+
+export type FeedbackType =
+  | 'wrong-answer'
+  | 'missing-option'
+  | 'wrong-explanation'
+  | 'other'
+
+export interface Feedback {
+  /** Dexie 自增主键。 */
+  id?: number
+  questionId: string
+  bankId: string
+  type: FeedbackType
+  note: string
+  createdAt: number
+}

@@ -53,7 +53,7 @@ pages（页面编排）
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | M0 | 项目基线 | 一 | P0 | — | 可启动应用、路由、主题基线 | ✅ | 2026-10-17 | build + dev 200 |
 | M1 | 题库解析 | 一 | P0 | M0 | `BankData`、`banks.json`、异常报告 | ✅ | 2026-10-17 | 336 有效题；重复执行一致；build 通过 |
-| M2 | 数据与存储 | 二 | P0 | M1 | Session 类型、Dexie API | ⬜ | | |
+| M2 | 数据与存储 | 二 | P0 | M1 | Session 类型、Dexie API | ✅ | 2026-10-17 | 11 项测试通过；build 通过 |
 | M3 | 判分与统计 | 二 | P0 | M2 | `scoring` 纯函数 | ⬜ | | |
 | M4 | 题库选择 | 二 | P0 | M1, M2 | 题库卡片、创建/继续会话 | ⬜ | | |
 | M5 | 答题核心 | 二 | P0 | M2, M3, M4 | 答题页、判分、翻题、题号侧栏 | ⬜ | | |
@@ -151,8 +151,8 @@ pages（页面编排）
 
 ### M2 数据与存储
 
-- [ ] `src/types/index.ts`：Question、BankMeta、PracticeSession、AnswerRecord、WrongEntry、Feedback。
-- [ ] `src/lib/db.ts`：Dexie v1。
+- [x] `src/types/index.ts`：Question、BankMeta、PracticeSession、AnswerRecord、WrongEntry、Feedback。
+- [x] `src/lib/db.ts`：Dexie v1。
 
 ```ts
 sessions:  'id, bankId, startedAt, finishedAt'
@@ -160,14 +160,16 @@ wrongBook: 'questionId, bankId, firstWrongAt'
 feedback:  '++id, questionId, createdAt'
 ```
 
-- [ ] `src/lib/id.ts`：会话 ID 生成。`crypto.randomUUID()` 只在安全上下文可用（HTTPS / localhost），手机通过 `http://局域网IP` 访问时会是 `undefined`，必须写成 `crypto.randomUUID?.() ?? 时间戳 + randomValues` 兜底；不要直接在页面里调用。
-- [ ] API：`createSession`、`getSession`、`saveSession`、`findActiveSession`、`addWrong`、`listWrong`、`addFeedback`。
-- [ ] 会话规则：每次开始练习新建 session；同 session 每题只提交一次；重开练习是新 session。
-- [ ] session 保存 `questionIds` 快照，结果统计以快照为准。
-- [ ] 验收：在临时页面/控制台完成增删查，刷新后数据仍在。
-- [ ] 禁止：任何页面直接写 Dexie 表名或查询。
+- [x] `src/lib/id.ts`：会话 ID 生成。`crypto.randomUUID()` 只在安全上下文可用（HTTPS / localhost），手机通过 `http://局域网IP` 访问时会是 `undefined`，必须写成 `crypto.randomUUID?.() ?? 时间戳 + randomValues` 兜底；不要直接在页面里调用。
+- [x] API：`createSession`、`getSession`、`saveSession`、`findActiveSession`、`addWrong`、`listWrong`、`addFeedback`。
+- [x] 会话规则：每次开始练习新建 session；同 session 每题只提交一次；重开练习是新 session。
+- [x] session 保存 `questionIds` 快照，结果统计以快照为准。
+- [x] 验收：在临时页面/控制台完成增删查，刷新后数据仍在。
+- [x] 禁止：任何页面直接写 Dexie 表名或查询。
 
-**完成标记**：⬜ 未开始｜日期：____｜验证：____｜接口变更：无
+**完成标记**：✅ 已完成｜日期：2026-10-17｜涉及文件：`src/types/index.ts`、`src/lib/db.ts`、`src/lib/id.ts`、`src/lib/db.test.ts`、`package.json`｜验证：Vitest 11 项全部通过（会话增删查、关闭重开持久化、错题累计、反馈、ID 兜底）；`npm run build` 通过｜接口变更：新增并冻结 `PracticeSession` / `AnswerRecord` / `WrongEntry` / `Feedback` 与 db API；额外提供 `deleteSession`、`removeWrong`、`listFeedback`｜影响模块：M3–M8
+
+> 说明：验收以 Vitest + fake-indexeddb 自动化测试完成；真实浏览器 IndexedDB 持久化在 T3/M10 真机流程中复验。
 
 ### M3 判分与统计
 
