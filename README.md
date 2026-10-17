@@ -1,6 +1,6 @@
 # 在线刷题网站
 
-> 基于本地题库的在线刷题网站。目前已实现题库选择、答题、判分、结果页、错题本、反馈与移动端/深色体验基线；公网部署与完整测试记录仍在推进中。
+> 基于本地题库的在线刷题网站。目前已实现题库选择、答题、判分、结果页、错题本、反馈与移动端/深色体验基线；已通过 GitHub Pages 部署公网 HTTPS 地址，真机与完整测试记录仍在推进中。
 
 ## 设计思路
 
@@ -57,7 +57,7 @@
 | M7 错题本 | ✅ | 按题库分组的累计错题，答案对照与解析 |
 | M8 异常反馈 | ✅ | 题目卡片与主页反馈入口、含“建议”类型、本机保存与成功提示 |
 | M9 体验基线 | ✅ | 底部操作栏、题号抽屉、主题三态切换、44px 触控与无障碍完善 |
-| M10 公网托管 | ⬜ | 静态托管与多端验证 |
+| M10 公网托管 | 🟨 | GitHub Pages + Actions 已上线；真机蜂窝与另一台电脑待复验 |
 | T1–T5 / D1 | ⬜ | 完整测试记录、交付物与公网地址 |
 
 > 详细验收项与验证记录见 [plan.md](plan.md)。
@@ -76,7 +76,7 @@
 | 题库处理 | Node 预处理脚本 | Markdown 转 JSON，构建期校验 |
 | 云端数据 | Supabase + PostgreSQL（未来） | 本期不接入，反馈先存本地 |
 | 后端 | NestJS（未来） | 本期不实现 |
-| 部署 | 本地静态服务器；公网静态托管（GitHub Pages / Netlify / Vercel / EdgeOne Pages） | 验收以本地可运行为准；公网地址供手机与其他电脑访问 |
+| 部署 | GitHub Pages + GitHub Actions | 推送到 main 自动测试、构建并发布 dist；HTTPS 公网地址供手机与其他电脑访问 |
 
 一期实际运行只依赖前端包（以 `package.json` 为准）；Supabase、NestJS 等后端与云服务不作为验收依赖。
 
@@ -108,7 +108,9 @@
   - 移动端题号抽屉初版标题重复、图例被裁切，改为抽屉固定标题 + 题号网格内部滚动。
   - 无头浏览器检查发现主题按钮仅 36px 宽，补足 44px 触控目标。
   - 预览服务器缓存旧脚本导致抽屉改动未生效，验收脚本禁用缓存后复测通过。
-- 发现与验证方式：先写 Vitest 覆盖判分、持久化、store 与题库数据（当前 49 项），提交前运行 `npm test` 与 `npm run build`；另用无头 Edge 模拟 375/390 移动端与 1280 桌面端，检查布局、深色、横向溢出和触控尺寸，真机与蜂窝网络验收留待 T4/M10。
+  - Netlify 首发站点默认 Private/SSO 访问，公网返回 401；按选定方案改用 GitHub Pages。
+  - GitHub Pages 首次部署需在仓库 Settings → Pages 把 Source 设为 GitHub Actions，工作流本身不负责启用 Pages。
+- 发现与验证方式：先写 Vitest 覆盖判分、持久化、store 与题库数据（当前 49 项），提交前运行 `npm test` 与 `npm run build`；另用无头 Edge 模拟 375/390 移动端与 1280 桌面端，检查布局、深色、横向溢出和触控尺寸，M10 已用公网 curl 与无头 Edge 验证首页、JS/CSS 和 Hash 深链接，真机蜂窝与另一台电脑验收待完成。
 - AI 会话记录：随交付物导出（D1 补充文件名或链接）。
 
 ## 运行方式
@@ -128,12 +130,15 @@
 
 ### 公网访问（手机 / 其他电脑）
 
-- 构建后把 `dist/` 发布到任意静态托管平台：GitHub Pages、Netlify、Vercel、Cloudflare Pages，或国内访问更稳的腾讯 EdgeOne Pages / 云厂商对象存储静态托管。
-- 发布步骤：`npm run build` → 上传 `dist/`（或配置 Git 自动构建，构建命令 `npm run build`，产物目录 `dist`）→ 获得 HTTPS 网址。
-- 无需服务端 rewrite：`base: './'` + HashRouter 已兼容子路径部署，刷新 `#/practice/...` 深链接不会 404。
+- 公网地址：https://loop0007.github.io/quiz-practice/
+- 托管平台：GitHub Pages（项目页子路径 `/quiz-practice/`），由 GitHub Actions 自动构建发布。
+- 自动更新：推送到 `main` 分支后，[deploy.yml](.github/workflows/deploy.yml) 依次执行 `npm ci`、`npm test`、`npm run build`，并把 `dist/` 发布到 Pages；无需手动上传。也可在仓库 Actions 页面手动 Run workflow。
+- 首次配置：仓库 Settings → Pages → Build and deployment → Source 选择 “GitHub Actions”；之后每次推送自动生效。
+- 子路径兼容：`base: './'` + HashRouter，刷新 `#/practice/...` 这类深链接不会 404，无需服务端 rewrite。
+- 本地复核：`npm run build` 后执行 `npm run preview -- --host`。
 - 验证方式：手机**关闭 Wi-Fi 用蜂窝网络**打开网址，另一台电脑也打开一次，各完成一套练习。
 - 数据说明：答题记录和错题本保存在浏览器 IndexedDB 中，按设备与 origin 隔离；手机、电脑、不同域名之间不会同步，换设备相当于从零开始（账号与云端同步不在本期范围）。
-- 实际公网地址：……（部署后填写）
+- 网络提示：GitHub Pages 在国内部分网络可能较慢或不可达；如验收网络访问不稳定，可把 `dist/` 另发布到腾讯 EdgeOne Pages 等国内静态托管，站点无需改代码。
 
 ## 未来完善方向（若再给 1 小时）
 

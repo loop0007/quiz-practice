@@ -61,7 +61,7 @@ pages（页面编排）
 | M7 | 错题本 | 二 | P0 | M2, M3, M5 | 累计错题列表与对照 | ✅ | 2026-10-17 | 42 项测试通过；build 通过 |
 | M8 | 异常反馈 | 二 | P0 | M2, M5 | 本地反馈记录 | ✅ | 2026-10-17 | 43 项测试通过；build 通过 |
 | M9 | 体验基线 | 二 | P0 | M5–M8 | 移动端、深色、无障碍 | ✅ | 2026-10-17 | 49 项测试；build；375/390 与 1280 布局截图 |
-| M10 | 公网托管 | 二 | P0 | M2, M9 | HTTPS 公网地址、多端真机验证 | ⬜ | | |
+| M10 | 公网托管 | 二 | P0 | M2, M9 | HTTPS 公网地址、多端真机验证 | 🟨 | 2026-10-17 | GitHub Pages 已上线；HTTPS 200；待真机蜂窝/另一台电脑复验 |
 | T1–T5 | 测试 | 三 | P0 | M0–M10 | 测试记录与缺陷清单 | ⬜ | | |
 | E1–E5 | 额外功能 | 四 | P2 | T5 | 可选增强 | ⬜ | | |
 | U1 | UI 美化 | 五 | P1 | T5/E | 视觉统一与细节打磨 | ⬜ | | |
@@ -265,22 +265,22 @@ feedback:  '++id, questionId, createdAt'
 
 > 目标：部署为公网 HTTPS 站点，手机（蜂窝网络）和任意一台电脑都能通过同一个网址使用。纯静态站，无后端；跨设备数据同步仍不在本期范围。
 
-- [ ] 选定托管平台并记录理由，候选（均为免费额度 + HTTPS）：
+- [x] 选定托管平台：GitHub Pages（与仓库绑定、GitHub Actions 自动构建发布、免费 HTTPS；项目页子路径由 `base: './'` + HashRouter 兼容）。候选对比：
   - GitHub Pages：与仓库绑定、可自动发布；国内访问可能不稳定。
   - Netlify / Vercel / Cloudflare Pages：拖拽或 Git 集成，部署最快；国内访问可能不稳定。
   - 腾讯 EdgeOne Pages / 云厂商对象存储静态托管：国内访问更稳，通常需要实名账号。
-- [ ] 发布前检查：`npm run build` 通过；`dist/` 资源为相对路径（`base: './'`）；无 `file://`、`localhost`、本机绝对路径引用；代码中无密钥或私有数据。
-- [ ] 上传 `dist/` 或配置 Git 自动构建；构建命令 `npm run build`，产物目录 `dist`。
-- [ ] 子路径部署无需额外配置：`base: './'` + HashRouter 已兼容 GitHub Pages 项目页等子路径，不需要服务端 rewrite。
+- [x] 发布前检查：`npm run build` 通过；`dist/` 资源为相对路径（`base: './'`）；无 `file://`、`localhost`、本机绝对路径引用；代码与 Git 历史中无密钥或私有数据。
+- [x] 配置 Git 自动构建：`.github/workflows/deploy.yml` 依次执行 `npm ci`、`npm test`、`npm run build`，再把 `dist/` 发布到 Pages；仓库 Pages Source 设为 GitHub Actions。
+- [x] 子路径部署无需额外配置：`base: './'` + HashRouter 已兼容 GitHub Pages 项目页 `/quiz-practice/` 子路径，不需要服务端 rewrite。
 - [ ] 公网验证：手机**关闭 Wi-Fi 用蜂窝网络**打开网址，确认不是局域网访问；再用另一台电脑打开一次。
 - [ ] 手机真机走完整流程：题库选择 → 答题 → 提交 → 翻题 → 交卷 → 结果页 → 错题本。
-- [ ] 深链接：直接打开/刷新 `https://<域名>/#/practice/<id>` 不 404，资源正常加载。
-- [ ] 发布更新：每个里程碑重新构建并发布；把发布步骤写成可复用命令，避免手忙脚乱。
-- [ ] README 补充：公网地址、托管平台、发布/更新步骤。
-- [ ] 数据边界写清楚：IndexedDB 按 **origin** 隔离，手机与电脑、不同域名之间答题记录和错题本不互通；换设备等于从零开始，界面不要出现会让人误以为会同步的文案。
+- [x] 深链接：`https://loop0007.github.io/quiz-practice/#/wrongbook` 直接打开正常渲染，JS/CSS 资源加载正常；`#/practice/<id>` 由同一 HashRouter 处理，不请求服务端路径。
+- [x] 发布更新：推送到 `main` 即触发 Actions；本地命令 `git push origin main`，无需手动上传 `dist/`，也可在 Actions 页面手动 Run workflow。
+- [x] README 补充：公网地址、托管平台、发布/更新步骤。
+- [x] 数据边界写清楚：IndexedDB 按 **origin** 隔离，手机与电脑、不同域名之间答题记录和错题本不互通；换设备等于从零开始，界面不要出现会让人误以为会同步的文案。
 - [ ] 验收：手机（蜂窝网络）+ 另一台电脑都能通过公网 HTTPS 地址完成一套练习，结果正确。
 
-**完成标记**：⬜ 未开始｜日期：____｜验证：____｜接口变更：无
+**完成标记**：🟨 进行中｜日期：2026-10-17｜涉及文件：`.github/workflows/deploy.yml`、`.gitignore`、`README.md`、`plan.md`｜验证：GitHub Actions 部署成功；公网 `https://loop0007.github.io/quiz-practice/` 首页、JS、CSS 均 200，HTTP 301 跳 HTTPS；无头 Edge 正常渲染首页与 `#/wrongbook`；`npm test` 49 项、`npm run build` 通过；真机蜂窝网络与另一台电脑待复验｜接口变更：无｜影响模块：D1、T4
 
 ## 3. 阶段三：测试
 
@@ -452,7 +452,7 @@ feedback:  '++id, questionId, createdAt'
 | Zustand 与 Dexie 不同步 | 刷新丢数据 | 提交即落库；session 为唯一来源 |
 | 手机/深色返工 | 场景验收失败 | M9 前置到阶段二，尽早 375px 检查 |
 | Linux 大小写/Node 版本 | 验收跑不起来 | Linux/WSL 实测；import 大小写一致 |
-| 公网托管国内访问不稳 | 手机打不开或很慢 | 优先 EdgeOne Pages / 云存储；或保留 GitHub Pages 作为备份 |
+| 公网托管国内访问不稳 | 手机打不开或很慢 | 本次选 GitHub Pages；如验收网络不稳，把 `dist/` 另发布到 EdgeOne Pages / 云存储作为备份 |
 | 子路径部署资源 404 | 白屏 | 保持 `base: './'` + HashRouter，发布前检查 `dist/index.html` 引用为相对路径 |
 | 误以为多端数据同步 | 换设备后记录“丢失” | README 与界面说明数据按 origin 本地存储，本期不做同步 |
 | shadcn/ui 配置耗时 | 拖慢主流程 | 按需引入；必要时 Tailwind 自写 |
