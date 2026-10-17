@@ -151,6 +151,22 @@ describe('反馈', () => {
     })
     expect(list[0].createdAt).toBeTypeOf('number')
   })
+
+  it('支持不带题目的通用反馈', async () => {
+    await addFeedback({
+      type: 'suggestion',
+      note: '希望增加错题组卷练习',
+    })
+
+    const list = await listFeedback()
+    expect(list).toHaveLength(1)
+    expect(list[0]).toMatchObject({
+      type: 'suggestion',
+      note: '希望增加错题组卷练习',
+    })
+    expect(list[0].questionId).toBeUndefined()
+    expect(list[0].bankId).toBeUndefined()
+  })
 })
 
 describe('ID 生成', () => {

@@ -126,13 +126,16 @@ export type FeedbackType =
   | 'wrong-answer'
   | 'missing-option'
   | 'wrong-explanation'
+  | 'suggestion'
   | 'other'
 
 export interface Feedback {
   /** Dexie 自增主键。 */
   id?: number
-  questionId: string
-  bankId: string
+  /** 关联题目；主页通用反馈时为空。 */
+  questionId?: string
+  /** 关联题库；主页通用反馈时为空。 */
+  bankId?: string
   type: FeedbackType
   note: string
   createdAt: number

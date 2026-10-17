@@ -1,6 +1,8 @@
-import { CheckCircle2, XCircle } from 'lucide-react'
+import { useState } from 'react'
+import { CheckCircle2, Flag, XCircle } from 'lucide-react'
 import type { AnswerRecord, Question, QuestionType } from '@/types'
 import MarkdownContent from './MarkdownContent'
+import FeedbackDialog from './FeedbackDialog'
 
 const TYPE_LABELS: Record<QuestionType, string> = {
   single: '单选题',
@@ -26,6 +28,7 @@ export default function QuestionCard({
   record,
   onSelect,
 }: QuestionCardProps) {
+  const [feedbackOpen, setFeedbackOpen] = useState(false)
   const multi = question.type === 'multi'
   const locked = Boolean(record)
 
@@ -40,9 +43,19 @@ export default function QuestionCard({
             题号 {question.number}
           </span>
         </div>
-        <span className="text-xs tabular-nums text-slate-500 dark:text-slate-400">
-          第 {index + 1} / {total} 题
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs tabular-nums text-slate-500 dark:text-slate-400">
+            第 {index + 1} / {total} 题
+          </span>
+          <button
+            type="button"
+            onClick={() => setFeedbackOpen(true)}
+            className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-xs text-slate-500 hover:bg-slate-100 hover:text-blue-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-blue-400"
+          >
+            <Flag className="size-3.5" aria-hidden="true" />
+            反馈
+          </button>
+        </div>
       </header>
 
       <h2 className="sr-only">题目</h2>
@@ -178,6 +191,10 @@ export default function QuestionCard({
             )}
           </div>
         </div>
+      )}
+
+      {feedbackOpen && (
+        <FeedbackDialog question={question} onClose={() => setFeedbackOpen(false)} />
       )}
     </article>
   )

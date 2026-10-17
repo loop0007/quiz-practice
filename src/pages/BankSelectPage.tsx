@@ -5,9 +5,11 @@ import {
   BookOpen,
   Layers,
   Loader2,
+  MessageSquarePlus,
   Play,
   RotateCcw,
 } from 'lucide-react'
+import FeedbackDialog from '@/components/FeedbackDialog'
 import { banks, getBankQuestions } from '@/lib/banks'
 import { createSession, findActiveSession } from '@/lib/db'
 import type { BankMeta, PracticeSession } from '@/types'
@@ -35,6 +37,7 @@ export default function BankSelectPage() {
   const [loading, setLoading] = useState(true)
   const [pendingBankId, setPendingBankId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [feedbackOpen, setFeedbackOpen] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -98,11 +101,21 @@ export default function BankSelectPage() {
 
   return (
     <section>
-      <header className="mb-5">
-        <h1 className="text-2xl font-bold">选择题库</h1>
-        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-          题目与答题记录都保存在本机浏览器，换设备不会同步。
-        </p>
+      <header className="mb-5 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold">选择题库</h1>
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+            题目与答题记录都保存在本机浏览器，换设备不会同步。
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setFeedbackOpen(true)}
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm font-medium hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
+        >
+          <MessageSquarePlus className="size-4" aria-hidden="true" />
+          反馈
+        </button>
       </header>
 
       {error && (
@@ -220,6 +233,10 @@ export default function BankSelectPage() {
           )
         })}
       </div>
+
+      {feedbackOpen && (
+        <FeedbackDialog onClose={() => setFeedbackOpen(false)} />
+      )}
     </section>
   )
 }

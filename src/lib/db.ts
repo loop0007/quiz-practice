@@ -37,8 +37,9 @@ export interface AddWrongInput {
 }
 
 export interface AddFeedbackInput {
-  questionId: string
-  bankId: string
+  /** 主页通用反馈可省略题目与题库。 */
+  questionId?: string
+  bankId?: string
   type: FeedbackType
   note: string
 }
@@ -127,12 +128,13 @@ export async function removeWrong(questionId: string): Promise<void> {
 
 export async function addFeedback(input: AddFeedbackInput): Promise<number> {
   const entry: Feedback = {
-    questionId: input.questionId,
-    bankId: input.bankId,
     type: input.type,
     note: input.note,
     createdAt: Date.now(),
   }
+  if (input.questionId) entry.questionId = input.questionId
+  if (input.bankId) entry.bankId = input.bankId
+
   return db.feedback.add(entry)
 }
 
