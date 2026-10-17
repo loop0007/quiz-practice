@@ -213,7 +213,7 @@ feedback:  '++id, questionId, createdAt'
 - [x] 交卷：未答题提示；确认后写 `finishedAt` 并跳转结果页。
 - [x] 验收：题库选择 → 答题 → 提交 → 翻题 → 交卷完整走通；首次提交后成绩不变。
 
-**完成标记**：✅ 已完成｜日期：2026-10-17｜涉及文件：`src/store/usePracticeStore.ts`、`src/store/usePracticeStore.test.ts`、`src/components/MarkdownContent.tsx`、`src/components/QuestionCard.tsx`、`src/components/QuestionPalette.tsx`、`src/pages/PracticePage.tsx`｜验证：Vitest 42 项全部通过（新增 store 10 项：题目快照加载、缺失会话报错、单选替换、多选切换、已提交锁定、答对不写错题本、答错累计一次、未选择提交无效、翻题持久化与越界收敛、交卷幂等）；`npm run build` 通过。浏览器内翻题、滚动、移动端题号折叠与交卷确认在 T3/T4 真机复验｜接口变更：冻结 `QuestionCard` props（`question` / `index` / `total` / `selected` / `record` / `onSelect`）与 `QuestionPalette` props；新增 zustand store actions（`loadSession` / `select` / `submitCurrent` / `goTo` / `finish`）｜影响模块：M6、M8、M9、T3
+**完成标记**：✅ 已完成｜日期：2026-10-17｜涉及文件：`src/store/usePracticeStore.ts`、`src/store/usePracticeStore.test.ts`、`src/components/MarkdownContent.tsx`、`src/components/QuestionCard.tsx`、`src/components/QuestionPalette.tsx`、`src/pages/PracticePage.tsx`｜验证：Vitest 42 项全部通过（新增 store 10 项：题目快照加载、缺失会话报错、单选替换、多选切换、已提交锁定、答对不写错题本、答错累计一次、未选择提交无效、翻题持久化与越界收敛、交卷幂等）；`npm run build` 通过。交卷确认：全部答完直接交卷；存在未提交题时提示未提交题数并需二次确认。浏览器内翻题、滚动、移动端题号折叠与交卷确认在 T3/T4 真机复验｜接口变更：冻结 `QuestionCard` props（`question` / `index` / `total` / `selected` / `record` / `onSelect`）与 `QuestionPalette` props；新增 zustand store actions（`loadSession` / `select` / `submitCurrent` / `goTo` / `finish`）｜影响模块：M6、M8、M9、T3
 
 ### M6 结果页
 
@@ -224,7 +224,7 @@ feedback:  '++id, questionId, createdAt'
 - [x] 操作：返回题库、查看错题本、再练一次（新 session）。
 - [x] 验收：结果数字与 session 记录一致；刷新结果页不丢数据。
 
-**完成标记**：✅ 已完成｜日期：2026-10-17｜涉及文件：`src/pages/ResultPage.tsx`｜验证：Vitest 42 项全部通过；`npm run build` 通过。结果页直接从 IndexedDB 读取 session，刷新不依赖内存状态；统计统一调用 `getSessionStats`，与答题页同口径；本次错题/未答题号按原题号展示；“错题本累计”独立读取 `listWrong`，区分全部题库与本题库数量；未交卷会话显示当前进度并提供“继续答题”；“再练一次”按原快照创建新 session｜接口变更：无｜影响模块：M7、M9、T3、T4
+**完成标记**：✅ 已完成｜日期：2026-10-17｜涉及文件：`src/pages/ResultPage.tsx`｜验证：Vitest 42 项全部通过；`npm run build` 通过。结果页直接从 IndexedDB 读取 session，刷新不依赖内存状态；统计统一调用 `getSessionStats`，与答题页同口径；正确率旁新增问号气泡（点击切换、鼠标/触控笔停留 1 秒显示，Escape 或点击外部关闭）；本次错题/未答题号按原题号展示；“错题本累计”独立读取 `listWrong`，区分全部题库与本题库数量；未交卷会话显示当前进度并提供“继续答题”；“再练一次”按原快照创建新 session｜接口变更：无｜影响模块：M7、M9、T3、T4
 
 ### M7 错题本
 

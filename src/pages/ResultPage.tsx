@@ -10,6 +10,7 @@ import {
   SquarePen,
   XCircle,
 } from 'lucide-react'
+import AccuracyHint from '@/components/AccuracyHint'
 import { getBank, getQuestion } from '@/lib/banks'
 import { createSession, getSession, listWrong } from '@/lib/db'
 import { getSessionStats } from '@/lib/scoring'
@@ -177,7 +178,10 @@ export default function ResultPage() {
             <p className="text-4xl font-bold tabular-nums text-blue-600 dark:text-blue-400">
               {accuracyPercent}%
             </p>
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">正确率</p>
+            <p className="mt-1 flex items-center justify-end gap-1 text-xs text-slate-500 dark:text-slate-400">
+              <AccuracyHint />
+              <span>正确率</span>
+            </p>
           </div>
         </div>
 
@@ -187,10 +191,6 @@ export default function ResultPage() {
             style={{ width: `${accuracyPercent}%` }}
           />
         </div>
-
-        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-          正确率 = 答对题数 ÷ 总题数，未作答按错误计入。
-        </p>
 
         {session.finishedAt == null && (
           <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">

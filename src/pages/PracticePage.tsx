@@ -101,12 +101,17 @@ export default function PracticePage() {
   async function handleFinish() {
     if (!session) return
 
-    const message =
-      stats.unanswered > 0
-        ? `还有 ${stats.unanswered} 题未作答，未作答将按错误计入正确率。确定交卷吗？`
-        : '确定交卷吗？交卷后不能再修改答案。'
+    if (stats.unanswered > 0) {
+      const firstConfirmed = window.confirm(
+        `还有 ${stats.unanswered} 题未提交，未作答将按错误计入正确率。确定交卷吗？`,
+      )
+      if (!firstConfirmed) return
 
-    if (!window.confirm(message)) return
+      const secondConfirmed = window.confirm(
+        '再次确认：交卷后不能再修改答案，确认现在交卷吗？',
+      )
+      if (!secondConfirmed) return
+    }
 
     const id = await finish()
     if (id) navigate(`/result/${id}`)
