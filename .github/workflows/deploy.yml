@@ -1,8 +1,7 @@
 name: Deploy to GitHub Pages
 
 on:
-  push:
-    branches: [main, master]
+  # 仅手动触发；本地提交不会自动推送或发布。
   workflow_dispatch:
 
 permissions:

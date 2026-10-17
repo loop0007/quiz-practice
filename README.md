@@ -76,7 +76,7 @@
 | 题库处理 | Node 预处理脚本 | Markdown 转 JSON，构建期校验 |
 | 云端数据 | Supabase + PostgreSQL（未来） | 本期不接入，反馈先存本地 |
 | 后端 | NestJS（未来） | 本期不实现 |
-| 部署 | GitHub Pages + GitHub Actions | 推送到 main 自动测试、构建并发布 dist；HTTPS 公网地址供手机与其他电脑访问 |
+| 部署 | GitHub Pages + GitHub Actions | Actions 手动触发后自动测试、构建并发布 dist；HTTPS 公网地址供手机与其他电脑访问 |
 
 一期实际运行只依赖前端包（以 `package.json` 为准）；Supabase、NestJS 等后端与云服务不作为验收依赖。
 
@@ -110,6 +110,7 @@
   - 预览服务器缓存旧脚本导致抽屉改动未生效，验收脚本禁用缓存后复测通过。
   - Netlify 首发站点默认 Private/SSO 访问，公网返回 401；按选定方案改用 GitHub Pages。
   - GitHub Pages 首次部署需在仓库 Settings → Pages 把 Source 设为 GitHub Actions，工作流本身不负责启用 Pages。
+  - 按用户要求本地只提交版本、GitHub 手动推送与发布，工作流由 push 触发改为仅 `workflow_dispatch`。
 - 发现与验证方式：先写 Vitest 覆盖判分、持久化、store 与题库数据（当前 49 项），提交前运行 `npm test` 与 `npm run build`；另用无头 Edge 模拟 375/390 移动端与 1280 桌面端，检查布局、深色、横向溢出和触控尺寸，M10 已用公网 curl 与无头 Edge 验证首页、JS/CSS 和 Hash 深链接，真机蜂窝与另一台电脑验收待完成。
 - AI 会话记录：随交付物导出（D1 补充文件名或链接）。
 
@@ -132,7 +133,7 @@
 
 - 公网地址：https://loop0007.github.io/quiz-practice/
 - 托管平台：GitHub Pages（项目页子路径 `/quiz-practice/`），由 GitHub Actions 自动构建发布。
-- 自动更新：推送到 `main` 分支后，[deploy.yml](.github/workflows/deploy.yml) 依次执行 `npm ci`、`npm test`、`npm run build`，并把 `dist/` 发布到 Pages；无需手动上传。也可在仓库 Actions 页面手动 Run workflow。
+- 发布方式：本地只做 Git 提交，不自动推送或发布。需要更新线上站点时，由你手动 `git push origin main`，再到仓库 Actions 页面点击 **Run workflow**（`workflow_dispatch`）；[deploy.yml](.github/workflows/deploy.yml) 依次执行 `npm ci`、`npm test`、`npm run build` 并发布 `dist/`。
 - 首次配置：仓库 Settings → Pages → Build and deployment → Source 选择 “GitHub Actions”；之后每次推送自动生效。
 - 子路径兼容：`base: './'` + HashRouter，刷新 `#/practice/...` 这类深链接不会 404，无需服务端 rewrite。
 - 本地复核：`npm run build` 后执行 `npm run preview -- --host`。

@@ -270,12 +270,12 @@ feedback:  '++id, questionId, createdAt'
   - Netlify / Vercel / Cloudflare Pages：拖拽或 Git 集成，部署最快；国内访问可能不稳定。
   - 腾讯 EdgeOne Pages / 云厂商对象存储静态托管：国内访问更稳，通常需要实名账号。
 - [x] 发布前检查：`npm run build` 通过；`dist/` 资源为相对路径（`base: './'`）；无 `file://`、`localhost`、本机绝对路径引用；代码与 Git 历史中无密钥或私有数据。
-- [x] 配置 Git 自动构建：`.github/workflows/deploy.yml` 依次执行 `npm ci`、`npm test`、`npm run build`，再把 `dist/` 发布到 Pages；仓库 Pages Source 设为 GitHub Actions。
+- [x] 配置 GitHub Actions 构建：`.github/workflows/deploy.yml`（仅手动 `workflow_dispatch`）依次执行 `npm ci`、`npm test`、`npm run build`，再把 `dist/` 发布到 Pages；仓库 Pages Source 设为 GitHub Actions。
 - [x] 子路径部署无需额外配置：`base: './'` + HashRouter 已兼容 GitHub Pages 项目页 `/quiz-practice/` 子路径，不需要服务端 rewrite。
 - [ ] 公网验证：手机**关闭 Wi-Fi 用蜂窝网络**打开网址，确认不是局域网访问；再用另一台电脑打开一次。
 - [ ] 手机真机走完整流程：题库选择 → 答题 → 提交 → 翻题 → 交卷 → 结果页 → 错题本。
 - [x] 深链接：`https://loop0007.github.io/quiz-practice/#/wrongbook` 直接打开正常渲染，JS/CSS 资源加载正常；`#/practice/<id>` 由同一 HashRouter 处理，不请求服务端路径。
-- [x] 发布更新：推送到 `main` 即触发 Actions；本地命令 `git push origin main`，无需手动上传 `dist/`，也可在 Actions 页面手动 Run workflow。
+- [x] 发布更新：本地只提交版本，推送与发布由人工执行；工作流改为仅 `workflow_dispatch`，在 Actions 页面手动 Run workflow 后发布 `dist/`。
 - [x] README 补充：公网地址、托管平台、发布/更新步骤。
 - [x] 数据边界写清楚：IndexedDB 按 **origin** 隔离，手机与电脑、不同域名之间答题记录和错题本不互通；换设备等于从零开始，界面不要出现会让人误以为会同步的文案。
 - [ ] 验收：手机（蜂窝网络）+ 另一台电脑都能通过公网 HTTPS 地址完成一套练习，结果正确。
