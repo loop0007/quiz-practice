@@ -60,7 +60,7 @@ pages（页面编排）
 | M6 | 结果页 | 二 | P0 | M2, M3, M5 | 成绩、错题/未答题号、异常数 | ✅ | 2026-10-17 | 42 项测试通过；build 通过 |
 | M7 | 错题本 | 二 | P0 | M2, M3, M5 | 累计错题列表与对照 | ✅ | 2026-10-17 | 42 项测试通过；build 通过 |
 | M8 | 异常反馈 | 二 | P0 | M2, M5 | 本地反馈记录 | ✅ | 2026-10-17 | 43 项测试通过；build 通过 |
-| M9 | 体验基线 | 二 | P0 | M5–M8 | 移动端、深色、无障碍 | ⬜ | | |
+| M9 | 体验基线 | 二 | P0 | M5–M8 | 移动端、深色、无障碍 | ✅ | 2026-10-17 | 49 项测试；build；375/390 与 1280 布局截图 |
 | M10 | 公网托管 | 二 | P0 | M2, M9 | HTTPS 公网地址、多端真机验证 | ⬜ | | |
 | T1–T5 | 测试 | 三 | P0 | M0–M10 | 测试记录与缺陷清单 | ⬜ | | |
 | E1–E5 | 额外功能 | 四 | P2 | T5 | 可选增强 | ⬜ | | |
@@ -249,17 +249,17 @@ feedback:  '++id, questionId, createdAt'
 
 > 这是验收场景的下限，不是阶段五的美化项。
 
-- [ ] 手机布局：底部操作栏、safe-area、44px 以上触控目标。
-- [ ] 题号侧栏在手机端改为底部抽屉/弹层。
-- [ ] 深色模式：跟随系统 + 手动切换 + 持久化；首屏无闪烁。
-- [ ] 对比度：深色下题干、选项、解析、状态色可读。
-- [ ] 原生 input + label；键盘可操作；focus-visible。
-- [ ] 题号状态不只靠颜色；判分结果用 `aria-live`。
-- [ ] 长题干、长选项、代码块横向滚动不撑破布局。
-- [ ] 空状态、错误状态、404。
-- [ ] 验收：375px/390px 手机宽度 + 深色模式 + 单手完成整套流程。
+- [x] 手机布局：底部操作栏、safe-area、44px 以上触控目标。
+- [x] 题号侧栏在手机端改为底部抽屉/弹层。
+- [x] 深色模式：跟随系统 + 手动切换 + 持久化；首屏无闪烁。
+- [x] 对比度：深色下题干、选项、解析、状态色可读。
+- [x] 原生 input + label；键盘可操作；focus-visible。
+- [x] 题号状态不只靠颜色；判分结果用 `aria-live`。
+- [x] 长题干、长选项、代码块横向滚动不撑破布局。
+- [x] 空状态、错误状态、404。
+- [x] 验收：375px/390px 手机宽度 + 深色模式 + 单手完成整套流程。
 
-**完成标记**：⬜ 未开始｜日期：____｜验证：____｜接口变更：无
+**完成标记**：✅ 已完成｜日期：2026-10-17｜涉及文件：`src/lib/theme.ts`、`src/lib/theme.test.ts`、`src/store/useThemeStore.ts`、`src/components/ThemeToggle.tsx`、`src/components/MobilePaletteSheet.tsx`、`src/components/Layout.tsx`、`src/components/QuestionPalette.tsx`、`src/components/QuestionCard.tsx`、`src/components/MarkdownContent.tsx`、`src/components/AccuracyHint.tsx`、`src/components/FeedbackDialog.tsx`、`src/pages/PracticePage.tsx`、`src/pages/BankSelectPage.tsx`、`src/pages/ResultPage.tsx`、`src/pages/WrongBookPage.tsx`、`src/pages/NotFoundPage.tsx`、`src/index.css`、`index.html`｜验证：Vitest 49 项全部通过（新增主题模式 6 项：非法值回退、三种模式、系统偏好解析、手动模式、切换顺序、名称）；`npm run build` 通过。无头 Edge 按 375×812、390×844 模拟移动端（非真机）走完选题→作答→提交→交卷→结果→错题本，浅色/深色均无横向溢出；题号抽屉为原生 dialog，最高 85dvh，网格内部滚动且图例保持可见；题号按钮与主题按钮均不小于 44px，正确率问号命中区实测约 44px；系统深色跟随、手动三态切换、刷新持久化与系统外观实时切换均验证；另以 1280×900 检查桌面布局，截图存 `docs/screenshots/`。真机与蜂窝网络验证留 M10/T4｜接口变更：`QuestionPalette` 新增可选 `listClassName`、`showHeader`；新增 `theme` 工具与 `useThemeStore`（`mode` / `resolved` / `setMode` / `cycle` / `syncSystem`）｜影响模块：M10、T4、U1
 
 ### M10 公网托管与多端访问
 

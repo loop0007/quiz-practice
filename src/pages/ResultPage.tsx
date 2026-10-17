@@ -204,7 +204,11 @@ export default function ResultPage() {
           </div>
         )}
 
-        <dl className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <dl
+          aria-label="本次成绩统计"
+          aria-live="polite"
+          className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4"
+        >
           {statItems.map((item) => (
             <div
               key={item.label}
@@ -296,14 +300,14 @@ export default function ResultPage() {
       <div className="flex flex-wrap gap-2">
         <Link
           to="/"
-          className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2.5 text-sm font-medium hover:bg-slate-50 sm:flex-none dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
+          className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-4 text-sm font-medium hover:bg-slate-50 sm:flex-none dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
           返回题库
         </Link>
         <Link
           to="/wrongbook"
-          className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2.5 text-sm font-medium hover:bg-slate-50 sm:flex-none dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
+          className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-4 text-sm font-medium hover:bg-slate-50 sm:flex-none dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
         >
           <SquarePen className="size-4" aria-hidden="true" />
           查看错题本
@@ -312,7 +316,7 @@ export default function ResultPage() {
           type="button"
           onClick={() => void handleReplay()}
           disabled={starting}
-          className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 sm:flex-none dark:disabled:bg-slate-700 dark:disabled:text-slate-400"
+          className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 sm:flex-none dark:disabled:bg-slate-700 dark:disabled:text-slate-400"
         >
           {starting ? (
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />

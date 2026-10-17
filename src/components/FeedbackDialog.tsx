@@ -85,14 +85,14 @@ export default function FeedbackDialog({ question, onClose }: FeedbackDialogProp
           type="button"
           onClick={onClose}
           aria-label="关闭"
-          className="-mr-1 inline-flex size-8 shrink-0 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+          className="-mr-1 inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
         >
           <X className="size-4" aria-hidden="true" />
         </button>
       </div>
 
       {saved ? (
-        <div className="px-4 py-8 text-center">
+        <div role="status" aria-live="polite" className="px-4 py-8 text-center">
           <CheckCircle2
             className="mx-auto size-9 text-green-600 dark:text-green-400"
             aria-hidden="true"
@@ -104,7 +104,7 @@ export default function FeedbackDialog({ question, onClose }: FeedbackDialogProp
           <button
             type="button"
             onClick={onClose}
-            className="mt-5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            className="mt-5 min-h-11 rounded-lg bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-700"
           >
             关闭
           </button>
@@ -119,7 +119,7 @@ export default function FeedbackDialog({ question, onClose }: FeedbackDialogProp
               {typeOptions.map((option) => (
                 <label
                   key={option.value}
-                  className={`flex cursor-pointer items-center justify-center rounded-lg border px-3 py-2 text-sm transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-blue-500 has-[:focus-visible]:ring-offset-1 dark:has-[:focus-visible]:ring-offset-slate-900 ${
+                  className={`flex min-h-11 cursor-pointer items-center justify-center rounded-lg border px-3 text-sm transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-blue-500 has-[:focus-visible]:ring-offset-1 dark:has-[:focus-visible]:ring-offset-slate-900 ${
                     type === option.value
                       ? 'border-blue-600 bg-blue-50 font-medium text-blue-700 dark:border-blue-500 dark:bg-blue-950/50 dark:text-blue-300'
                       : 'border-slate-200 hover:border-blue-400 dark:border-slate-700 dark:hover:border-blue-500'
@@ -153,9 +153,9 @@ export default function FeedbackDialog({ question, onClose }: FeedbackDialogProp
                 ? '可补充错误位置或修改建议，例如：正确答案应为 B。'
                 : '想增加什么功能，或有哪些使用建议？'
             }
-            className="mt-1.5 w-full resize-y rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm leading-relaxed placeholder:text-slate-400 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-950/50 dark:placeholder:text-slate-500"
+            className="mt-1.5 w-full resize-y rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm leading-relaxed placeholder:text-slate-400 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-950/50 dark:placeholder:text-slate-400"
           />
-          <p className="mt-1 text-right text-xs tabular-nums text-slate-400 dark:text-slate-500">
+          <p className="mt-1 text-right text-xs tabular-nums text-slate-400 dark:text-slate-400">
             {note.length} / 500
           </p>
 
@@ -172,14 +172,14 @@ export default function FeedbackDialog({ question, onClose }: FeedbackDialogProp
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
+              className="min-h-11 rounded-lg border border-slate-200 px-4 text-sm font-medium hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
             >
               取消
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 dark:disabled:bg-slate-700 dark:disabled:text-slate-400"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 dark:disabled:bg-slate-700 dark:disabled:text-slate-400"
             >
               {submitting && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
               提交反馈

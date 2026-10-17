@@ -82,7 +82,7 @@ export default function AccuracyHint() {
           clearTimer()
           if (!pinned) setOpen(false)
         }}
-        className="inline-flex size-4 items-center justify-center rounded-full text-slate-400 hover:text-blue-600 dark:text-slate-500 dark:hover:text-blue-400"
+        className="relative inline-flex size-4 items-center justify-center rounded-full text-slate-400 after:absolute after:-inset-3.5 after:content-[''] hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400"
       >
         <HelpCircle className="size-4" aria-hidden="true" />
       </button>

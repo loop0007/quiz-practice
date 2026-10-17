@@ -1,13 +1,16 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import {
   AlertTriangle,
   ArrowLeft,
+  CheckCheck,
   ChevronLeft,
   ChevronRight,
+  LayoutGrid,
   Loader2,
   Send,
 } from 'lucide-react'
+import MobilePaletteSheet from '@/components/MobilePaletteSheet'
 import QuestionCard from '@/components/QuestionCard'
 import QuestionPalette from '@/components/QuestionPalette'
 import { getSessionStats } from '@/lib/scoring'
@@ -29,7 +32,7 @@ export default function PracticePage() {
   const goTo = usePracticeStore((state) => state.goTo)
   const finish = usePracticeStore((state) => state.finish)
 
-  const mobilePaletteRef = useRef<HTMLDetailsElement>(null)
+  const [paletteOpen, setPaletteOpen] = useState(false)
   const previousIndexRef = useRef<number | null>(null)
 
   useEffect(() => {
@@ -45,7 +48,8 @@ export default function PracticePage() {
     const previous = previousIndexRef.current
     previousIndexRef.current = currentIndex
     if (previous !== null && previous !== currentIndex) {
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+      const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+      window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' })
     }
   }, [currentIndex])
 
@@ -94,8 +98,8 @@ export default function PracticePage() {
   const canSubmit = !record && selected.length > 0 && !submitting
 
   function handlePaletteSelect(index: number) {
+    setPaletteOpen(false)
     void goTo(index)
-    if (mobilePaletteRef.current) mobilePaletteRef.current.open = false
   }
 
   async function handleFinish() {
@@ -118,11 +122,11 @@ export default function PracticePage() {
   }
 
   return (
-    <section>
+    <section className="pb-24 lg:pb-0">
       <div className="mb-4 flex items-center justify-between gap-3">
         <Link
           to="/"
-          className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm text-slate-600 hover:bg-white hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-900"
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm text-slate-600 hover:bg-white hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-900"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
           题库
@@ -130,9 +134,9 @@ export default function PracticePage() {
         <button
           type="button"
           onClick={handleFinish}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.5 text-sm font-medium text-amber-800 hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200 dark:hover:bg-amber-950/70"
+          className="hidden min-h-11 items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3 text-sm font-medium text-amber-800 hover:bg-amber-100 lg:inline-flex dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200 dark:hover:bg-amber-950/70"
         >
-          <Send className="size-4" aria-hidden="true" />
+          <CheckCheck className="size-4" aria-hidden="true" />
           交卷
         </button>
       </div>
@@ -167,23 +171,6 @@ export default function PracticePage() {
 
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_15rem] lg:items-start lg:gap-6">
         <div className="min-w-0">
-          <details
-            ref={mobilePaletteRef}
-            className="mb-4 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 lg:hidden dark:border-slate-700 dark:bg-slate-900"
-          >
-            <summary className="cursor-pointer text-sm font-medium">
-              题号导航 · 已答 {stats.answered} / {stats.total}
-            </summary>
-            <div className="mt-3">
-              <QuestionPalette
-                questions={questions}
-                session={session}
-                currentIndex={currentIndex}
-                onSelect={handlePaletteSelect}
-              />
-            </div>
-          </details>
-
           <QuestionCard
             question={question}
             index={currentIndex}
@@ -193,12 +180,12 @@ export default function PracticePage() {
             onSelect={(key) => select(question.id, key, question.type === 'multi')}
           />
 
-          <div className="mt-4 flex flex-wrap items-center gap-2">
+          <div className="mt-4 hidden flex-wrap items-center gap-2 lg:flex">
             <button
               type="button"
               onClick={() => void submitCurrent()}
               disabled={!canSubmit}
-              className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 sm:flex-none dark:disabled:bg-slate-700 dark:disabled:text-slate-400"
+              className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 sm:flex-none dark:disabled:bg-slate-700 dark:disabled:text-slate-400"
             >
               {submitting ? (
                 <Loader2 className="size-4 animate-spin" aria-hidden="true" />
@@ -219,12 +206,12 @@ export default function PracticePage() {
             )}
           </div>
 
-          <div className="mt-4 flex items-center justify-between gap-2">
+          <div className="mt-4 hidden items-center justify-between gap-2 lg:flex">
             <button
               type="button"
               onClick={() => void goTo(currentIndex - 1)}
               disabled={currentIndex === 0}
-              className="inline-flex items-center gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm font-medium hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
+              className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-sm font-medium hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
             >
               <ChevronLeft className="size-4" aria-hidden="true" />
               上一题
@@ -233,7 +220,7 @@ export default function PracticePage() {
               type="button"
               onClick={() => void goTo(currentIndex + 1)}
               disabled={currentIndex === questions.length - 1}
-              className="inline-flex items-center gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm font-medium hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
+              className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-sm font-medium hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
             >
               下一题
               <ChevronRight className="size-4" aria-hidden="true" />
@@ -250,6 +237,74 @@ export default function PracticePage() {
           />
         </aside>
       </div>
+
+      <nav
+        aria-label="答题操作"
+        className="fixed inset-x-0 bottom-0 z-30 border-t border-[var(--color-border)] bg-white/95 backdrop-blur lg:hidden dark:border-slate-700 dark:bg-slate-900/95"
+        style={{ paddingBottom: 'calc(0.375rem + env(safe-area-inset-bottom, 0px))' }}
+      >
+        <div className="mx-auto flex max-w-4xl items-stretch gap-1 px-2 pt-1.5">
+          <button
+            type="button"
+            onClick={() => setPaletteOpen(true)}
+            className="flex min-h-12 min-w-12 flex-col items-center justify-center gap-0.5 rounded-lg px-1 text-[10px] font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+          >
+            <LayoutGrid className="size-5" aria-hidden="true" />
+            题号
+          </button>
+          <button
+            type="button"
+            onClick={() => void goTo(currentIndex - 1)}
+            disabled={currentIndex === 0}
+            aria-label="上一题"
+            className="flex min-h-12 min-w-12 flex-col items-center justify-center gap-0.5 rounded-lg px-1 text-[10px] font-medium text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:text-slate-300 dark:hover:bg-slate-800"
+          >
+            <ChevronLeft className="size-5" aria-hidden="true" />
+            上一题
+          </button>
+          <button
+            type="button"
+            onClick={() => void submitCurrent()}
+            disabled={!canSubmit}
+            className="flex min-h-12 flex-1 items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 dark:disabled:bg-slate-700 dark:disabled:text-slate-400"
+          >
+            {submitting ? (
+              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <Send className="size-4" aria-hidden="true" />
+            )}
+            {record ? '已提交' : '提交答案'}
+          </button>
+          <button
+            type="button"
+            onClick={() => void goTo(currentIndex + 1)}
+            disabled={currentIndex === questions.length - 1}
+            aria-label="下一题"
+            className="flex min-h-12 min-w-12 flex-col items-center justify-center gap-0.5 rounded-lg px-1 text-[10px] font-medium text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:text-slate-300 dark:hover:bg-slate-800"
+          >
+            <ChevronRight className="size-5" aria-hidden="true" />
+            下一题
+          </button>
+          <button
+            type="button"
+            onClick={handleFinish}
+            className="flex min-h-12 min-w-12 flex-col items-center justify-center gap-0.5 rounded-lg px-1 text-[10px] font-medium text-amber-700 hover:bg-amber-50 dark:text-amber-300 dark:hover:bg-amber-950/40"
+          >
+            <CheckCheck className="size-5" aria-hidden="true" />
+            交卷
+          </button>
+        </div>
+      </nav>
+
+      {paletteOpen && (
+        <MobilePaletteSheet
+          questions={questions}
+          session={session}
+          currentIndex={currentIndex}
+          onSelect={handlePaletteSelect}
+          onClose={() => setPaletteOpen(false)}
+        />
+      )}
     </section>
   )
 }

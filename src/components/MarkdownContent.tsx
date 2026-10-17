@@ -8,14 +8,14 @@ interface MarkdownContentProps {
 }
 
 const codeClassName =
-  'rounded bg-slate-100 px-1 py-0.5 font-mono text-[0.9em] text-slate-800 dark:bg-slate-800 dark:text-slate-100'
+  'rounded bg-slate-100 px-1 py-0.5 font-mono text-[0.9em] text-slate-800 [overflow-wrap:anywhere] dark:bg-slate-800 dark:text-slate-100'
 
 const blockComponents: Components = {
   p: ({ children }) => (
-    <p className="my-2 leading-relaxed first:mt-0 last:mb-0">{children}</p>
+    <p className="my-2 break-words leading-relaxed first:mt-0 last:mb-0">{children}</p>
   ),
   pre: ({ children }) => (
-    <pre className="my-3 overflow-x-auto rounded-lg bg-slate-900 p-3 text-xs leading-relaxed text-slate-100 dark:bg-black/60">
+    <pre className="my-3 max-w-full overflow-x-auto rounded-lg bg-slate-900 p-3 text-xs leading-relaxed text-slate-100 dark:bg-black/60">
       {children}
     </pre>
   ),
@@ -37,10 +37,23 @@ const blockComponents: Components = {
       href={href}
       target="_blank"
       rel="noreferrer noopener"
-      className="text-blue-600 underline underline-offset-2 hover:text-blue-700 dark:text-blue-400"
+      className="break-words text-blue-600 underline underline-offset-2 hover:text-blue-700 dark:text-blue-400"
     >
       {children}
     </a>
+  ),
+  table: ({ children }) => (
+    <div className="my-3 max-w-full overflow-x-auto">
+      <table className="w-full border-collapse text-sm">{children}</table>
+    </div>
+  ),
+  th: ({ children }) => (
+    <th className="border border-slate-300 px-2 py-1 text-left font-semibold dark:border-slate-600">
+      {children}
+    </th>
+  ),
+  td: ({ children }) => (
+    <td className="border border-slate-300 px-2 py-1 dark:border-slate-600">{children}</td>
   ),
 }
 
@@ -48,7 +61,7 @@ const blockComponents: Components = {
 const inlineComponents: Components = {
   p: ({ children }) => <span className="block">{children}</span>,
   pre: ({ children }) => (
-    <span className="my-1 block overflow-x-auto rounded bg-slate-900 p-2 text-xs text-slate-100">
+    <span className="my-1 block max-w-full overflow-x-auto rounded bg-slate-900 p-2 text-xs text-slate-100">
       {children}
     </span>
   ),
@@ -65,7 +78,7 @@ const inlineComponents: Components = {
       href={href}
       target="_blank"
       rel="noreferrer noopener"
-      className="text-blue-600 underline underline-offset-2 dark:text-blue-400"
+      className="break-words text-blue-600 underline underline-offset-2 dark:text-blue-400"
     >
       {children}
     </a>
@@ -81,7 +94,13 @@ export default function MarkdownContent({
   const content = children?.trim() ?? ''
   if (!content) return null
 
-  const classes = [inline ? 'block' : '', className].filter(Boolean).join(' ')
+  const classes = [
+    inline ? 'block' : 'min-w-0 max-w-full',
+    'break-words',
+    className,
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   if (inline) {
     return (

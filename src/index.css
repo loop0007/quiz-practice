@@ -21,13 +21,15 @@
   --spacing-safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-/* M9 会接入手动切换；当前先跟随系统初值。 */
+/* 首屏主题由 index.html 内联脚本先写入，这里保持同色避免闪烁。 */
 html {
   color-scheme: light;
+  background-color: var(--color-surface-muted);
 }
 
 html.dark {
   color-scheme: dark;
+  background-color: #0b1220;
 }
 
 body {
@@ -49,5 +51,20 @@ html.dark body {
   :focus-visible {
     outline: 2px solid var(--color-brand);
     outline-offset: 2px;
+  }
+
+  html.dark :focus-visible {
+    outline-color: #60a5fa;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

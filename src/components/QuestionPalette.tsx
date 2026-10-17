@@ -7,6 +7,10 @@ interface QuestionPaletteProps {
   session: PracticeSession
   currentIndex: number
   onSelect: (index: number) => void
+  /** 覆盖题号网格的最大高度；移动端抽屉会传入更高值。 */
+  listClassName?: string
+  /** 抽屉自带标题时可关闭内部标题，避免重复。 */
+  showHeader?: boolean
 }
 
 const STATUS_LABEL = {
@@ -20,19 +24,25 @@ export default function QuestionPalette({
   session,
   currentIndex,
   onSelect,
+  listClassName = 'max-h-64 lg:max-h-[60vh]',
+  showHeader = true,
 }: QuestionPaletteProps) {
   const answered = session.questionIds.filter((id) => session.answers[id]).length
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold">题号导航</h2>
-        <span className="text-xs tabular-nums text-slate-500 dark:text-slate-400">
-          已答 {answered} / {questions.length}
-        </span>
-      </div>
+      {showHeader && (
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold">题号导航</h2>
+          <span className="text-xs tabular-nums text-slate-500 dark:text-slate-400">
+            已答 {answered} / {questions.length}
+          </span>
+        </div>
+      )}
 
-      <div className="mt-2 grid max-h-64 grid-cols-6 gap-1.5 overflow-y-auto pr-1 lg:max-h-[60vh] lg:grid-cols-5">
+      <div
+        className={`${showHeader ? 'mt-2' : ''} grid grid-cols-6 gap-1.5 overflow-y-auto pr-1 lg:grid-cols-5 ${listClassName}`}
+      >
         {questions.map((question, index) => {
           const status = getQuestionStatus(session, question.id)
           const current = index === currentIndex
@@ -56,7 +66,7 @@ export default function QuestionPalette({
                 current ? '，当前题' : ''
               }`}
               aria-current={current ? 'true' : undefined}
-              className={`relative min-h-9 rounded-md border px-1 py-1 text-xs font-medium tabular-nums transition-colors ${statusClass} ${
+              className={`relative min-h-11 rounded-md border px-1 py-1 text-xs font-medium tabular-nums transition-colors ${statusClass} ${
                 current
                   ? 'ring-2 ring-blue-500 ring-offset-1 dark:ring-offset-slate-900'
                   : ''

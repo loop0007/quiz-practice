@@ -33,7 +33,7 @@ export default function QuestionCard({
   const locked = Boolean(record)
 
   return (
-    <article className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm sm:p-6 dark:border-slate-700 dark:bg-slate-900">
+    <article className="min-w-0 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm sm:p-6 dark:border-slate-700 dark:bg-slate-900">
       <header className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3 dark:border-slate-700">
         <div className="flex items-center gap-2">
           <span className="rounded bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
@@ -50,7 +50,7 @@ export default function QuestionCard({
           <button
             type="button"
             onClick={() => setFeedbackOpen(true)}
-            className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-xs text-slate-500 hover:bg-slate-100 hover:text-blue-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-blue-400"
+            className="inline-flex min-h-11 items-center gap-1 rounded-md px-2 text-xs text-slate-500 hover:bg-slate-100 hover:text-blue-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-blue-400"
           >
             <Flag className="size-3.5" aria-hidden="true" />
             反馈

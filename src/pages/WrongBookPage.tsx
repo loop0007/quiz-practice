@@ -251,7 +251,7 @@ export default function WrongBookPage() {
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">{error}</p>
         <Link
           to="/"
-          className="mt-5 inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          className="mt-5 inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-700"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
           返回题库
@@ -273,7 +273,7 @@ export default function WrongBookPage() {
         </p>
         <Link
           to="/"
-          className="mt-5 inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          className="mt-5 inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-700"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
           去刷题
@@ -296,7 +296,7 @@ export default function WrongBookPage() {
         </p>
         <Link
           to="/"
-          className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-sm font-medium hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
+          className="mt-4 inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-[var(--color-border)] px-3 text-sm font-medium hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
           返回题库

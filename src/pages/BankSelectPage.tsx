@@ -111,7 +111,7 @@ export default function BankSelectPage() {
         <button
           type="button"
           onClick={() => setFeedbackOpen(true)}
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm font-medium hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
+          className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-sm font-medium hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
         >
           <MessageSquarePlus className="size-4" aria-hidden="true" />
           反馈
@@ -177,7 +177,7 @@ export default function BankSelectPage() {
                   <button
                     type="button"
                     disabled
-                    className="w-full cursor-not-allowed rounded-lg bg-slate-200 px-4 py-2.5 text-sm font-medium text-slate-500 dark:bg-slate-800 dark:text-slate-400"
+                    className="min-h-11 w-full cursor-not-allowed rounded-lg bg-slate-200 px-4 text-sm font-medium text-slate-500 dark:bg-slate-800 dark:text-slate-400"
                   >
                     暂无可练习题目
                   </button>
@@ -193,7 +193,7 @@ export default function BankSelectPage() {
                       <button
                         type="button"
                         onClick={() => continuePractice(active)}
-                        className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
+                        className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-3 text-sm font-medium text-white hover:bg-blue-700"
                       >
                         <Play className="size-4" aria-hidden="true" />
                         继续上次
@@ -202,7 +202,7 @@ export default function BankSelectPage() {
                         type="button"
                         onClick={() => startPractice(bank.id, 'restart')}
                         disabled={pending}
-                        className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[var(--color-border)] px-3 py-2.5 text-sm font-medium hover:bg-slate-50 disabled:opacity-60 dark:border-slate-700 dark:hover:bg-slate-800"
+                        className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-[var(--color-border)] px-3 text-sm font-medium hover:bg-slate-50 disabled:opacity-60 dark:border-slate-700 dark:hover:bg-slate-800"
                       >
                         {pending ? (
                           <Loader2 className="size-4 animate-spin" aria-hidden="true" />
@@ -218,7 +218,7 @@ export default function BankSelectPage() {
                     type="button"
                     onClick={() => startPractice(bank.id, 'new')}
                     disabled={pending}
-                    className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+                    className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
                   >
                     {pending ? (
                       <Loader2 className="size-4 animate-spin" aria-hidden="true" />
