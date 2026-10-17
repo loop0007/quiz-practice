@@ -1,0 +1,38 @@
+[
+  {
+    "code": "missing-answer",
+    "bankId": "java",
+    "questionId": "java:71",
+    "number": 71,
+    "line": 1118,
+    "message": "单选题：答案缺失或无法解析",
+    "excerpt": "在Java中，下列哪个关键字用于定义常量（ ）"
+  },
+  {
+    "code": "invalid-options",
+    "bankId": "web",
+    "questionId": "web:31",
+    "number": 31,
+    "line": 409,
+    "message": "单选题：选项不足（0 个）",
+    "excerpt": "在 CSS 中，用于设置元素**外边距**的属性是（ ）"
+  },
+  {
+    "code": "answer-not-in-options",
+    "bankId": "web",
+    "questionId": "web:31",
+    "number": 31,
+    "line": 409,
+    "message": "单选题：答案 A 不在选项内",
+    "excerpt": "在 CSS 中，用于设置元素**外边距**的属性是（ ）"
+  },
+  {
+    "code": "answer-not-in-options",
+    "bankId": "web",
+    "questionId": "web:80",
+    "number": 80,
+    "line": 1060,
+    "message": "单选题：答案 E 不在选项内",
+    "excerpt": "在 JavaScript 中，用于向数组**开头**添加元素的正确方法是（ ）"
+  }
+]

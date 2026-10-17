@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "parse:banks": "node scripts/parse-banks.mjs",
+    "predev": "npm run parse:banks",
+    "prebuild": "npm run parse:banks"
   },
   "dependencies": {
     "dexie": "^4.4.6",

@@ -52,7 +52,7 @@ pages（页面编排）
 | 编号 | 模块 | 阶段 | 优先级 | 依赖 | 对外产出/接口 | 状态 | 完成日期 | 验证 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | M0 | 项目基线 | 一 | P0 | — | 可启动应用、路由、主题基线 | ✅ | 2026-10-17 | build + dev 200 |
-| M1 | 题库解析 | 一 | P0 | M0 | `BankData`、`banks.json`、异常报告 | ⬜ | | |
+| M1 | 题库解析 | 一 | P0 | M0 | `BankData`、`banks.json`、异常报告 | ✅ | 2026-10-17 | 336 有效题；重复执行一致；build 通过 |
 | M2 | 数据与存储 | 二 | P0 | M1 | Session 类型、Dexie API | ⬜ | | |
 | M3 | 判分与统计 | 二 | P0 | M2 | `scoring` 纯函数 | ⬜ | | |
 | M4 | 题库选择 | 二 | P0 | M1, M2 | 题库卡片、创建/继续会话 | ⬜ | | |
@@ -122,18 +122,28 @@ pages（页面编排）
 
 #### 任务
 
-- [ ] 编写 `scripts/parse-banks.mjs`，无第三方 Markdown 依赖。
-- [ ] 生成 `src/data/banks.json`：
+- [x] 编写 `scripts/parse-banks.mjs`，无第三方 Markdown 依赖。
+- [x] 生成 `src/data/banks.json`：
   - `banks`：题库元信息、章节、题量、题型统计、异常数。
   - `questions`：以 `bankId:number` 为键的题目对象。
-- [ ] 生成 `src/data/anomalies.json`：异常类型、题库、题号、源行号、原文摘要。
-- [ ] 题目对象统一包含：`id/bankId/chapterId/number/type/stem/options/answer/explanation`。
-- [ ] 增加脚本：`parse:banks`、`predev`、`prebuild`。
-- [ ] 断言：Java 219、Web 120；ID 唯一；答案 key 均在选项内。
-- [ ] 抽查：单选、多选、判断、含代码块题各 1–2 道。
-- [ ] 验证：`node scripts/parse-banks.mjs` 输出统计与异常报告，重复执行结果稳定。
+- [x] 生成 `src/data/anomalies.json`：异常类型、题库、题号、源行号、原文摘要。
+- [x] 题目对象统一包含：`id/bankId/chapterId/number/type/stem/options/answer/explanation`。
+- [x] 增加脚本：`parse:banks`、`predev`、`prebuild`。
+- [x] 断言：Java 219、Web 120；ID 唯一；答案 key 均在选项内。
+- [x] 抽查：单选、多选、判断、含代码块题各 1–2 道。
+- [x] 验证：`node scripts/parse-banks.mjs` 输出统计与异常报告，重复执行结果稳定。
 
-**完成标记**：⬜ 未开始｜日期：____｜验证：____｜接口变更：无
+**完成标记**：✅ 已完成｜日期：2026-10-17｜涉及文件：`scripts/parse-banks.mjs`、`scripts/check-banks.mjs`、`src/types/index.ts`、`src/data/banks.json`、`src/data/anomalies.json`、`package.json`｜验证：解析块 Java 219 / Web 120，有效题 218 / 118（共 336）；ID 唯一、答案均在选项内、代码围栏成对；连续两次解析 md5 一致；`npm run build` 通过｜接口变更：新增并冻结 `BankData` / `BankMeta` / `Question` / `Anomaly`（`src/types/index.ts`）｜影响模块：M2 起读取题库数据
+
+**题库异常（不进入练习，不计入正确率分母）**：
+
+| 题库 | 题号 | 源行 | 异常 |
+| --- | --- | --- | --- |
+| Java | 71 | 1118 | 缺少答案 |
+| Web | 31 | 409 | 无选项，答案 A 无法对照 |
+| Web | 80 | 1060 | 答案 E 不在 A–D 选项内（解析指向 B） |
+
+> 另：Java 142 有答案但无解析（计划未定义为异常，保留，解析为空）；Java 219、Web 120 为末题，缺少结尾 `---` 属正常。
 
 ## 2. 阶段二：逐模块完成基础功能
 
