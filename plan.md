@@ -56,7 +56,7 @@ pages（页面编排）
 | M2 | 数据与存储 | 二 | P0 | M1 | Session 类型、Dexie API | ✅ | 2026-10-17 | 11 项测试通过；build 通过 |
 | M3 | 判分与统计 | 二 | P0 | M2 | `scoring` 纯函数 | ✅ | 2026-10-17 | 27 项测试通过；build 通过 |
 | M4 | 题库选择 | 二 | P0 | M1, M2 | 题库卡片、创建/继续会话 | ✅ | 2026-10-17 | 32 项测试通过；build 通过 |
-| M5 | 答题核心 | 二 | P0 | M2, M3, M4 | 答题页、判分、翻题、题号侧栏 | ⬜ | | |
+| M5 | 答题核心 | 二 | P0 | M2, M3, M4 | 答题页、判分、翻题、题号侧栏 | ✅ | 2026-10-17 | 42 项测试通过；build 通过 |
 | M6 | 结果页 | 二 | P0 | M2, M3, M5 | 成绩、错题/未答题号、异常数 | ⬜ | | |
 | M7 | 错题本 | 二 | P0 | M2, M3, M5 | 累计错题列表与对照 | ⬜ | | |
 | M8 | 异常反馈 | 二 | P0 | M2, M5 | 本地反馈记录 | ⬜ | | |
@@ -202,18 +202,18 @@ feedback:  '++id, questionId, createdAt'
 
 ### M5 答题核心
 
-- [ ] 题目渲染：题干、选项、代码块、行内代码；使用 react-markdown，不启用原始 HTML。
-- [ ] 单选/判断 radio，多选 checkbox；未选择禁用提交。
-- [ ] 提交：判分、写入 session、首次答错写错题本；提交后锁定选项和按钮。
-- [ ] 幂等：按 `questionId` 检查已有记录，存在直接返回；双击无副作用。
-- [ ] 提交后展示：正确/错误、正确答案、解析。
-- [ ] 上一题/下一题；保持每题状态；切换后滚动到题目顶部。
-- [ ] 显示当前题号、已答数、答对数、进度。
-- [ ] 题号侧栏：未做/正确/错误/当前题；颜色 + 图标/文字。
-- [ ] 交卷：未答题提示；确认后写 `finishedAt` 并跳转结果页。
-- [ ] 验收：题库选择 → 答题 → 提交 → 翻题 → 交卷完整走通；首次提交后成绩不变。
+- [x] 题目渲染：题干、选项、代码块、行内代码；使用 react-markdown，不启用原始 HTML。
+- [x] 单选/判断 radio，多选 checkbox；未选择禁用提交。
+- [x] 提交：判分、写入 session、首次答错写错题本；提交后锁定选项和按钮。
+- [x] 幂等：按 `questionId` 检查已有记录，存在直接返回；双击无副作用。
+- [x] 提交后展示：正确/错误、正确答案、解析。
+- [x] 上一题/下一题；保持每题状态；切换后滚动到题目顶部。
+- [x] 显示当前题号、已答数、答对数、进度。
+- [x] 题号侧栏：未做/正确/错误/当前题；颜色 + 图标/文字。
+- [x] 交卷：未答题提示；确认后写 `finishedAt` 并跳转结果页。
+- [x] 验收：题库选择 → 答题 → 提交 → 翻题 → 交卷完整走通；首次提交后成绩不变。
 
-**完成标记**：⬜ 未开始｜日期：____｜验证：____｜接口变更：无
+**完成标记**：✅ 已完成｜日期：2026-10-17｜涉及文件：`src/store/usePracticeStore.ts`、`src/store/usePracticeStore.test.ts`、`src/components/MarkdownContent.tsx`、`src/components/QuestionCard.tsx`、`src/components/QuestionPalette.tsx`、`src/pages/PracticePage.tsx`｜验证：Vitest 42 项全部通过（新增 store 10 项：题目快照加载、缺失会话报错、单选替换、多选切换、已提交锁定、答对不写错题本、答错累计一次、未选择提交无效、翻题持久化与越界收敛、交卷幂等）；`npm run build` 通过。浏览器内翻题、滚动、移动端题号折叠与交卷确认在 T3/T4 真机复验｜接口变更：冻结 `QuestionCard` props（`question` / `index` / `total` / `selected` / `record` / `onSelect`）与 `QuestionPalette` props；新增 zustand store actions（`loadSession` / `select` / `submitCurrent` / `goTo` / `finish`）｜影响模块：M6、M8、M9、T3
 
 ### M6 结果页
 
