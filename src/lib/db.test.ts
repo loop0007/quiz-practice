@@ -14,6 +14,7 @@ import {
   saveSession,
 } from './db'
 import { createSessionId } from './id'
+import { getSessionStats } from './scoring'
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -166,6 +167,37 @@ describe('反馈', () => {
     })
     expect(list[0].questionId).toBeUndefined()
     expect(list[0].bankId).toBeUndefined()
+  })
+})
+
+describe('T2 本次错题与错题本累计', () => {
+  it('新会话答对不会清除旧错题，两种统计口径互不影响', async () => {
+    const first = await createSession({ bankId: 'java', questionIds: ['java:1'] })
+    first.answers['java:1'] = {
+      questionId: 'java:1',
+      selected: ['A'],
+      correct: false,
+      answeredAt: 1,
+    }
+    await saveSession(first)
+    await addWrong({ questionId: 'java:1', bankId: 'java', selected: ['A'] })
+
+    const second = await createSession({ bankId: 'java', questionIds: ['java:1'] })
+    second.answers['java:1'] = {
+      questionId: 'java:1',
+      selected: ['B'],
+      correct: true,
+      answeredAt: 2,
+    }
+    await saveSession(second)
+
+    expect(getSessionStats(first).wrong).toBe(1)
+    expect(getSessionStats(second).wrong).toBe(0)
+    expect(getSessionStats(second).correct).toBe(1)
+
+    const wrongBook = await listWrong()
+    expect(wrongBook).toHaveLength(1)
+    expect(wrongBook[0].questionId).toBe('java:1')
   })
 })
 
