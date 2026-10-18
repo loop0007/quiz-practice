@@ -110,6 +110,13 @@ export interface PracticeSession {
   currentIndex: number
 }
 
+export interface FavoriteEntry {
+  /** 作为主键，一题一条。 */
+  questionId: string
+  bankId: string
+  createdAt: number
+}
+
 export interface WrongEntry {
   /** 作为主键，一题一条。 */
   questionId: string

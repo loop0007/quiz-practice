@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom'
 import Layout from '@/components/Layout'
 import BankSelectPage from '@/pages/BankSelectPage'
+import FavoritesPage from '@/pages/FavoritesPage'
 import HistoryPage from '@/pages/HistoryPage'
 import PracticePage from '@/pages/PracticePage'
 import ResultPage from '@/pages/ResultPage'
@@ -16,6 +17,7 @@ export default function App() {
         <Route path="result/:sessionId" element={<ResultPage />} />
         <Route path="history" element={<HistoryPage />} />
         <Route path="wrongbook" element={<WrongBookPage />} />
+        <Route path="favorites" element={<FavoritesPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

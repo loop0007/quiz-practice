@@ -9,10 +9,12 @@ import {
   LayoutGrid,
   Loader2,
   Send,
+  Star,
 } from 'lucide-react'
 import MobilePaletteSheet from '@/components/MobilePaletteSheet'
 import QuestionCard from '@/components/QuestionCard'
 import QuestionPalette from '@/components/QuestionPalette'
+import { addFavorite, listFavorites, removeFavorite } from '@/lib/db'
 import { getSessionStats } from '@/lib/scoring'
 import { usePracticeStore } from '@/store/usePracticeStore'
 
@@ -38,11 +40,32 @@ export default function PracticePage() {
   const finish = usePracticeStore((state) => state.finish)
 
   const [paletteOpen, setPaletteOpen] = useState(false)
+  const [favoriteIds, setFavoriteIds] = useState<string[]>([])
+  const [favoritePending, setFavoritePending] = useState(false)
+  const [favoriteError, setFavoriteError] = useState<string | null>(null)
   const previousIndexRef = useRef<number | null>(null)
 
   useEffect(() => {
     void loadSession(sessionId)
   }, [sessionId, loadSession])
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadFavorites() {
+      try {
+        const list = await listFavorites()
+        if (!cancelled) setFavoriteIds(list.map((entry) => entry.questionId))
+      } catch {
+        if (!cancelled) setFavoriteError('读取收藏夹失败，收藏状态可能不准确。')
+      }
+    }
+
+    void loadFavorites()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const currentIndex = useMemo(() => {
     if (!currentSession || questions.length === 0) return 0
@@ -96,11 +119,37 @@ export default function PracticePage() {
   }
 
   const question = questions[currentIndex]
+  const bankId = currentSession.bankId
   const record = currentSession.answers[question.id]
   const selected = record?.selected ?? drafts[question.id] ?? []
   const stats = getSessionStats(currentSession)
   const progress = stats.total === 0 ? 0 : (stats.answered / stats.total) * 100
   const canSubmit = !record && selected.length > 0 && !submitting
+  const favorited = favoriteIds.includes(question.id)
+
+  async function handleToggleFavorite() {
+    if (favoritePending) return
+
+    const questionId = question.id
+    const wasFavorited = favoriteIds.includes(questionId)
+    setFavoritePending(true)
+    setFavoriteError(null)
+    try {
+      if (wasFavorited) {
+        await removeFavorite(questionId)
+        setFavoriteIds((prev) => prev.filter((id) => id !== questionId))
+      } else {
+        await addFavorite({ questionId, bankId })
+        setFavoriteIds((prev) =>
+          prev.includes(questionId) ? prev : [...prev, questionId],
+        )
+      }
+    } catch {
+      setFavoriteError('收藏操作失败，请重试。')
+    } finally {
+      setFavoritePending(false)
+    }
+  }
 
   function handlePaletteSelect(index: number) {
     setPaletteOpen(false)
@@ -136,14 +185,38 @@ export default function PracticePage() {
           <ArrowLeft className="size-4" aria-hidden="true" />
           题库
         </Link>
-        <button
-          type="button"
-          onClick={handleFinish}
-          className="hidden min-h-11 items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3 text-sm font-medium text-amber-800 hover:bg-amber-100 lg:inline-flex dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200 dark:hover:bg-amber-950/70"
-        >
-          <CheckCheck className="size-4" aria-hidden="true" />
-          交卷
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => void handleToggleFavorite()}
+            disabled={favoritePending}
+            aria-pressed={favorited}
+            className={`inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-60 ${
+              favorited
+                ? 'border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200 dark:hover:bg-amber-950/70'
+                : 'border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800'
+            }`}
+          >
+            {favoritePending ? (
+              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <Star
+                className="size-4"
+                fill={favorited ? 'currentColor' : 'none'}
+                aria-hidden="true"
+              />
+            )}
+            {favorited ? '已收藏' : '收藏'}
+          </button>
+          <button
+            type="button"
+            onClick={handleFinish}
+            className="hidden min-h-11 items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3 text-sm font-medium text-amber-800 hover:bg-amber-100 lg:inline-flex dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200 dark:hover:bg-amber-950/70"
+          >
+            <CheckCheck className="size-4" aria-hidden="true" />
+            交卷
+          </button>
+        </div>
       </div>
 
       <div className="mb-4 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 dark:border-slate-700 dark:bg-slate-900">
@@ -163,6 +236,16 @@ export default function PracticePage() {
           />
         </div>
       </div>
+
+      {favoriteError && (
+        <div
+          role="alert"
+          className="mb-4 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/50 dark:text-red-300"
+        >
+          <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          <span>{favoriteError}</span>
+        </div>
+      )}
 
       {error && (
         <div

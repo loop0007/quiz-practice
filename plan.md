@@ -63,7 +63,7 @@ pages（页面编排）
 | M9 | 体验基线 | 二 | P0 | M5–M8 | 移动端、深色、无障碍 | ✅ | 2026-10-17 | 49 项测试；build；375/390 与 1280 布局截图 |
 | M10 | 公网托管 | 二 | P0 | M2, M9 | HTTPS 公网地址、多端真机验证 | 🟨 | 2026-10-17 | GitHub Pages 已上线；HTTPS 200；待真机蜂窝/另一台电脑复验 |
 | T1–T5 | 测试 | 三 | P0 | M0–M10 | 测试记录与缺陷清单 | 🟨 | 2026-10-18 | T1–T4 通过（Vitest 56 + 浏览器 72）；T5 Linux/WSL 实测待环境 |
-| E1–E7 | 额外功能 | 四 | P2 | T5 | 可选增强 | 🟨 | 2026-10-18 | E1、E2、E3、E7 完成（Vitest 71 + 浏览器 104）；E4–E6 未开始 |
+| E1–E7 | 额外功能 | 四 | P2 | T5 | 可选增强 | 🟨 | 2026-10-18 | E1、E2、E3、E4、E7 完成（Vitest 73 + 浏览器 115）；E5–E6 未开始 |
 | U1 | UI 美化 | 五 | P1 | T5/E | 视觉统一与细节打磨 | ⬜ | | |
 | D1 | 交付 | 五后 | P0 | 全部 | `dist/`、README、AI 记录、公网地址 | ⬜ | | |
 
@@ -389,6 +389,16 @@ feedback:  '++id, questionId, createdAt'
 
 **完成标记**：✅ 已完成｜日期：2026-10-18｜涉及文件：`src/lib/wrongbook.ts`、`src/lib/wrongbook.test.ts`、`src/pages/WrongBookPage.tsx`、`scripts/e2e-browser.mjs`、`README.md`、`plan.md`、`docs/测试记录.md`｜验证：Vitest 71 项、浏览器 104 项全部通过；`npm run build` 与 `check:source` 通过。1 道累计错题组卷为 1 题练习，从零计分，答对后正确率 100%，sessions 表新增第 3 条记录，错题本记录保留｜接口变更：新增只读 `getWrongBookQuestionIds`；未改 Session/存储契约｜影响模块：M7、T3、T4、D1
 
+### E4 收藏夹
+
+- [x] `types` 新增 `FavoriteEntry`；Dexie 以 `version(2)` 新增 `favorites` 表，既有表结构不变。
+- [x] 答题页顶部新增收藏/取消收藏按钮，收藏状态刷新后保持；收藏不改写 Session。
+- [x] 新增 `/favorites` 页面与主导航入口：按题库分组展示收藏题目、收藏时间，可逐条取消收藏。
+- [x] 窄屏主导航改为图标 + `aria-label`，为新增入口留出空间并保持 44px 触控目标。
+- [x] 新增 2 项 db 单测；无头浏览器追加 7 项桌面检查与 4 项移动端检查。
+
+**完成标记**：✅ 已完成｜日期：2026-10-18｜涉及文件：`src/types/index.ts`、`src/lib/db.ts`、`src/lib/db.test.ts`、`src/pages/PracticePage.tsx`、`src/pages/FavoritesPage.tsx`、`src/App.tsx`、`src/components/Layout.tsx`、`scripts/e2e-browser.mjs`、`README.md`、`plan.md`、`docs/测试记录.md`｜验证：Vitest 73 项、浏览器 115 项全部通过；`npm run build` 与 `check:source` 通过。收藏写入 favorites 表、刷新后保持，收藏夹展示题干并可取消，取消后表为空；移动端 375/390 空状态无横向溢出｜接口变更：`types` 新增 `FavoriteEntry`；db 新增 `addFavorite`/`listFavorites`/`removeFavorite` 与 `favorites` 表（version 2）；未改 Session/判分/既有表｜影响模块：M2、M5、T3、T4、D1
+
 ### E7 结果页错题重练
 
 - [x] 已交卷结果页新增“错题重练”入口，题数为本次答错 + 未作答。
@@ -399,7 +409,7 @@ feedback:  '++id, questionId, createdAt'
 
 **完成标记**：✅ 已完成｜日期：2026-10-18｜涉及文件：`src/lib/scoring.ts`、`src/lib/scoring.test.ts`、`src/store/usePracticeStore.test.ts`、`src/pages/ResultPage.tsx`、`scripts/e2e-browser.mjs`、`README.md`、`plan.md`、`docs/测试记录.md`｜验证：Vitest 68 项、浏览器 91 项全部通过；`npm run build` 与 `check:source` 通过。错题重练创建独立 session（原 118 题，重练 117 题），从零计分，sessions 表新增记录，原结果不受影响｜接口变更：`scoring.ts` 新增只读函数 `getRedoQuestionIds`；未改 Session/存储契约｜影响模块：M6、T3、T4、D1
 
-**完成标记**：🟨 进行中｜日期：2026-10-18｜验证：E1、E2、E3、E7 已完成（Vitest 71 项、浏览器 104 项）；E4–E6 未开始｜接口变更：见 E1、E2、E3、E7｜影响模块：M4、M6、M7、T3、T4、D1
+**完成标记**：🟨 进行中｜日期：2026-10-18｜验证：E1、E2、E3、E4、E7 已完成（Vitest 73 项、浏览器 115 项）；E5–E6 未开始｜接口变更：见 E1、E2、E3、E4、E7｜影响模块：M2、M4、M5、M6、M7、T3、T4、D1
 
 ## 5. 阶段五：UI 界面美化
 

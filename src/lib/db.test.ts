@@ -1,6 +1,7 @@
 import 'fake-indexeddb/auto'
 import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
+  addFavorite,
   addFeedback,
   addWrong,
   createSession,
@@ -8,9 +9,11 @@ import {
   deleteSession,
   findActiveSession,
   getSession,
+  listFavorites,
   listFeedback,
   listFinishedSessions,
   listWrong,
+  removeFavorite,
   removeWrong,
   saveSession,
 } from './db'
@@ -147,6 +150,37 @@ describe('错题本', () => {
 
     await removeWrong('java:1')
     expect((await listWrong()).map((entry) => entry.questionId)).toEqual(['web:2'])
+  })
+})
+
+describe('收藏夹', () => {
+  it('收藏后可读取，重复收藏不重复写入', async () => {
+    await addFavorite({ questionId: 'java:1', bankId: 'java' })
+    const first = await db.favorites.get('java:1')
+    expect(first?.createdAt).toBeTypeOf('number')
+
+    await wait(5)
+    await addFavorite({ questionId: 'java:1', bankId: 'java' })
+    const again = await db.favorites.get('java:1')
+
+    expect(again?.createdAt).toBe(first?.createdAt)
+    expect(await db.favorites.count()).toBe(1)
+  })
+
+  it('按收藏时间倒序返回，并可取消收藏', async () => {
+    await addFavorite({ questionId: 'java:1', bankId: 'java' })
+    await wait(5)
+    await addFavorite({ questionId: 'web:2', bankId: 'web' })
+
+    expect((await listFavorites()).map((entry) => entry.questionId)).toEqual([
+      'web:2',
+      'java:1',
+    ])
+
+    await removeFavorite('java:1')
+    expect((await listFavorites()).map((entry) => entry.questionId)).toEqual([
+      'web:2',
+    ])
   })
 })
 

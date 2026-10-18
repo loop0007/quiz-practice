@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from 'react-router-dom'
-import { BookOpenCheck, History, SquarePen } from 'lucide-react'
+import { BookOpenCheck, History, SquarePen, Star } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 
 export default function Layout() {
@@ -29,19 +29,30 @@ export default function Layout() {
           >
             <Link
               to="/history"
+              aria-label="历史成绩"
               aria-current={pathname === '/history' ? 'page' : undefined}
-              className="inline-flex min-h-11 items-center gap-1 rounded-lg px-2 hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-slate-800 dark:hover:text-blue-400"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-lg px-2 hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-slate-800 dark:hover:text-blue-400"
             >
               <History className="size-4" aria-hidden="true" />
-              历史成绩
+              <span className="hidden sm:inline">历史成绩</span>
             </Link>
             <Link
               to="/wrongbook"
+              aria-label="错题本"
               aria-current={pathname === '/wrongbook' ? 'page' : undefined}
-              className="inline-flex min-h-11 items-center gap-1 rounded-lg px-2 hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-slate-800 dark:hover:text-blue-400"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-lg px-2 hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-slate-800 dark:hover:text-blue-400"
             >
               <SquarePen className="size-4" aria-hidden="true" />
-              错题本
+              <span className="hidden sm:inline">错题本</span>
+            </Link>
+            <Link
+              to="/favorites"
+              aria-label="收藏夹"
+              aria-current={pathname === '/favorites' ? 'page' : undefined}
+              className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-lg px-2 hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-slate-800 dark:hover:text-blue-400"
+            >
+              <Star className="size-4" aria-hidden="true" />
+              <span className="hidden sm:inline">收藏夹</span>
             </Link>
             <ThemeToggle />
           </nav>

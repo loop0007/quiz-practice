@@ -266,6 +266,17 @@ async function runDesktopFlow(browser, data) {
   await submitFeedback(page, { typeLabel: '其他', note: 'T3 题目反馈' })
   equal('题目反馈已写入 feedback 表', await indexedDbCount(page, 'feedback'), 2)
 
+  console.log('  · E4 收藏')
+  await page.getByRole('button', { name: '收藏', exact: true }).click()
+  await page.getByRole('button', { name: '已收藏' }).waitFor({ timeout: 5000 })
+  equal('收藏写入 favorites 表', await indexedDbCount(page, 'favorites'), 1)
+  await page.reload({ waitUntil: 'load' })
+  await page.getByText(/第 1 \/ 118 题/).first().waitFor({ timeout: 15000 })
+  check(
+    '刷新后收藏状态保持',
+    await page.getByRole('button', { name: '已收藏' }).isVisible(),
+  )
+
   console.log('  · 故意答错并锁定')
   await selectOption(page, wrongKey)
   await submitDesktop(page)
@@ -508,6 +519,31 @@ async function runDesktopFlow(browser, data) {
     timeout: 15000,
   })
   equal('答对组卷题后错题本仍保留记录', await page.locator('article').count(), 1)
+
+  console.log('  · E4 收藏夹页面')
+  await page.goto(`${BASE}/#/favorites`, { waitUntil: 'load' })
+  await page.getByRole('heading', { name: '收藏夹' }).waitFor({ timeout: 15000 })
+  equal('收藏夹条目数', await page.locator('article').count(), 1)
+  const favoriteArticle = page.locator('article').first()
+  equal(
+    '收藏夹题干与练习一致',
+    normalize(
+      await favoriteArticle.locator(':scope > header + div').textContent(),
+    ),
+    normalize(q1.stem),
+  )
+  check(
+    '收藏夹显示收藏时间',
+    (await favoriteArticle.innerText()).includes('收藏于：'),
+  )
+  check(
+    '收藏夹显示取消收藏入口',
+    await favoriteArticle.getByRole('button', { name: '取消收藏' }).isVisible(),
+  )
+  await page.screenshot({ path: path.join(SHOTS, 't3-07-favorites-desktop.png') })
+  await favoriteArticle.getByRole('button', { name: '取消收藏' }).click()
+  await page.getByText('收藏夹是空的').waitFor({ timeout: 5000 })
+  equal('取消收藏后 favorites 表为空', await indexedDbCount(page, 'favorites'), 0)
   await goHome(page)
 
   console.log('  · E1 章节/题型筛选')
@@ -651,6 +687,14 @@ async function runMobileFlow(browser, options, label, startAtDark) {
     await page.getByRole('button', { name: /错题组卷/ }).isVisible(),
   )
   await noOverflow(page, `${label} 错题本`)
+
+  await page.getByRole('link', { name: '收藏夹' }).click()
+  await page.getByRole('heading', { name: '收藏夹' }).waitFor({ timeout: 5000 })
+  check(
+    `${label} 收藏夹显示空状态`,
+    await page.getByText('收藏夹是空的').isVisible(),
+  )
+  await noOverflow(page, `${label} 收藏夹`)
   await errorSummary(page, errors, label)
 
   await context.close()

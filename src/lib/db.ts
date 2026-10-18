@@ -1,9 +1,15 @@
 /**
- * 本地持久化层（M2 冻结）。
+ * 本地持久化层（M2 冻结；E4 以 version(2) 新增收藏夹表，既有表结构不变）。
  * 页面与组件不得直接访问 Dexie 表，统一通过本文件导出的 API。
  */
 import Dexie, { type Table } from 'dexie'
-import type { Feedback, FeedbackType, PracticeSession, WrongEntry } from '../types'
+import type {
+  FavoriteEntry,
+  Feedback,
+  FeedbackType,
+  PracticeSession,
+  WrongEntry,
+} from '../types'
 import { createSessionId } from './id'
 
 export const DB_NAME = 'quiz-practice'
@@ -12,6 +18,7 @@ class AppDatabase extends Dexie {
   sessions!: Table<PracticeSession, string>
   wrongBook!: Table<WrongEntry, string>
   feedback!: Table<Feedback, number>
+  favorites!: Table<FavoriteEntry, string>
 
   constructor(name = DB_NAME) {
     super(name)
@@ -19,6 +26,12 @@ class AppDatabase extends Dexie {
       sessions: 'id, bankId, startedAt, finishedAt',
       wrongBook: 'questionId, bankId, firstWrongAt',
       feedback: '++id, questionId, createdAt',
+    })
+    this.version(2).stores({
+      sessions: 'id, bankId, startedAt, finishedAt',
+      wrongBook: 'questionId, bankId, firstWrongAt',
+      feedback: '++id, questionId, createdAt',
+      favorites: 'questionId, bankId, createdAt',
     })
   }
 }
@@ -34,6 +47,11 @@ export interface AddWrongInput {
   questionId: string
   bankId: string
   selected: string[]
+}
+
+export interface AddFavoriteInput {
+  questionId: string
+  bankId: string
 }
 
 export interface AddFeedbackInput {
@@ -137,6 +155,27 @@ export async function listWrong(): Promise<WrongEntry[]> {
 
 export async function removeWrong(questionId: string): Promise<void> {
   await db.wrongBook.delete(questionId)
+}
+
+/** 收藏一题；重复收藏不改变首次收藏时间。 */
+export async function addFavorite(input: AddFavoriteInput): Promise<void> {
+  const existing = await db.favorites.get(input.questionId)
+  if (existing) return
+
+  await db.favorites.add({
+    questionId: input.questionId,
+    bankId: input.bankId,
+    createdAt: Date.now(),
+  })
+}
+
+/** 按收藏时间倒序返回全部收藏。 */
+export async function listFavorites(): Promise<FavoriteEntry[]> {
+  return db.favorites.orderBy('createdAt').reverse().toArray()
+}
+
+export async function removeFavorite(questionId: string): Promise<void> {
+  await db.favorites.delete(questionId)
 }
 
 export async function addFeedback(input: AddFeedbackInput): Promise<number> {
