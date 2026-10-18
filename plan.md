@@ -453,8 +453,12 @@ feedback:  '++id, questionId, createdAt'
 - [x] 新增首页，题库入口移动到顶部菜单。
 - [x] 题库筛选改为点击题库卡片进入题库内侧后选择。
 - [x] “开始练习”按钮从题库卡片移动到题库内侧。
+- [x] 题库、错题本、收藏夹头部统一为“历史成绩”式纯文字标题，去掉深色矩形底；题库内侧删除与题库卡片重复的统计卡片。
+- [x] “三”菜单常驻，集成使用说明、外观、反馈与深色模式；移动端导航同收进菜单；清理页面冗余说明文字。
+- [x] 错题本、收藏夹支持批量勾选、全选与批量移除/取消收藏。
+- [x] 结果页本次错题与未作答默认只显示题数，点击“查看题号”弹出题号窗口。
 
-**完成标记**：✅ 已完成｜日期：2026-10-18｜涉及文件：`src/index.css`、`src/lib/theme.ts`、`index.html`、`public/manifest.webmanifest`、`src/App.tsx`、`src/components/{Layout,QuestionCard,QuestionPalette,ThemeToggle,AppearanceDialog,FeedbackDialog,MobilePaletteSheet,AccuracyHint}.tsx`、`src/pages/{HomePage,BankSelectPage,BankDetailPage,PracticePage,ResultPage,WrongBookPage,FavoritesPage,HistoryPage,NotFoundPage}.tsx`、`scripts/e2e-browser.mjs`；删除被题库内侧取代的 `src/components/PracticeFilterDialog.tsx`｜验证：`npm test` 86 项、`npm run test:e2e` 152 项、`npm run check:source`（45 个源文件、95 条本地 import）与 `npm run build` 均通过；无头 Edge 检查 1280/390/375 布局、浅色/深色、壁纸、触控尺寸、横向溢出与控制台报错，另截图抽查题库列表、题库内侧、汉堡菜单与自定义壁纸｜接口变更：新增路由 `/`（首页）、`/banks`（题库列表）、`/banks/:bankId`（题库内侧）；`PracticeFilterDialog` 移除；既有 Session/判分/存储 API 不变｜影响模块：M4、M9、T3/T4、U1
+**完成标记**：✅ 已完成｜日期：2026-10-18｜涉及文件：`src/index.css`、`src/lib/theme.ts`、`src/lib/db.ts`、`index.html`、`public/manifest.webmanifest`、`src/App.tsx`、`src/components/{Layout,QuestionCard,QuestionPalette,ThemeToggle,AppearanceDialog,FeedbackDialog,MobilePaletteSheet,AccuracyHint,HelpDialog,QuestionNumbersDialog,SelectionCheckbox}.tsx`、`src/pages/{HomePage,BankSelectPage,BankDetailPage,PracticePage,ResultPage,WrongBookPage,FavoritesPage,HistoryPage,NotFoundPage}.tsx`、`scripts/e2e-browser.mjs`；删除被题库内侧取代的 `src/components/PracticeFilterDialog.tsx`｜验证：`npm test` 88 项、`npm run test:e2e` 157 项、`npm run check:source`（48 个源文件、99 条本地 import）与 `npm run build` 均通过；无头 Edge 检查 1280/390/375 布局、浅色/深色、壁纸、触控尺寸、横向溢出与控制台报错，另截图抽查题库列表、题库内侧、“三”菜单、使用说明与结果页题号弹窗｜接口变更：新增路由 `/`（首页）、`/banks`（题库列表）、`/banks/:bankId`（题库内侧）；新增 `removeWrongMany` / `removeFavoriteMany` 批量删除 API；`PracticeFilterDialog` 移除；既有 Session/判分/存储 API 不变｜影响模块：M4、M6、M7、M9、T3/T4、U1
 
 ## 6. 交付检查（D1）
 

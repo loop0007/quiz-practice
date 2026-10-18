@@ -5,13 +5,16 @@ import {
   ArrowLeft,
   BookOpenCheck,
   CheckCircle2,
+  CheckSquare,
   ListChecks,
   Loader2,
+  Trash2,
   XCircle,
 } from 'lucide-react'
 import MarkdownContent from '@/components/MarkdownContent'
+import SelectionCheckbox from '@/components/SelectionCheckbox'
 import { banks, getQuestion } from '@/lib/banks'
-import { createSession, listWrong } from '@/lib/db'
+import { createSession, listWrong, removeWrongMany } from '@/lib/db'
 import { getWrongBookQuestionIds } from '@/lib/wrongbook'
 import type { Question, QuestionType, WrongEntry } from '@/types'
 
@@ -113,16 +116,35 @@ function AnswerKeys({
   )
 }
 
-function WrongItem({ entry }: { entry: WrongEntry }) {
+function WrongItem({
+  entry,
+  selectable,
+  selected,
+  onToggle,
+}: {
+  entry: WrongEntry
+  selectable: boolean
+  selected: boolean
+  onToggle: () => void
+}) {
   const question = getQuestion(entry.questionId)
 
   if (!question) {
     return (
       <article className="rounded-[var(--radius-card)] border border-amber-200 bg-amber-50/60 p-5 shadow-sm backdrop-blur-sm dark:border-amber-900 dark:bg-amber-950/30">
         <header className="flex flex-wrap items-center justify-between gap-2">
-          <span className="text-sm font-medium text-amber-800 dark:text-amber-200">
-            题目缺失
-          </span>
+          <div className="flex items-center gap-2">
+            {selectable && (
+              <SelectionCheckbox
+                label={`选择记录 ${entry.questionId}`}
+                checked={selected}
+                onChange={onToggle}
+              />
+            )}
+            <span className="text-sm font-medium text-amber-800 dark:text-amber-200">
+              题目缺失
+            </span>
+          </div>
           <span className="text-xs text-slate-500 dark:text-slate-400">
             首次答错：{formatTime(entry.firstWrongAt)}
           </span>
@@ -156,6 +178,13 @@ function WrongItem({ entry }: { entry: WrongEntry }) {
     <article className="rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-5 shadow-soft backdrop-blur-sm dark:border-slate-700/70 dark:bg-slate-900/80">
       <header className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-slate-200 pb-2.5 dark:border-slate-700">
         <div className="flex items-center gap-2">
+          {selectable && (
+            <SelectionCheckbox
+              label={`选择第 ${question.number} 题`}
+              checked={selected}
+              onChange={onToggle}
+            />
+          )}
           <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
             {TYPE_LABELS[question.type]}
           </span>
@@ -216,6 +245,9 @@ export default function WrongBookPage() {
   const [error, setError] = useState<string | null>(null)
   const [pendingBankId, setPendingBankId] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
+  const [batchMode, setBatchMode] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [batchPending, setBatchPending] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -238,6 +270,46 @@ export default function WrongBookPage() {
   }, [])
 
   const groups = useMemo(() => groupEntries(entries ?? []), [entries])
+  const allIds = useMemo(
+    () => (entries ?? []).map((entry) => entry.questionId),
+    [entries],
+  )
+  const allSelected = allIds.length > 0 && selectedIds.size === allIds.length
+
+  function toggleSelect(questionId: string) {
+    setSelectedIds((previous) => {
+      const next = new Set(previous)
+      if (next.has(questionId)) next.delete(questionId)
+      else next.add(questionId)
+      return next
+    })
+  }
+
+  function toggleSelectAll() {
+    setSelectedIds(allSelected ? new Set() : new Set(allIds))
+  }
+
+  async function handleBatchRemove() {
+    if (!entries || selectedIds.size === 0 || batchPending) return
+    if (!window.confirm(`确定将选中的 ${selectedIds.size} 道题移出错题本吗？`)) return
+
+    setBatchPending(true)
+    setActionError(null)
+    try {
+      await removeWrongMany([...selectedIds])
+      setEntries((previous) =>
+        previous
+          ? previous.filter((entry) => !selectedIds.has(entry.questionId))
+          : previous,
+      )
+      setSelectedIds(new Set())
+      setBatchMode(false)
+    } catch {
+      setActionError('批量移除失败，请重试。')
+    } finally {
+      setBatchPending(false)
+    }
+  }
 
   async function handleAssemble(group: WrongGroup) {
     if (pendingBankId) return
@@ -305,39 +377,38 @@ export default function WrongBookPage() {
   }
 
   return (
-    <section>
-      <div className="rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-5 shadow-soft backdrop-blur-sm sm:p-6 dark:border-slate-700/70 dark:bg-slate-900/80">
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <div>
-            <p className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.22em] text-blue-700 uppercase dark:text-blue-300">
-              <span
-                aria-hidden="true"
-                className="inline-block size-1.5 rounded-full bg-blue-500"
-              />
-              Review · Mistakes
-            </p>
-            <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight">
-              错题本累计
-            </h1>
-          </div>
+    <section className={batchMode ? 'pb-24' : undefined}>
+      <header className="mb-5 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.22em] text-blue-700 uppercase dark:text-blue-300">
+            <span
+              aria-hidden="true"
+              className="inline-block size-1.5 rounded-full bg-blue-500"
+            />
+            Review · Mistakes
+          </p>
+          <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight sm:text-5xl">
+            错题本
+          </h1>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm tabular-nums text-slate-600 dark:text-slate-300">
             共 {entries.length} 题
           </span>
+          <button
+            type="button"
+            onClick={() => {
+              setBatchMode((mode) => !mode)
+              setSelectedIds(new Set())
+            }}
+            aria-pressed={batchMode}
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-slate-200/90 bg-white/70 px-4 text-sm font-medium transition-colors hover:bg-white hover:text-blue-700 dark:border-slate-700 dark:bg-slate-900/60 dark:hover:bg-slate-800 dark:hover:text-blue-300"
+          >
+            <CheckSquare className="size-4" aria-hidden="true" />
+            {batchMode ? '完成' : '批量管理'}
+          </button>
         </div>
-        <p className="mt-3 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-          跨多次练习累计，同一道题只保留一条记录；重复答错会累加次数，但首次答错时间保持不变。与结果页的“本次错题”不是同一口径。
-        </p>
-        <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-          可按题库把累计错题组卷成新一轮练习，成绩独立记录，不影响已有结果；已不在题库中的错题不会进入组卷。
-        </p>
-        <Link
-          to="/banks"
-          className="mt-4 inline-flex min-h-11 items-center gap-1.5 rounded-full border border-slate-200/90 bg-white/70 px-4 text-sm font-medium transition-colors hover:bg-white hover:text-blue-700 dark:border-slate-700 dark:bg-slate-900/60 dark:hover:bg-slate-800 dark:hover:text-blue-300"
-        >
-          <ArrowLeft className="size-4" aria-hidden="true" />
-          返回题库
-        </Link>
-      </div>
+      </header>
 
       {actionError && (
         <div
@@ -383,13 +454,47 @@ export default function WrongBookPage() {
               </div>
               <div className="space-y-3">
                 {group.entries.map((entry) => (
-                  <WrongItem key={entry.questionId} entry={entry} />
+                  <WrongItem
+                    key={entry.questionId}
+                    entry={entry}
+                    selectable={batchMode}
+                    selected={selectedIds.has(entry.questionId)}
+                    onToggle={() => toggleSelect(entry.questionId)}
+                  />
                 ))}
               </div>
             </section>
           )
         })}
       </div>
+
+      {batchMode && (
+        <div className="fixed inset-x-3 bottom-4 z-30 mx-auto flex max-w-2xl flex-wrap items-center justify-between gap-2 rounded-full border border-slate-200/80 bg-white/95 px-3 py-2 shadow-lift backdrop-blur-xl dark:border-slate-700/70 dark:bg-slate-900/95">
+          <button
+            type="button"
+            onClick={toggleSelectAll}
+            className="inline-flex min-h-11 items-center rounded-full px-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+          >
+            {allSelected ? '取消全选' : '全选'}
+          </button>
+          <span className="text-xs tabular-nums text-slate-500 dark:text-slate-400">
+            已选 {selectedIds.size} 题
+          </span>
+          <button
+            type="button"
+            onClick={() => void handleBatchRemove()}
+            disabled={selectedIds.size === 0 || batchPending}
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-red-600 px-4 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 dark:disabled:bg-slate-700 dark:disabled:text-slate-400"
+          >
+            {batchPending ? (
+              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <Trash2 className="size-4" aria-hidden="true" />
+            )}
+            移出错题本
+          </button>
+        </div>
+      )}
     </section>
   )
 }

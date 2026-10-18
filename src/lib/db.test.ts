@@ -15,8 +15,10 @@ import {
   listFinishedSessions,
   listWrong,
   removeFavorite,
+  removeFavoriteMany,
   removeWallpaper,
   removeWrong,
+  removeWrongMany,
   saveSession,
   saveWallpaper,
 } from './db'
@@ -154,6 +156,18 @@ describe('错题本', () => {
     await removeWrong('java:1')
     expect((await listWrong()).map((entry) => entry.questionId)).toEqual(['web:2'])
   })
+
+  it('支持批量移除，空数组不报错', async () => {
+    await addWrong({ questionId: 'java:1', bankId: 'java', selected: ['A'] })
+    await addWrong({ questionId: 'java:2', bankId: 'java', selected: ['B'] })
+    await addWrong({ questionId: 'web:3', bankId: 'web', selected: ['C'] })
+
+    await removeWrongMany(['java:1', 'java:2'])
+    expect((await listWrong()).map((entry) => entry.questionId)).toEqual(['web:3'])
+
+    await removeWrongMany([])
+    expect(await db.wrongBook.count()).toBe(1)
+  })
 })
 
 describe('收藏夹', () => {
@@ -184,6 +198,20 @@ describe('收藏夹', () => {
     expect((await listFavorites()).map((entry) => entry.questionId)).toEqual([
       'web:2',
     ])
+  })
+
+  it('支持批量取消收藏，空数组不报错', async () => {
+    await addFavorite({ questionId: 'java:1', bankId: 'java' })
+    await addFavorite({ questionId: 'java:2', bankId: 'java' })
+    await addFavorite({ questionId: 'web:3', bankId: 'web' })
+
+    await removeFavoriteMany(['java:1', 'java:2'])
+    expect((await listFavorites()).map((entry) => entry.questionId)).toEqual([
+      'web:3',
+    ])
+
+    await removeFavoriteMany([])
+    expect(await db.favorites.count()).toBe(1)
   })
 })
 

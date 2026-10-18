@@ -138,35 +138,8 @@ export default function BankDetailPage() {
             {bank.name}
           </h1>
           <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-            在下方选择章节与题型，立即开始一轮练习。已交卷的成绩会进入历史成绩，答错的题自动收进错题本。
+            选择章节与题型，开始一轮练习。
           </p>
-
-          <dl className="mt-6 grid max-w-md grid-cols-3 gap-2">
-            <div className="rounded-2xl border border-slate-200/80 bg-white/70 px-3 py-3 text-center shadow-sm backdrop-blur dark:border-slate-700/70 dark:bg-slate-900/60">
-              <dt className="text-[10px] tracking-wider text-slate-500 dark:text-slate-400">
-                有效题
-              </dt>
-              <dd className="mt-1 font-display text-2xl font-semibold tabular-nums">
-                {bank.validCount}
-              </dd>
-            </div>
-            <div className="rounded-2xl border border-slate-200/80 bg-white/70 px-3 py-3 text-center shadow-sm backdrop-blur dark:border-slate-700/70 dark:bg-slate-900/60">
-              <dt className="text-[10px] tracking-wider text-slate-500 dark:text-slate-400">
-                章节
-              </dt>
-              <dd className="mt-1 font-display text-2xl font-semibold tabular-nums">
-                {bank.chapters.length}
-              </dd>
-            </div>
-            <div className="rounded-2xl border border-slate-200/80 bg-white/70 px-3 py-3 text-center shadow-sm backdrop-blur dark:border-slate-700/70 dark:bg-slate-900/60">
-              <dt className="text-[10px] tracking-wider text-slate-500 dark:text-slate-400">
-                异常题
-              </dt>
-              <dd className="mt-1 font-display text-2xl font-semibold tabular-nums">
-                {bank.anomalyCount}
-              </dd>
-            </div>
-          </dl>
 
           {activeSession && (
             <div className="mt-5 rounded-[1.5rem] border border-amber-200/80 bg-amber-50/70 p-4 shadow-sm backdrop-blur dark:border-amber-900 dark:bg-amber-950/30">
@@ -207,10 +180,6 @@ export default function BankDetailPage() {
             <SlidersHorizontal className="size-4 text-blue-600 dark:text-blue-300" aria-hidden="true" />
             练习设置
           </h2>
-          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            选择章节与题型，开始后按本次选择固定题目。
-          </p>
-
           <label
             htmlFor="chapter-filter"
             className="mt-5 block text-sm font-medium"

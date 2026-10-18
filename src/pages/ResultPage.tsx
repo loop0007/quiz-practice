@@ -9,9 +9,9 @@ import {
   Loader2,
   RotateCcw,
   SquarePen,
-  XCircle,
 } from 'lucide-react'
 import AccuracyHint from '@/components/AccuracyHint'
+import QuestionNumbersDialog from '@/components/QuestionNumbersDialog'
 import { getBank, getQuestion } from '@/lib/banks'
 import { createSession, getSession, listWrong } from '@/lib/db'
 import { getRedoQuestionIds, getSessionStats } from '@/lib/scoring'
@@ -43,6 +43,9 @@ export default function ResultPage() {
   const [error, setError] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
   const [pendingAction, setPendingAction] = useState<'replay' | 'redo' | null>(null)
+  const [numbersDialog, setNumbersDialog] = useState<'wrong' | 'unanswered' | null>(
+    null,
+  )
 
   useEffect(() => {
     let cancelled = false
@@ -250,58 +253,52 @@ export default function ResultPage() {
       </div>
 
       <div className="rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-5 shadow-soft backdrop-blur-sm dark:border-slate-700/70 dark:bg-slate-900/80">
-        <header className="flex flex-wrap items-baseline justify-between gap-2">
+        <header className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-sm font-semibold">本次错题</h2>
-          <span className="text-xs text-slate-500 dark:text-slate-400">
+          <span className="text-xs tabular-nums text-slate-500 dark:text-slate-400">
             共 {stats.wrong} 题
           </span>
         </header>
         {wrongNumbers.length > 0 ? (
-          <ul className="mt-3 flex flex-wrap gap-2" aria-label="本次答错题号">
-            {wrongNumbers.map((number) => (
-              <li
-                key={number}
-                className="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-sm font-medium tabular-nums text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300"
-              >
-                第 {number} 题
-              </li>
-            ))}
-          </ul>
+          <button
+            type="button"
+            onClick={() => setNumbersDialog('wrong')}
+            className="mt-3 inline-flex min-h-11 items-center rounded-full border border-red-200 bg-red-50/70 px-4 text-sm font-medium text-red-700 transition-colors hover:bg-red-100 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950/70"
+          >
+            查看题号
+          </button>
         ) : (
           <p className="mt-3 flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
-            <CheckCircle2 className="size-4 text-green-600 dark:text-green-400" aria-hidden="true" />
+            <CheckCircle2
+              className="size-4 text-green-600 dark:text-green-400"
+              aria-hidden="true"
+            />
             本次没有答错的题。
           </p>
         )}
       </div>
 
       <div className="rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-5 shadow-soft backdrop-blur-sm dark:border-slate-700/70 dark:bg-slate-900/80">
-        <header className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="text-sm font-semibold">本次未作答题号</h2>
-          <span className="text-xs text-slate-500 dark:text-slate-400">
+        <header className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-sm font-semibold">本次未作答</h2>
+          <span className="text-xs tabular-nums text-slate-500 dark:text-slate-400">
             共 {stats.unanswered} 题
           </span>
         </header>
         {unansweredNumbers.length > 0 ? (
-          <ul className="mt-3 flex flex-wrap gap-2" aria-label="本次未作答题号">
-            {unansweredNumbers.map((number) => (
-              <li
-                key={number}
-                className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-sm font-medium tabular-nums text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
-              >
-                第 {number} 题
-              </li>
-            ))}
-          </ul>
+          <button
+            type="button"
+            onClick={() => setNumbersDialog('unanswered')}
+            className="mt-3 inline-flex min-h-11 items-center rounded-full border border-amber-200 bg-amber-50/70 px-4 text-sm font-medium text-amber-800 transition-colors hover:bg-amber-100 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200 dark:hover:bg-amber-950/70"
+          >
+            查看题号
+          </button>
         ) : (
           <p className="mt-3 flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
             <CircleHelp className="size-4" aria-hidden="true" />
             没有未作答的题。
           </p>
         )}
-        <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-          只有点击“提交答案”才计入已答；选了答案但没有提交，仍按未作题统计。
-        </p>
       </div>
 
       <div className="rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-5 shadow-soft backdrop-blur-sm dark:border-slate-700/70 dark:bg-slate-900/80">
@@ -310,9 +307,6 @@ export default function ResultPage() {
           {wrongEntries
             ? `全部题库共 ${wrongEntries.length} 题，其中本题库 ${bankWrongTotal ?? 0} 题。`
             : '错题本累计读取失败，不影响本次成绩。'}
-        </p>
-        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-          累计记录包含本次及以往练习答错的题；与上方“本次错题”口径不同。
         </p>
       </div>
 
@@ -371,19 +365,13 @@ export default function ResultPage() {
         )}
       </div>
 
-      {session.finishedAt != null && (
-        <p className="text-xs text-slate-500 dark:text-slate-400">
-          {redoQuestionIds.length > 0
-            ? '错题重练包含本次答错和未作答的题，会新建一轮独立成绩；选了答案但未提交的题也按未作答处理。'
-            : '本轮全部答对，没有需要重练的题。'}
-        </p>
-      )}
-
-      {stats.wrong > 0 && (
-        <p className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-          <XCircle className="size-3.5 text-red-500 dark:text-red-400" aria-hidden="true" />
-          本次答错的题已自动加入错题本。
-        </p>
+      {numbersDialog && (
+        <QuestionNumbersDialog
+          title={numbersDialog === 'wrong' ? '本次错题题号' : '本次未作答题号'}
+          numbers={numbersDialog === 'wrong' ? wrongNumbers : unansweredNumbers}
+          tone={numbersDialog}
+          onClose={() => setNumbersDialog(null)}
+        />
       )}
     </section>
   )

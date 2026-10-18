@@ -167,6 +167,12 @@ export async function removeWrong(questionId: string): Promise<void> {
   await db.wrongBook.delete(questionId)
 }
 
+/** 批量移除错题；单次事务，避免逐题删除时留下半完成状态。 */
+export async function removeWrongMany(questionIds: string[]): Promise<void> {
+  if (questionIds.length === 0) return
+  await db.wrongBook.bulkDelete(questionIds)
+}
+
 /** 收藏一题；重复收藏不改变首次收藏时间。 */
 export async function addFavorite(input: AddFavoriteInput): Promise<void> {
   const existing = await db.favorites.get(input.questionId)
@@ -186,6 +192,12 @@ export async function listFavorites(): Promise<FavoriteEntry[]> {
 
 export async function removeFavorite(questionId: string): Promise<void> {
   await db.favorites.delete(questionId)
+}
+
+/** 批量取消收藏；单次事务，避免逐题删除时留下半完成状态。 */
+export async function removeFavoriteMany(questionIds: string[]): Promise<void> {
+  if (questionIds.length === 0) return
+  await db.favorites.bulkDelete(questionIds)
 }
 
 /** 本机只保留一张自定义壁纸，重复上传直接覆盖。 */

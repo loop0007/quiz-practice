@@ -69,7 +69,7 @@ export default function FeedbackDialog({ question, onClose }: FeedbackDialogProp
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose()
       }}
-      className="w-[min(92vw,28rem)] rounded-[1.75rem] border border-slate-200 bg-white/95 p-0 text-slate-900 shadow-2xl backdrop:bg-slate-950/45 backdrop:backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/95 dark:text-slate-100"
+      className="m-auto w-[min(92vw,28rem)] rounded-[1.75rem] border border-slate-200 bg-white/95 p-0 text-slate-900 shadow-2xl backdrop:bg-slate-950/45 backdrop:backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/95 dark:text-slate-100"
     >
       <div className="flex items-start justify-between gap-3 border-b border-slate-200/80 px-5 py-4 dark:border-slate-700">
         <div>

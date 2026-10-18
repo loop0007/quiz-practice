@@ -170,10 +170,10 @@ async function startBank(page, bankName) {
   await page.getByText(/第 1 \/ 118 题/).first().waitFor({ timeout: 15000 })
 }
 
-async function openMobileMenu(page) {
+async function openHeaderMenu(page) {
   await page.getByRole('button', { name: '打开菜单' }).click()
   await page
-    .getByRole('navigation', { name: '移动端菜单' })
+    .getByRole('navigation', { name: '菜单' })
     .waitFor({ timeout: 5000 })
 }
 
@@ -309,9 +309,22 @@ async function runDesktopFlow(browser, data) {
   await goHome(page)
 
   console.log('  · 通用反馈')
+  await openHeaderMenu(page)
   await page.getByRole('button', { name: '反馈', exact: true }).click()
   await submitFeedback(page, { typeLabel: '建议', note: 'T3 通用反馈' })
   equal('通用反馈已写入 feedback 表', await indexedDbCount(page, 'feedback'), 1)
+
+  console.log('  · 使用说明')
+  await openHeaderMenu(page)
+  await page.getByRole('button', { name: '使用说明', exact: true }).click()
+  const helpDialog = page.locator('dialog[open]')
+  await helpDialog.waitFor({ timeout: 5000 })
+  check(
+    '使用说明弹窗包含练习步骤',
+    (await helpDialog.innerText()).includes('提交答案'),
+  )
+  await helpDialog.getByRole('button', { name: '知道了' }).click()
+  await helpDialog.waitFor({ state: 'hidden', timeout: 5000 })
 
   console.log('  · 开始 Web 题库练习')
   await startBank(page, 'Web前端题库')
@@ -433,20 +446,42 @@ async function runDesktopFlow(browser, data) {
   equal('结果页题库异常数', stats['题库异常题'], '2')
 
   const resultText = await page.locator('main').innerText()
-  check('本次错题包含第 1 题', resultText.includes('第 1 题'))
   check(
     '本次错题与累计分开命名',
     resultText.includes('本次错题') && resultText.includes('错题本累计'),
   )
   check('错题本累计显示 1 题', resultText.includes('全部题库共 1 题'))
+  check(
+    '结果页默认只显示本次错题题数',
+    resultText.includes('本次错题') && !resultText.includes('第 1 题'),
+  )
   await page.screenshot({ path: path.join(SHOTS, 't3-03-result-desktop.png') })
+
+  await page.getByRole('button', { name: '查看题号' }).first().click()
+  const numbersDialog = page.locator('dialog[open]')
+  await numbersDialog.waitFor({ timeout: 5000 })
+  check(
+    '本次错题题号弹窗显示第 1 题',
+    normalize(await numbersDialog.innerText()).includes('第1题'),
+  )
+  await numbersDialog.getByRole('button', { name: '关闭' }).click()
+  await numbersDialog.waitFor({ state: 'hidden', timeout: 5000 })
 
   console.log('  · 错题本对照')
   await page.getByRole('link', { name: '查看错题本' }).click()
-  await page.getByRole('heading', { name: '错题本累计' }).waitFor()
+  await page.getByRole('heading', { name: '错题本', exact: true }).waitFor()
   const wrongArticle = page.locator('article').first()
   await wrongArticle.waitFor({ timeout: 5000 })
   equal('错题本条目数', await page.locator('article').count(), 1)
+
+  await page.getByRole('button', { name: '批量管理' }).click()
+  await wrongArticle.getByRole('checkbox').first().check()
+  check(
+    '错题本批量勾选后显示已选 1 题',
+    await page.getByText('已选 1 题').isVisible(),
+  )
+  await page.getByRole('button', { name: '完成' }).click()
+
   const wrongStem = normalize(
     await wrongArticle.locator(':scope > header + div').textContent(),
   )
@@ -469,7 +504,7 @@ async function runDesktopFlow(browser, data) {
 
   console.log('  · 深链接与 404')
   await page.goto(`${BASE}/#/wrongbook`, { waitUntil: 'load' })
-  await page.getByRole('heading', { name: '错题本累计' }).waitFor({
+  await page.getByRole('heading', { name: '错题本', exact: true }).waitFor({
     timeout: 15000,
   })
   check('刷新后深链接 #/wrongbook 正常渲染', true)
@@ -538,7 +573,7 @@ async function runDesktopFlow(browser, data) {
 
   console.log('  · E3 错题组卷')
   await page.goto(`${BASE}/#/wrongbook`, { waitUntil: 'load' })
-  await page.getByRole('heading', { name: '错题本累计' }).waitFor({
+  await page.getByRole('heading', { name: '错题本', exact: true }).waitFor({
     timeout: 15000,
   })
   const assembleButton = page.getByRole('button', { name: /错题组卷/ })
@@ -578,7 +613,7 @@ async function runDesktopFlow(browser, data) {
   await page.screenshot({ path: path.join(SHOTS, 't3-06-wrongbook-result.png') })
 
   await page.goto(`${BASE}/#/wrongbook`, { waitUntil: 'load' })
-  await page.getByRole('heading', { name: '错题本累计' }).waitFor({
+  await page.getByRole('heading', { name: '错题本', exact: true }).waitFor({
     timeout: 15000,
   })
   await page.locator('article').first().waitFor({ timeout: 5000 })
@@ -606,12 +641,26 @@ async function runDesktopFlow(browser, data) {
     await favoriteArticle.getByRole('button', { name: '取消收藏' }).isVisible(),
   )
   await page.screenshot({ path: path.join(SHOTS, 't3-07-favorites-desktop.png') })
+
+  await page.getByRole('button', { name: '批量管理' }).click()
+  await favoriteArticle.getByRole('checkbox').first().check()
+  check(
+    '收藏夹批量勾选后显示已选 1 题',
+    await page.getByText('已选 1 题').isVisible(),
+  )
+  check(
+    '收藏夹全选后提供取消全选',
+    await page.getByRole('button', { name: '取消全选' }).isVisible(),
+  )
+  await page.getByRole('button', { name: '完成' }).click()
+
   await favoriteArticle.getByRole('button', { name: '取消收藏' }).click()
   await page.getByText('收藏夹是空的').waitFor({ timeout: 5000 })
   equal('取消收藏后 favorites 表为空', await indexedDbCount(page, 'favorites'), 0)
   await goHome(page)
 
   console.log('  · E5 壁纸')
+  await openHeaderMenu(page)
   await page.getByRole('button', { name: '外观', exact: true }).click()
   const appearance = page.locator('dialog[open]')
   await appearance.waitFor({ timeout: 5000 })
@@ -652,6 +701,7 @@ async function runDesktopFlow(browser, data) {
 
   console.log('  · E5 自定义壁纸')
   fs.writeFileSync(WALLPAPER_FIXTURE, Buffer.from(WALLPAPER_PNG_BASE64, 'base64'))
+  await openHeaderMenu(page)
   await page.getByRole('button', { name: '外观', exact: true }).click()
   const uploadDialog = page.locator('dialog[open]')
   await uploadDialog.waitFor({ timeout: 5000 })
@@ -691,6 +741,7 @@ async function runDesktopFlow(browser, data) {
   )
   check('刷新后自定义壁纸保持', true)
 
+  await openHeaderMenu(page)
   await page.getByRole('button', { name: '外观', exact: true }).click()
   const removeDialog = page.locator('dialog[open]')
   await removeDialog.waitFor({ timeout: 5000 })
@@ -835,7 +886,7 @@ async function runMobileFlow(browser, options, label, startAtDark) {
   check(`${label} 首页触控目标不小于 44px`, targets.length === 0, JSON.stringify(targets))
 
   console.log(`  · ${label} 历史成绩空状态`)
-  await openMobileMenu(page)
+  await openHeaderMenu(page)
   await page.getByRole('link', { name: '历史成绩', exact: true }).click()
   await page.getByRole('heading', { name: '历史成绩' }).waitFor({ timeout: 15000 })
   await page.getByText('还没有已完成的练习').waitFor({ timeout: 5000 })
@@ -843,7 +894,7 @@ async function runMobileFlow(browser, options, label, startAtDark) {
   await goHome(page)
 
   console.log(`  · ${label} 外观壁纸`)
-  await openMobileMenu(page)
+  await openHeaderMenu(page)
   await page.getByRole('button', { name: '外观', exact: true }).click()
   const appearance = page.locator('dialog[open]')
   await appearance.waitFor({ timeout: 5000 })
@@ -861,7 +912,7 @@ async function runMobileFlow(browser, options, label, startAtDark) {
     path: path.join(SHOTS, `t3-08-wallpaper-${label}.png`),
   })
 
-  await openMobileMenu(page)
+  await openHeaderMenu(page)
   await page.getByRole('button', { name: '外观', exact: true }).click()
   const resetDialog = page.locator('dialog[open]')
   await resetDialog.waitFor({ timeout: 5000 })
@@ -929,13 +980,13 @@ async function runMobileFlow(browser, options, label, startAtDark) {
   })
 
   await page.getByRole('link', { name: '查看错题本' }).click()
-  await page.getByRole('heading', { name: '错题本累计' }).waitFor()
+  await page.getByRole('heading', { name: '错题本', exact: true }).waitFor()
   const mobileAssemble = page.getByRole('button', { name: /错题组卷/ })
   await mobileAssemble.waitFor({ timeout: 5000 })
   check(`${label} 错题本显示错题组卷入口`, await mobileAssemble.isVisible())
   await noOverflow(page, `${label} 错题本`)
 
-  await openMobileMenu(page)
+  await openHeaderMenu(page)
   await page.getByRole('link', { name: '收藏夹' }).click()
   await page.getByRole('heading', { name: '收藏夹' }).waitFor({ timeout: 5000 })
   check(

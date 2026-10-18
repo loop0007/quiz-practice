@@ -85,9 +85,6 @@ export default function HistoryPage() {
         <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight sm:text-5xl">
           历史成绩
         </h1>
-        <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-          已交卷的练习按交卷时间倒序；记录只保存在本机浏览器。
-        </p>
       </header>
 
       {list.length === 0 ? (
@@ -132,9 +129,6 @@ export default function HistoryPage() {
                 </dd>
               </div>
             </dl>
-            <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-              正确率按各次练习的题目总数汇总，未作答计入分母。
-            </p>
           </div>
 
           <ul aria-label="已完成练习列表" className="space-y-3">
