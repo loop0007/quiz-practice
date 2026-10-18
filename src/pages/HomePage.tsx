@@ -1,16 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import {
-  ArrowRight,
-  ArrowUpRight,
-  BookOpenCheck,
-  Layers,
-  ListChecks,
-  RotateCcw,
-  Sparkles,
-  Star,
-  WifiOff,
-} from 'lucide-react'
+import { ArrowRight, BookOpenCheck, ListChecks, Sparkles, WifiOff } from 'lucide-react'
 import { banks } from '@/lib/banks'
 import { listFavorites, listFinishedSessions, listWrong } from '@/lib/db'
 
@@ -19,30 +9,6 @@ interface HomeStats {
   wrong: number
   favorites: number
 }
-
-const FEATURES = [
-  {
-    to: '/banks',
-    title: '按章节与题型练习',
-    description: '只练今天要考的章节，单选、多选、判断自由组合。',
-    Icon: Layers,
-    accent: 'bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300',
-  },
-  {
-    to: '/wrongbook',
-    title: '错题自动成册',
-    description: '答错的题自动收录，可对照解析或一键组卷重练。',
-    Icon: RotateCcw,
-    accent: 'bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300',
-  },
-  {
-    to: '/favorites',
-    title: '收藏随时回看',
-    description: '把值得反复看的题收进收藏夹，按题库集中复习。',
-    Icon: Star,
-    accent: 'bg-green-50 text-green-700 dark:bg-green-950/40 dark:text-green-300',
-  },
-]
 
 const STEPS = [
   { number: '01', label: '选择题库' },
@@ -87,11 +53,6 @@ export default function HomePage() {
           <h1 className="mt-4 max-w-2xl font-display text-[clamp(2.6rem,6.5vw,4.6rem)] leading-[1.04] font-semibold tracking-tight text-balance">
             把刷题，变成每天的小进步
           </h1>
-          <p className="mt-5 max-w-xl text-base leading-relaxed text-slate-600 dark:text-slate-300">
-            两套本地题库，覆盖 Java 与 Web 前端。按章节筛选、逐题判分、错题重练，
-            学习记录只留在你的浏览器里。
-          </p>
-
           <div className="mt-7 flex flex-wrap items-center gap-2.5">
             <Link
               to="/banks"
@@ -187,16 +148,9 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="mt-4 flex items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400">
-              <span>数据只保存在本机浏览器</span>
-              <Link
-                to="/history"
-                className="inline-flex min-h-11 items-center gap-1 rounded-full px-2 font-medium text-blue-700 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-blue-950/50"
-              >
-                查看记录
-                <ArrowUpRight className="size-3.5" aria-hidden="true" />
-              </Link>
-            </div>
+            <p className="mt-4 text-xs text-slate-500 dark:text-slate-400">
+              数据只保存在本机浏览器
+            </p>
           </div>
         </div>
       </div>
@@ -216,36 +170,7 @@ export default function HomePage() {
         </ol>
       </div>
 
-      <div className="grid gap-4 pb-4 sm:grid-cols-3 sm:gap-5">
-        {FEATURES.map(({ to, title, description, Icon, accent }) => (
-          <Link
-            key={title}
-            to={to}
-            className="group rounded-[var(--radius-card)] border border-slate-200/80 bg-white/70 p-5 shadow-soft backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:shadow-lift dark:border-slate-700/70 dark:bg-slate-900/70 sm:p-6"
-          >
-            <span
-              className={`flex size-11 items-center justify-center rounded-2xl ${accent}`}
-            >
-              <Icon className="size-5" aria-hidden="true" />
-            </span>
-            <h2 className="mt-4 font-display text-lg font-semibold tracking-tight">
-              {title}
-            </h2>
-            <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-              {description}
-            </p>
-            <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-blue-700 dark:text-blue-300">
-              去看看
-              <ArrowRight
-                className="size-3.5 transition-transform group-hover:translate-x-0.5"
-                aria-hidden="true"
-              />
-            </span>
-          </Link>
-        ))}
-      </div>
-
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-[1.5rem] border border-slate-200/70 bg-white/50 px-4 py-3 text-xs text-slate-500 backdrop-blur dark:border-slate-700/60 dark:bg-slate-900/40 dark:text-slate-400">
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-[1.5rem] border border-slate-200/70 bg-white/50 px-4 py-3 text-xs text-slate-500 backdrop-blur dark:border-slate-700/60 dark:bg-slate-900/40 dark:text-slate-400">
         <span className="flex items-center gap-1.5">
           <WifiOff className="size-3.5" aria-hidden="true" />
           已支持离线打开与作答

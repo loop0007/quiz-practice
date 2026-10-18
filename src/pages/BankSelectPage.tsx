@@ -17,7 +17,6 @@ const TYPE_LABELS: Array<{ key: keyof BankMeta['typeCounts']; label: string }> =
 
 export default function BankSelectPage() {
   const totalQuestions = banks.reduce((sum, bank) => sum + bank.validCount, 0)
-  const totalChapters = banks.reduce((sum, bank) => sum + bank.chapters.length, 0)
 
   if (banks.length === 0) {
     return (
@@ -42,12 +41,11 @@ export default function BankSelectPage() {
             />
             Catalog · {totalQuestions} Questions
           </p>
-          <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight sm:text-5xl">
+          <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight sm:text-5xl">
             题库
           </h1>
-          <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-            选择一套题库进入，可按章节与题型组合筛选后开始练习。{banks.length} 套题库、
-            {totalChapters} 个章节，记录只保存在本机。
+          <p className="mt-2 max-w-xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            两套本地题库，覆盖 Java 与 Web 前端。按章节筛选、逐题判分、错题重练，学习记录只留在你的浏览器里。
           </p>
         </div>
         <Link

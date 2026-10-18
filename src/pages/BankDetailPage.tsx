@@ -3,9 +3,6 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
   AlertTriangle,
   ArrowLeft,
-  BookOpen,
-  ChevronRight,
-  Layers,
   Loader2,
   Play,
   RotateCcw,
@@ -61,16 +58,6 @@ export default function BankDetailPage() {
   }, [bank])
 
   const chapterFilter = chapterId ? { chapterId } : undefined
-
-  const typeCounts = useMemo(() => {
-    if (!bank) return { single: 0, multi: 0, judge: 0 }
-    return Object.fromEntries(
-      ALL_TYPES.map((type) => [
-        type,
-        getBankQuestions(bank.id, { ...chapterFilter, types: [type] }).length,
-      ]),
-    ) as Record<QuestionType, number>
-  }, [bank, chapterFilter])
 
   const selectedQuestions = useMemo(() => {
     if (!bank) return []
@@ -213,36 +200,6 @@ export default function BankDetailPage() {
             </div>
           )}
 
-          <div className="mt-7">
-            <h2 className="flex items-center gap-2 font-display text-xl font-semibold">
-              <Layers className="size-4 text-slate-400" aria-hidden="true" />
-              章节目录
-            </h2>
-            <div className="mt-3 grid gap-2 sm:grid-cols-2">
-              {bank.chapters.map((chapter) => {
-                const count = getBankQuestions(bank.id, { chapterId: chapter.id }).length
-                const active = chapterId === chapter.id
-                return (
-                  <button
-                    key={chapter.id}
-                    type="button"
-                    onClick={() => setChapterId(active ? '' : chapter.id)}
-                    aria-pressed={active}
-                    className={`flex min-h-11 items-center justify-between gap-2 rounded-2xl border px-3.5 py-2 text-left text-sm transition-colors ${
-                      active
-                        ? 'border-blue-300 bg-blue-50 font-medium text-blue-800 dark:border-blue-700 dark:bg-blue-950/50 dark:text-blue-200'
-                        : 'border-slate-200/80 bg-white/60 hover:border-blue-300 hover:bg-white dark:border-slate-700/70 dark:bg-slate-900/50 dark:hover:border-blue-700'
-                    }`}
-                  >
-                    <span className="min-w-0 truncate">{chapter.title}</span>
-                    <span className="shrink-0 text-xs tabular-nums text-slate-500 dark:text-slate-400">
-                      {count} 题
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
-          </div>
         </div>
 
         <aside className="rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-5 shadow-soft backdrop-blur-sm sm:p-6 dark:border-slate-700/70 dark:bg-slate-900/80 lg:sticky lg:top-24">
@@ -251,7 +208,7 @@ export default function BankDetailPage() {
             练习设置
           </h2>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            选题库内的章节与题型，开始后按本次选择冻结题目。
+            选择章节与题型，开始后按本次选择固定题目。
           </p>
 
           <label
@@ -285,7 +242,7 @@ export default function BankDetailPage() {
                 return (
                   <label
                     key={key}
-                    className={`flex min-h-11 cursor-pointer flex-col items-center justify-center rounded-2xl border px-2 py-1.5 text-sm transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-blue-500 has-[:focus-visible]:ring-offset-1 dark:has-[:focus-visible]:ring-offset-slate-900 ${
+                    className={`flex min-h-11 cursor-pointer items-center justify-center rounded-2xl border px-2 text-sm transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-blue-500 has-[:focus-visible]:ring-offset-1 dark:has-[:focus-visible]:ring-offset-slate-900 ${
                       checked
                         ? 'border-blue-300 bg-blue-50 font-medium text-blue-800 dark:border-blue-700 dark:bg-blue-950/50 dark:text-blue-200'
                         : 'border-slate-200 hover:border-blue-300 dark:border-slate-700 dark:hover:border-blue-700'
@@ -298,30 +255,24 @@ export default function BankDetailPage() {
                       className="sr-only"
                     />
                     <span>{label}</span>
-                    <span className="text-xs font-normal tabular-nums text-slate-500 dark:text-slate-400">
-                      {typeCounts[key]} 题
-                    </span>
                   </label>
                 )
               })}
             </div>
           </fieldset>
 
-          <p
-            aria-live="polite"
-            className="mt-4 rounded-2xl bg-slate-50/80 px-3.5 py-3 text-sm dark:bg-slate-950/50"
-          >
+          <p aria-live="polite" className="mt-4 text-sm text-slate-600 dark:text-slate-300">
             将练习{' '}
-            <strong className="font-display text-lg tabular-nums">
+            <strong className="font-display text-lg tabular-nums text-slate-900 dark:text-slate-100">
               {selectedQuestions.length}
             </strong>{' '}
             道题
-            {selectedQuestions.length === 0 && (
-              <span className="mt-0.5 block text-xs text-amber-700 dark:text-amber-300">
-                当前条件下没有题目，请调整章节或至少选择一种题型。
-              </span>
-            )}
           </p>
+          {selectedQuestions.length === 0 && (
+            <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">
+              当前条件下没有题目，请调整章节或至少选择一种题型。
+            </p>
+          )}
 
           {error && (
             <p
@@ -338,7 +289,7 @@ export default function BankDetailPage() {
               void startPractice(selectedQuestions.map((question) => question.id))
             }
             disabled={selectedQuestions.length === 0 || pending}
-            className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-1.5 rounded-full bg-blue-600 px-4 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 dark:disabled:bg-slate-700 dark:disabled:text-slate-400"
+            className="mt-3 inline-flex min-h-12 w-full items-center justify-center gap-1.5 rounded-full bg-blue-600 px-4 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 dark:disabled:bg-slate-700 dark:disabled:text-slate-400"
           >
             {pending ? (
               <Loader2 className="size-4 animate-spin" aria-hidden="true" />
@@ -347,12 +298,6 @@ export default function BankDetailPage() {
             )}
             开始练习
           </button>
-
-          <p className="mt-3 flex items-center justify-center gap-1 text-xs text-slate-500 dark:text-slate-400">
-            <BookOpen className="size-3.5" aria-hidden="true" />
-            答错自动进入错题本
-            <ChevronRight className="size-3.5" aria-hidden="true" />
-          </p>
         </aside>
       </div>
     </section>
