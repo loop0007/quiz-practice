@@ -406,6 +406,30 @@ async function runDesktopFlow(browser, data) {
   })
   check('未知路由显示 404 页面', true)
   await goHome(page)
+
+  console.log('  · E1 章节/题型筛选')
+  const javaCard = page.locator('article').filter({ hasText: 'Java程序设计题库' })
+  await javaCard.getByRole('button', { name: '按章节/题型筛选' }).click()
+  const filterDialog = page.locator('dialog[open]')
+  await filterDialog.waitFor({ timeout: 5000 })
+
+  await filterDialog.locator('label').filter({ hasText: '单选' }).click()
+  await filterDialog.locator('label').filter({ hasText: '多选' }).click()
+  check(
+    '筛选弹窗显示可练习 15 道判断题',
+    normalize(await filterDialog.innerText()).includes('将练习15道题'),
+    normalize(await filterDialog.innerText()).slice(0, 120),
+  )
+
+  await filterDialog.getByRole('button', { name: '开始练习' }).click()
+  await page.waitForURL(/#\/practice\//, { timeout: 15000 })
+  await page.getByText(/第 1 \/ 15 题/).first().waitFor({ timeout: 15000 })
+  const firstJudge = Object.values(data.questions)
+    .filter((question) => question.bankId === 'java' && question.type === 'judge')
+    .sort((a, b) => a.number - b.number)[0]
+  equal('筛选后首题与题库数据一致', await stemText(page), normalize(firstJudge.stem))
+
+  await goHome(page)
   await errorSummary(page, errors, '桌面端流程')
 
   await context.close()

@@ -64,6 +64,56 @@ const EXPECTED = {
   },
 } as const
 
+describe('E1 章节与题型筛选', () => {
+  it('按题型筛选，支持多选且保持题号升序', () => {
+    const judge = getBankQuestions('java', { types: ['judge'] })
+    expect(judge).toHaveLength(15)
+    expect(judge.every((question) => question.type === 'judge')).toBe(true)
+
+    expect(getBankQuestions('java', { types: ['multi', 'judge'] })).toHaveLength(27)
+    expect(getBankQuestions('java', { types: ['single'] })).toHaveLength(191)
+    expect(getBankQuestions('java', { types: [] })).toEqual([])
+  })
+
+  it('按章节筛选只返回该章节的有效题', () => {
+    const web = getBank('web')!
+    let total = 0
+
+    for (const chapter of web.chapters) {
+      const list = getBankQuestions('web', { chapterId: chapter.id })
+      expect(list.length).toBeGreaterThan(0)
+      expect(list.every((question) => question.chapterId === chapter.id)).toBe(true)
+      total += list.length
+    }
+
+    expect(total).toBe(getBankQuestions('web').length)
+  })
+
+  it('章节与题型组合筛选，结果同时满足两个条件', () => {
+    const web = getBank('web')!
+    const chapter = web.chapters[0]
+    const type = (['single', 'multi', 'judge'] as const).find(
+      (item) =>
+        getBankQuestions('web', { chapterId: chapter.id, types: [item] }).length > 0,
+    )!
+    const list = getBankQuestions('web', { chapterId: chapter.id, types: [type] })
+
+    expect(list.length).toBeGreaterThan(0)
+    expect(
+      list.every(
+        (question) => question.chapterId === chapter.id && question.type === type,
+      ),
+    ).toBe(true)
+    const numbers = list.map((question) => question.number)
+    expect(numbers).toEqual([...numbers].sort((a, b) => a - b))
+  })
+
+  it('未知章节或无匹配题型返回空数组', () => {
+    expect(getBankQuestions('web', { chapterId: 'nope' })).toEqual([])
+    expect(getBankQuestions('nope', { types: ['single'] })).toEqual([])
+  })
+})
+
 describe('T1 题库数据质量', () => {
   it('题量与题型与文件头声明一致，且无声明不一致异常', () => {
     for (const bank of banks) {

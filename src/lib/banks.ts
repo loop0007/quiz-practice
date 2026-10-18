@@ -6,7 +6,7 @@
  */
 import banksJson from '../data/banks.json'
 import anomaliesJson from '../data/anomalies.json'
-import type { Anomaly, BankData, BankMeta, Question } from '../types'
+import type { Anomaly, BankData, BankMeta, Question, QuestionType } from '../types'
 
 const data = banksJson as unknown as BankData
 
@@ -35,9 +35,26 @@ export function getQuestion(questionId: string): Question | undefined {
   return questions[questionId]
 }
 
-/** 该题库全部有效题，按题号升序；不含异常题。 */
-export function getBankQuestions(bankId: string): Question[] {
-  return questionsByBank.get(bankId) ?? []
+export interface QuestionFilter {
+  /** 章节；不传表示全部章节。 */
+  chapterId?: string
+  /** 题型；不传表示全部题型，空数组表示不选任何题型。 */
+  types?: QuestionType[]
+}
+
+/**
+ * 该题库的有效题，按题号升序；不含异常题。
+ * 传入 filter 时只返回匹配的题目，原数组不受影响。
+ */
+export function getBankQuestions(bankId: string, filter?: QuestionFilter): Question[] {
+  const list = questionsByBank.get(bankId) ?? []
+  if (!filter) return list
+
+  return list.filter(
+    (question) =>
+      (filter.chapterId === undefined || question.chapterId === filter.chapterId) &&
+      (filter.types === undefined || filter.types.includes(question.type)),
+  )
 }
 
 /** 该题库的异常题记录（题库级异常无题号）。 */

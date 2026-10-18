@@ -21,6 +21,11 @@ export default function PracticePage() {
   const navigate = useNavigate()
 
   const session = usePracticeStore((state) => state.session)
+  /**
+   * store 可能仍保留上一场练习；只有与路由一致时才是当前会话。
+   * 避免首帧用旧会话的 finishedAt 触发错误重定向。
+   */
+  const currentSession = session?.id === sessionId ? session : null
   const questions = usePracticeStore((state) => state.questions)
   const loadingId = usePracticeStore((state) => state.loadingId)
   const submitting = usePracticeStore((state) => state.submitting)
@@ -40,9 +45,9 @@ export default function PracticePage() {
   }, [sessionId, loadSession])
 
   const currentIndex = useMemo(() => {
-    if (!session || questions.length === 0) return 0
-    return Math.min(Math.max(session.currentIndex, 0), questions.length - 1)
-  }, [session, questions.length])
+    if (!currentSession || questions.length === 0) return 0
+    return Math.min(Math.max(currentSession.currentIndex, 0), questions.length - 1)
+  }, [currentSession, questions.length])
 
   useEffect(() => {
     const previous = previousIndexRef.current
@@ -53,11 +58,11 @@ export default function PracticePage() {
     }
   }, [currentIndex])
 
-  if (session?.finishedAt != null) {
-    return <Navigate to={`/result/${session.id}`} replace />
+  if (currentSession?.finishedAt != null) {
+    return <Navigate to={`/result/${currentSession.id}`} replace />
   }
 
-  const loading = loadingId !== null || (!session && !error)
+  const loading = loadingId !== null || (!currentSession && !error)
 
   if (loading) {
     return (
@@ -68,7 +73,7 @@ export default function PracticePage() {
     )
   }
 
-  if (!session || questions.length === 0) {
+  if (!currentSession || questions.length === 0) {
     return (
       <section className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-8 text-center dark:border-slate-700 dark:bg-slate-900">
         <AlertTriangle
@@ -91,9 +96,9 @@ export default function PracticePage() {
   }
 
   const question = questions[currentIndex]
-  const record = session.answers[question.id]
+  const record = currentSession.answers[question.id]
   const selected = record?.selected ?? drafts[question.id] ?? []
-  const stats = getSessionStats(session)
+  const stats = getSessionStats(currentSession)
   const progress = stats.total === 0 ? 0 : (stats.answered / stats.total) * 100
   const canSubmit = !record && selected.length > 0 && !submitting
 
@@ -103,7 +108,7 @@ export default function PracticePage() {
   }
 
   async function handleFinish() {
-    if (!session) return
+    if (!currentSession) return
 
     if (stats.unanswered > 0) {
       const firstConfirmed = window.confirm(
@@ -231,7 +236,7 @@ export default function PracticePage() {
         <aside className="hidden rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 lg:sticky lg:top-4 lg:block dark:border-slate-700 dark:bg-slate-900">
           <QuestionPalette
             questions={questions}
-            session={session}
+            session={currentSession}
             currentIndex={currentIndex}
             onSelect={handlePaletteSelect}
           />
@@ -299,7 +304,7 @@ export default function PracticePage() {
       {paletteOpen && (
         <MobilePaletteSheet
           questions={questions}
-          session={session}
+          session={currentSession}
           currentIndex={currentIndex}
           onSelect={handlePaletteSelect}
           onClose={() => setPaletteOpen(false)}

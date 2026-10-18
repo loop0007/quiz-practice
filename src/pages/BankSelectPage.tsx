@@ -8,8 +8,10 @@ import {
   MessageSquarePlus,
   Play,
   RotateCcw,
+  SlidersHorizontal,
 } from 'lucide-react'
 import FeedbackDialog from '@/components/FeedbackDialog'
+import PracticeFilterDialog from '@/components/PracticeFilterDialog'
 import { banks, getBankQuestions } from '@/lib/banks'
 import { createSession, findActiveSession } from '@/lib/db'
 import type { BankMeta, PracticeSession } from '@/types'
@@ -38,6 +40,7 @@ export default function BankSelectPage() {
   const [pendingBankId, setPendingBankId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [feedbackOpen, setFeedbackOpen] = useState(false)
+  const [filterBank, setFilterBank] = useState<BankMeta | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -60,6 +63,13 @@ export default function BankSelectPage() {
     }
   }, [])
 
+  async function createAndOpenSession(bankId: string, questionIds: string[]) {
+    if (questionIds.length === 0) throw new Error('当前条件下暂无可练习题目')
+
+    const session = await createSession({ bankId, questionIds })
+    navigate(`/practice/${session.id}`)
+  }
+
   async function startPractice(bankId: string, mode: 'new' | 'restart') {
     if (
       mode === 'restart' &&
@@ -72,11 +82,23 @@ export default function BankSelectPage() {
     setError(null)
 
     try {
-      const questionIds = getBankQuestions(bankId).map((question) => question.id)
-      if (questionIds.length === 0) throw new Error('该题库暂无可练习题目')
+      await createAndOpenSession(
+        bankId,
+        getBankQuestions(bankId).map((question) => question.id),
+      )
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : '创建练习失败，请重试')
+      setPendingBankId(null)
+    }
+  }
 
-      const session = await createSession({ bankId, questionIds })
-      navigate(`/practice/${session.id}`)
+  async function startFilteredPractice(bankId: string, questionIds: string[]) {
+    setFilterBank(null)
+    setPendingBankId(bankId)
+    setError(null)
+
+    try {
+      await createAndOpenSession(bankId, questionIds)
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : '创建练习失败，请重试')
       setPendingBankId(null)
@@ -172,6 +194,17 @@ export default function BankSelectPage() {
                 </div>
               </dl>
 
+              {!empty && (
+                <button
+                  type="button"
+                  onClick={() => setFilterBank(bank)}
+                  className="mt-3 inline-flex min-h-11 items-center gap-1.5 self-start rounded-lg px-2 text-sm font-medium text-blue-700 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-blue-950/50"
+                >
+                  <SlidersHorizontal className="size-4" aria-hidden="true" />
+                  按章节/题型筛选
+                </button>
+              )}
+
               <div className="mt-auto pt-5">
                 {empty ? (
                   <button
@@ -236,6 +269,14 @@ export default function BankSelectPage() {
 
       {feedbackOpen && (
         <FeedbackDialog onClose={() => setFeedbackOpen(false)} />
+      )}
+
+      {filterBank && (
+        <PracticeFilterDialog
+          bank={filterBank}
+          onClose={() => setFilterBank(null)}
+          onStart={(questionIds) => startFilteredPractice(filterBank.id, questionIds)}
+        />
       )}
     </section>
   )
