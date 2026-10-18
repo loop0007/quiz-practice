@@ -2,6 +2,7 @@ import 'fake-indexeddb/auto'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { getBankQuestions, getQuestion } from '../lib/banks'
 import { createSession, db, getSession, listWrong } from '../lib/db'
+import { getRedoQuestionIds, getSessionStats } from '../lib/scoring'
 import { usePracticeStore } from './usePracticeStore'
 
 function state() {
@@ -137,6 +138,23 @@ describe('提交答案', () => {
     await state().submitCurrent()
 
     expect(state().session?.answers).toEqual({})
+  })
+
+  it('选了正确答案但未提交，仍算未作答并进入重练', async () => {
+    const question = getQuestion('java:1')!
+    const session = await createSession({ bankId: 'java', questionIds: [question.id] })
+    await state().loadSession(session.id)
+
+    for (const key of question.answer) {
+      state().select(question.id, key, question.type === 'multi')
+    }
+
+    const current = state().session!
+    const stats = getSessionStats(current)
+    expect(stats.correct).toBe(0)
+    expect(stats.unanswered).toBe(1)
+    expect(getRedoQuestionIds(current)).toEqual([question.id])
+    expect((await getSession(session.id))?.answers).toEqual({})
   })
 })
 

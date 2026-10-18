@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { PracticeSession, Question, QuestionType } from '../types'
 import {
   getQuestionStatus,
+  getRedoQuestionIds,
   getSessionStats,
   isAnswerCorrect,
   normalizeSelected,
@@ -174,6 +175,37 @@ describe('getSessionStats', () => {
     const stats = getSessionStats(makeSession([]))
     expect(stats.accuracy).toBe(0)
     expect(stats.total).toBe(0)
+  })
+})
+
+describe('getRedoQuestionIds', () => {
+  it('包含答错和未提交的题，保持快照顺序', () => {
+    const session = makeSession(['q1', 'q2', 'q3', 'q4'])
+    session.answers = {
+      q1: { questionId: 'q1', selected: ['A'], correct: true, answeredAt: 1 },
+      q3: { questionId: 'q3', selected: ['B'], correct: false, answeredAt: 2 },
+    }
+
+    expect(getRedoQuestionIds(session)).toEqual(['q2', 'q3', 'q4'])
+  })
+
+  it('选了正确答案但未提交，仍算未作答并进入重练', () => {
+    // 勾选只存在于页面草稿；未提交时 session.answers 中没有任何记录。
+    const session = makeSession(['q1'])
+    const stats = getSessionStats(session)
+
+    expect(stats.correct).toBe(0)
+    expect(stats.unanswered).toBe(1)
+    expect(getRedoQuestionIds(session)).toEqual(['q1'])
+  })
+
+  it('全部答对时为空', () => {
+    const session = makeSession(['q1'])
+    session.answers = {
+      q1: { questionId: 'q1', selected: ['A'], correct: true, answeredAt: 1 },
+    }
+
+    expect(getRedoQuestionIds(session)).toEqual([])
   })
 })
 

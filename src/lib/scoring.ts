@@ -158,6 +158,21 @@ export function getQuestionStatus(
   return record.correct ? 'correct' : 'wrong'
 }
 
+/**
+ * 错题重练的题目快照：本次未答对的所有题（已提交且错误 + 未提交），
+ * 保持原 session.questionIds 顺序。
+ *
+ * 未提交的题即使已勾选正确答案，也属于未作答并进入重练。
+ */
+export function getRedoQuestionIds(session: PracticeSession): string[] {
+  const stats = getSessionStats(session)
+  const retry = new Set([
+    ...stats.wrongQuestionIds,
+    ...stats.unansweredQuestionIds,
+  ])
+  return session.questionIds.filter((questionId) => retry.has(questionId))
+}
+
 /** 题型是否允许多选；供答题控件选择 radio / checkbox。 */
 export function isMultiChoice(type: QuestionType): boolean {
   return type === 'multi'

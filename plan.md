@@ -63,7 +63,7 @@ pages（页面编排）
 | M9 | 体验基线 | 二 | P0 | M5–M8 | 移动端、深色、无障碍 | ✅ | 2026-10-17 | 49 项测试；build；375/390 与 1280 布局截图 |
 | M10 | 公网托管 | 二 | P0 | M2, M9 | HTTPS 公网地址、多端真机验证 | 🟨 | 2026-10-17 | GitHub Pages 已上线；HTTPS 200；待真机蜂窝/另一台电脑复验 |
 | T1–T5 | 测试 | 三 | P0 | M0–M10 | 测试记录与缺陷清单 | 🟨 | 2026-10-18 | T1–T4 通过（Vitest 56 + 浏览器 72）；T5 Linux/WSL 实测待环境 |
-| E1–E5 | 额外功能 | 四 | P2 | T5 | 可选增强 | 🟨 | 2026-10-18 | E1、E2 完成（Vitest 64 + 浏览器 80）；E3–E6 未开始 |
+| E1–E7 | 额外功能 | 四 | P2 | T5 | 可选增强 | 🟨 | 2026-10-18 | E1、E2、E7 完成（Vitest 68 + 浏览器 91）；E3–E6 未开始 |
 | U1 | UI 美化 | 五 | P1 | T5/E | 视觉统一与细节打磨 | ⬜ | | |
 | D1 | 交付 | 五后 | P0 | 全部 | `dist/`、README、AI 记录、公网地址 | ⬜ | | |
 
@@ -353,6 +353,7 @@ feedback:  '++id, questionId, createdAt'
 | E4 | 收藏夹 | 新表 + 新入口 | 中 | M2, M5 | P2 |
 | E5 | 主题/壁纸 | 只改 UI token | 低 | M9 | P2 |
 | E6 | PWA 离线 / 键盘快捷键 | 地铁场景增强 | 中 | M9 | P2 |
+| E7 | 结果页错题重练 | 本轮未答对的题独立重练 | 低 | M6 | P1 |
 | — | 账号/云端/后端管理 | 超出本期范围 | 高 | — | 不做 |
 
 - [x] 从表中按剩余时间选择 1–2 个，优先 E1。（本次选择 E1）
@@ -379,7 +380,17 @@ feedback:  '++id, questionId, createdAt'
 
 **完成标记**：✅ 已完成｜日期：2026-10-18｜涉及文件：`src/lib/db.ts`、`src/lib/db.test.ts`、`src/lib/history.ts`、`src/lib/history.test.ts`、`src/pages/HistoryPage.tsx`、`src/App.tsx`、`src/components/Layout.tsx`、`scripts/e2e-browser.mjs`、`README.md`、`plan.md`、`docs/测试记录.md`｜验证：Vitest 64 项、浏览器 80 项全部通过；`npm run build` 与 `check:source` 通过｜接口变更：db 新增只读 `listFinishedSessions` 与 `FinishedSession` 类型；新增 `history.ts`｜影响模块：M6、T4、D1
 
-**完成标记**：🟨 进行中｜日期：2026-10-18｜验证：E1、E2 已完成（Vitest 64 项、浏览器 80 项）；E3–E6 未开始｜接口变更：见 E1、E2｜影响模块：M4、M6、T3、T4、D1
+### E7 结果页错题重练
+
+- [x] 已交卷结果页新增“错题重练”入口，题数为本次答错 + 未作答。
+- [x] 复用 `createSession` 冻结新一轮 `questionIds` 快照；新 session 独立计分、独立出现在历史成绩，不修改原结果。
+- [x] 定义作答口径：只有提交才计入已答；选了正确答案但未提交仍算未作题，并进入重练。
+- [x] `scoring.ts` 新增 `getRedoQuestionIds` 纯函数，保持原快照顺序；未答对时隐藏入口并提示全部答对。
+- [x] 新增 3 项判分派生单测、1 项 store 单测；无头浏览器追加 9 项桌面检查与 2 项移动端入口检查。
+
+**完成标记**：✅ 已完成｜日期：2026-10-18｜涉及文件：`src/lib/scoring.ts`、`src/lib/scoring.test.ts`、`src/store/usePracticeStore.test.ts`、`src/pages/ResultPage.tsx`、`scripts/e2e-browser.mjs`、`README.md`、`plan.md`、`docs/测试记录.md`｜验证：Vitest 68 项、浏览器 91 项全部通过；`npm run build` 与 `check:source` 通过。错题重练创建独立 session（原 118 题，重练 117 题），从零计分，sessions 表新增记录，原结果不受影响｜接口变更：`scoring.ts` 新增只读函数 `getRedoQuestionIds`；未改 Session/存储契约｜影响模块：M6、T3、T4、D1
+
+**完成标记**：🟨 进行中｜日期：2026-10-18｜验证：E1、E2、E7 已完成（Vitest 68 项、浏览器 91 项）；E3–E6 未开始｜接口变更：见 E1、E2、E7｜影响模块：M4、M6、T3、T4、D1
 
 ## 5. 阶段五：UI 界面美化
 
@@ -444,6 +455,8 @@ feedback:  '++id, questionId, createdAt'
 - [ ] 随时看到当前题号、已答数、答对数。
 - [ ] 题号侧栏未做白、正确绿、错误红，并有图标/文字。
 - [ ] 交卷后显示答对数、错题题号、正确率（未做计入）、题库异常数。
+- [ ] 结果页可发起错题重练：新一轮只含本次答错 + 未作答题，独立计分，原成绩不变。
+- [ ] 选了正确答案但未提交，仍按未作题统计并进入错题重练。
 - [ ] 刷新后答题记录和进度恢复。
 - [ ] 错题本跨练习累计，与“本次错题”区分。
 - [ ] 异常反馈可提交并本地保存。

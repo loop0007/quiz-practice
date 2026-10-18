@@ -429,6 +429,39 @@ async function runDesktopFlow(browser, data) {
   await page.getByRole('link', { name: '查看结果' }).first().click()
   await page.getByText('本次成绩').waitFor({ timeout: 15000 })
   check('历史成绩可打开对应结果页', page.url().includes('/#/result/'))
+
+  console.log('  · 错题重练')
+  const originalResultUrl = page.url()
+  const originalSessionId = originalResultUrl.split('/result/')[1]
+  await page.getByRole('button', { name: /错题重练/ }).click()
+  await page.waitForURL(/#\/practice\//, { timeout: 15000 })
+  await page.getByText(/第 1 \/ 117 题/).first().waitFor({ timeout: 15000 })
+  const redoSessionId = page.url().split('/practice/')[1]
+  check('错题重练创建新的独立 session', redoSessionId !== originalSessionId)
+  equal(
+    '错题重练首题为本次答错的题',
+    await stemText(page),
+    normalize(q1.stem),
+  )
+  check(
+    '错题重练从零开始计分',
+    (await page.locator('main').innerText()).includes('已答 0'),
+  )
+
+  await page.getByRole('button', { name: '交卷' }).first().click()
+  await page.waitForURL(/#\/result\//, { timeout: 15000 })
+  await page.getByText('本次成绩').waitFor({ timeout: 15000 })
+  const redoStats = await readResultStats(page)
+  equal('错题重练总题数（错题 + 未答）', redoStats['总题数'], '117')
+  equal('错题重练本次未答', redoStats['本次未答'], '117')
+  equal('错题重练正确率', redoStats['正确率'], '0%')
+  check('错题重练成绩为独立记录', page.url().includes(redoSessionId))
+  equal('sessions 表新增独立记录', await indexedDbCount(page, 'sessions'), 2)
+  await page.screenshot({ path: path.join(SHOTS, 't3-05-redo-result.png') })
+
+  await page.goto(originalResultUrl, { waitUntil: 'load' })
+  await page.getByText('本次成绩').waitFor({ timeout: 15000 })
+  equal('原练习结果不受重练影响', (await readResultStats(page))['总题数'], '118')
   await goHome(page)
 
   console.log('  · E1 章节/题型筛选')
@@ -557,6 +590,10 @@ async function runMobileFlow(browser, options, label, startAtDark) {
   await page.getByText('本次成绩').waitFor({ timeout: 15000 })
   equal(`${label} 交卷确认次数`, dialogs.length, 2)
   await noOverflow(page, `${label} 结果页`)
+  check(
+    `${label} 结果页显示错题重练入口`,
+    await page.getByRole('button', { name: /错题重练/ }).isVisible(),
+  )
   await page.screenshot({
     path: path.join(SHOTS, `t4-${label}-result.png`),
   })

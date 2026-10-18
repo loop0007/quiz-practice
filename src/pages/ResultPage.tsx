@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   CheckCircle2,
   CircleHelp,
+  ListChecks,
   Loader2,
   RotateCcw,
   SquarePen,
@@ -13,7 +14,7 @@ import {
 import AccuracyHint from '@/components/AccuracyHint'
 import { getBank, getQuestion } from '@/lib/banks'
 import { createSession, getSession, listWrong } from '@/lib/db'
-import { getSessionStats } from '@/lib/scoring'
+import { getRedoQuestionIds, getSessionStats } from '@/lib/scoring'
 import type { PracticeSession, WrongEntry } from '@/types'
 
 function questionNumbers(questionIds: string[]): number[] {
@@ -41,7 +42,7 @@ export default function ResultPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
-  const [starting, setStarting] = useState(false)
+  const [pendingAction, setPendingAction] = useState<'replay' | 'redo' | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -84,9 +85,9 @@ export default function ResultPage() {
   }, [sessionId])
 
   async function handleReplay() {
-    if (!session || starting) return
+    if (!session || pendingAction) return
 
-    setStarting(true)
+    setPendingAction('replay')
     setActionError(null)
     try {
       const next = await createSession({
@@ -96,7 +97,7 @@ export default function ResultPage() {
       navigate(`/practice/${next.id}`)
     } catch {
       setActionError('创建新练习失败，请重试。')
-      setStarting(false)
+      setPendingAction(null)
     }
   }
 
@@ -135,6 +136,26 @@ export default function ResultPage() {
   const unansweredNumbers = questionNumbers(stats.unansweredQuestionIds)
   const bankWrongTotal =
     wrongEntries?.filter((entry) => entry.bankId === session.bankId).length ?? null
+  // 只有已交卷的练习才提供错题重练；未提交（含选了正确答案但没提交）同样进入重练。
+  const redoQuestionIds =
+    session.finishedAt != null ? getRedoQuestionIds(session) : []
+
+  async function handleRedo() {
+    if (!session || pendingAction || redoQuestionIds.length === 0) return
+
+    setPendingAction('redo')
+    setActionError(null)
+    try {
+      const next = await createSession({
+        bankId: session.bankId,
+        questionIds: redoQuestionIds,
+      })
+      navigate(`/practice/${next.id}`)
+    } catch {
+      setActionError('创建错题重练失败，请重试。')
+      setPendingAction(null)
+    }
+  }
 
   const statItems = [
     { label: '总题数', value: stats.total, tone: 'text-slate-900 dark:text-slate-100' },
@@ -273,6 +294,9 @@ export default function ResultPage() {
             没有未作答的题。
           </p>
         )}
+        <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+          只有点击“提交答案”才计入已答；选了答案但没有提交，仍按未作题统计。
+        </p>
       </div>
 
       <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 dark:border-slate-700 dark:bg-slate-900">
@@ -315,17 +339,40 @@ export default function ResultPage() {
         <button
           type="button"
           onClick={() => void handleReplay()}
-          disabled={starting}
-          className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 sm:flex-none dark:disabled:bg-slate-700 dark:disabled:text-slate-400"
+          disabled={pendingAction !== null}
+          className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-4 text-sm font-medium hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
         >
-          {starting ? (
+          {pendingAction === 'replay' ? (
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />
           ) : (
             <RotateCcw className="size-4" aria-hidden="true" />
           )}
           再练一次
         </button>
+        {session.finishedAt != null && redoQuestionIds.length > 0 && (
+          <button
+            type="button"
+            onClick={() => void handleRedo()}
+            disabled={pendingAction !== null}
+            className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 sm:flex-none dark:disabled:bg-slate-700 dark:disabled:text-slate-400"
+          >
+            {pendingAction === 'redo' ? (
+              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <ListChecks className="size-4" aria-hidden="true" />
+            )}
+            错题重练（{redoQuestionIds.length} 题）
+          </button>
+        )}
       </div>
+
+      {session.finishedAt != null && (
+        <p className="text-xs text-slate-500 dark:text-slate-400">
+          {redoQuestionIds.length > 0
+            ? '错题重练包含本次答错和未作答的题，会新建一轮独立成绩；选了答案但未提交的题也按未作答处理。'
+            : '本轮全部答对，没有需要重练的题。'}
+        </p>
+      )}
 
       {stats.wrong > 0 && (
         <p className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
