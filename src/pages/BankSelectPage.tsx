@@ -6,10 +6,12 @@ import {
   Layers,
   Loader2,
   MessageSquarePlus,
+  Palette,
   Play,
   RotateCcw,
   SlidersHorizontal,
 } from 'lucide-react'
+import AppearanceDialog from '@/components/AppearanceDialog'
 import FeedbackDialog from '@/components/FeedbackDialog'
 import PracticeFilterDialog from '@/components/PracticeFilterDialog'
 import { banks, getBankQuestions } from '@/lib/banks'
@@ -40,6 +42,7 @@ export default function BankSelectPage() {
   const [pendingBankId, setPendingBankId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [feedbackOpen, setFeedbackOpen] = useState(false)
+  const [appearanceOpen, setAppearanceOpen] = useState(false)
   const [filterBank, setFilterBank] = useState<BankMeta | null>(null)
 
   useEffect(() => {
@@ -130,14 +133,24 @@ export default function BankSelectPage() {
             题目与答题记录都保存在本机浏览器，换设备不会同步。
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => setFeedbackOpen(true)}
-          className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-sm font-medium hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
-        >
-          <MessageSquarePlus className="size-4" aria-hidden="true" />
-          反馈
-        </button>
+        <div className="flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setAppearanceOpen(true)}
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-sm font-medium hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
+          >
+            <Palette className="size-4" aria-hidden="true" />
+            外观
+          </button>
+          <button
+            type="button"
+            onClick={() => setFeedbackOpen(true)}
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-sm font-medium hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
+          >
+            <MessageSquarePlus className="size-4" aria-hidden="true" />
+            反馈
+          </button>
+        </div>
       </header>
 
       {error && (
@@ -269,6 +282,10 @@ export default function BankSelectPage() {
 
       {feedbackOpen && (
         <FeedbackDialog onClose={() => setFeedbackOpen(false)} />
+      )}
+
+      {appearanceOpen && (
+        <AppearanceDialog onClose={() => setAppearanceOpen(false)} />
       )}
 
       {filterBank && (

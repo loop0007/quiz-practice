@@ -117,6 +117,14 @@ export interface FavoriteEntry {
   createdAt: number
 }
 
+export interface WallpaperEntry {
+  /** 固定为 custom：本机只保留一张自定义壁纸。 */
+  id: string
+  /** data URL，直接用作 CSS 背景图，避免额外的对象 URL 生命周期。 */
+  dataUrl: string
+  updatedAt: number
+}
+
 export interface WrongEntry {
   /** 作为主键，一题一条。 */
   questionId: string

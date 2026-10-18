@@ -1,9 +1,36 @@
+import { useEffect } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { BookOpenCheck, History, SquarePen, Star } from 'lucide-react'
+import { getWallpaper } from '@/lib/db'
+import { applyWallpaper, readStoredWallpaper } from '@/lib/wallpaper'
 import ThemeToggle from './ThemeToggle'
 
 export default function Layout() {
   const { pathname } = useLocation()
+
+  useEffect(() => {
+    let cancelled = false
+    const stored = readStoredWallpaper()
+
+    if (stored !== 'custom') {
+      applyWallpaper(stored)
+      return
+    }
+
+    getWallpaper()
+      .then((dataUrl) => {
+        if (cancelled) return
+        if (dataUrl) applyWallpaper('custom', dataUrl)
+        else applyWallpaper('none')
+      })
+      .catch(() => {
+        if (!cancelled) applyWallpaper('none')
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   return (
     <div className="min-h-dvh">

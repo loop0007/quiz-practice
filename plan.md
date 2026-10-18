@@ -63,7 +63,7 @@ pages（页面编排）
 | M9 | 体验基线 | 二 | P0 | M5–M8 | 移动端、深色、无障碍 | ✅ | 2026-10-17 | 49 项测试；build；375/390 与 1280 布局截图 |
 | M10 | 公网托管 | 二 | P0 | M2, M9 | HTTPS 公网地址、多端真机验证 | 🟨 | 2026-10-17 | GitHub Pages 已上线；HTTPS 200；待真机蜂窝/另一台电脑复验 |
 | T1–T5 | 测试 | 三 | P0 | M0–M10 | 测试记录与缺陷清单 | 🟨 | 2026-10-18 | T1–T4 通过（Vitest 56 + 浏览器 72）；T5 Linux/WSL 实测待环境 |
-| E1–E7 | 额外功能 | 四 | P2 | T5 | 可选增强 | 🟨 | 2026-10-18 | E1、E2、E3、E4、E7 完成（Vitest 73 + 浏览器 115）；E5–E6 未开始 |
+| E1–E7 | 额外功能 | 四 | P2 | T5 | 可选增强 | 🟨 | 2026-10-18 | E1、E2、E3、E4、E5、E7 完成（Vitest 80 + 浏览器 135）；E6 未开始 |
 | U1 | UI 美化 | 五 | P1 | T5/E | 视觉统一与细节打磨 | ⬜ | | |
 | D1 | 交付 | 五后 | P0 | 全部 | `dist/`、README、AI 记录、公网地址 | ⬜ | | |
 
@@ -351,7 +351,7 @@ feedback:  '++id, questionId, createdAt'
 | E2 | 历史成绩统计 | 复用 session 数据 | 中 | M2, M6 | P1 |
 | E3 | 错题组卷练习 | 复用错题本 | 中 | M7 | P2 |
 | E4 | 收藏夹 | 新表 + 新入口 | 中 | M2, M5 | P2 |
-| E5 | 主题/壁纸 | 只改 UI token | 低 | M9 | P2 |
+| E5 | 主题/壁纸(允许提交本地图片为壁纸) | 只改 UI token | 低 | M9 | P2 |
 | E6 | PWA 离线 / 键盘快捷键 | 地铁场景增强 | 中 | M9 | P2 |
 | E7 | 结果页错题重练 | 本轮未答对的题独立重练 | 低 | M6 | P1 |
 | — | 账号/云端/后端管理 | 超出本期范围 | 高 | — | 不做 |
@@ -399,6 +399,17 @@ feedback:  '++id, questionId, createdAt'
 
 **完成标记**：✅ 已完成｜日期：2026-10-18｜涉及文件：`src/types/index.ts`、`src/lib/db.ts`、`src/lib/db.test.ts`、`src/pages/PracticePage.tsx`、`src/pages/FavoritesPage.tsx`、`src/App.tsx`、`src/components/Layout.tsx`、`scripts/e2e-browser.mjs`、`README.md`、`plan.md`、`docs/测试记录.md`｜验证：Vitest 73 项、浏览器 115 项全部通过；`npm run build` 与 `check:source` 通过。收藏写入 favorites 表、刷新后保持，收藏夹展示题干并可取消，取消后表为空；移动端 375/390 空状态无横向溢出｜接口变更：`types` 新增 `FavoriteEntry`；db 新增 `addFavorite`/`listFavorites`/`removeFavorite` 与 `favorites` 表（version 2）；未改 Session/判分/既有表｜影响模块：M2、M5、T3、T4、D1
 
+### E5 主题/壁纸
+
+- [x] 首页新增“外观”入口与弹窗：内置晨曦、暮色、青野三套渐变壁纸，可恢复无壁纸。
+- [x] 支持上传本机图片作为壁纸（最大 5 MB，仅接受图片类型），可更换或移除。
+- [x] 只通过根元素 CSS 变量 `--wallpaper-image` 与 `has-wallpaper` 类叠加固定背景层，不改页面结构与 Session/判分契约。
+- [x] 壁纸选择存 localStorage；自定义图片以 data URL 存 Dexie `version(3)` 的 `wallpapers` 表，刷新后恢复。
+- [x] 背景叠加深浅色半透明遮罩，保持正文与卡片边缘对比度；深色模式下同步切换遮罩。
+- [x] 新增 7 项单测（壁纸解析/校验 5 项、db 读写 2 项）；无头浏览器追加 12 项桌面检查与 8 项移动端检查。
+
+**完成标记**：✅ 已完成｜日期：2026-10-18｜涉及文件：`src/types/index.ts`、`src/lib/wallpaper.ts`、`src/lib/wallpaper.test.ts`、`src/lib/db.ts`、`src/lib/db.test.ts`、`src/components/AppearanceDialog.tsx`、`src/components/Layout.tsx`、`src/pages/BankSelectPage.tsx`、`src/index.css`、`scripts/e2e-browser.mjs`、`README.md`、`plan.md`、`docs/测试记录.md`｜验证：Vitest 80 项、浏览器 135 项全部通过；`npm run build` 与 `check:source` 通过。内置壁纸与自定义图片均可刷新保持，移除后恢复无壁纸并清空 wallpapers 表，非图片文件被拒绝；375/390 外观弹窗与壁纸首页无横向溢出｜接口变更：`types` 新增 `WallpaperEntry`；db 新增 `saveWallpaper`/`getWallpaper`/`removeWallpaper` 与 `wallpapers` 表（version 3）；新增 `wallpaper.ts`｜影响模块：M9、T4、D1
+
 ### E7 结果页错题重练
 
 - [x] 已交卷结果页新增“错题重练”入口，题数为本次答错 + 未作答。
@@ -409,7 +420,7 @@ feedback:  '++id, questionId, createdAt'
 
 **完成标记**：✅ 已完成｜日期：2026-10-18｜涉及文件：`src/lib/scoring.ts`、`src/lib/scoring.test.ts`、`src/store/usePracticeStore.test.ts`、`src/pages/ResultPage.tsx`、`scripts/e2e-browser.mjs`、`README.md`、`plan.md`、`docs/测试记录.md`｜验证：Vitest 68 项、浏览器 91 项全部通过；`npm run build` 与 `check:source` 通过。错题重练创建独立 session（原 118 题，重练 117 题），从零计分，sessions 表新增记录，原结果不受影响｜接口变更：`scoring.ts` 新增只读函数 `getRedoQuestionIds`；未改 Session/存储契约｜影响模块：M6、T3、T4、D1
 
-**完成标记**：🟨 进行中｜日期：2026-10-18｜验证：E1、E2、E3、E4、E7 已完成（Vitest 73 项、浏览器 115 项）；E5–E6 未开始｜接口变更：见 E1、E2、E3、E4、E7｜影响模块：M2、M4、M5、M6、M7、T3、T4、D1
+**完成标记**：🟨 进行中｜日期：2026-10-18｜验证：E1、E2、E3、E4、E5、E7 已完成（Vitest 80 项、浏览器 135 项）；E6 未开始｜接口变更：见 E1、E2、E3、E4、E5、E7｜影响模块：M2、M4、M5、M6、M7、M9、T3、T4、D1
 
 ## 5. 阶段五：UI 界面美化
 

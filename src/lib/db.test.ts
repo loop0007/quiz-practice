@@ -9,13 +9,16 @@ import {
   deleteSession,
   findActiveSession,
   getSession,
+  getWallpaper,
   listFavorites,
   listFeedback,
   listFinishedSessions,
   listWrong,
   removeFavorite,
+  removeWallpaper,
   removeWrong,
   saveSession,
+  saveWallpaper,
 } from './db'
 import { createSessionId } from './id'
 import { getSessionStats } from './scoring'
@@ -181,6 +184,23 @@ describe('收藏夹', () => {
     expect((await listFavorites()).map((entry) => entry.questionId)).toEqual([
       'web:2',
     ])
+  })
+})
+
+describe('壁纸', () => {
+  it('保存自定义壁纸后读取，重复保存覆盖旧图', async () => {
+    await saveWallpaper('data:image/png;base64,AAAA')
+    expect(await getWallpaper()).toBe('data:image/png;base64,AAAA')
+
+    await saveWallpaper('data:image/png;base64,BBBB')
+    expect(await getWallpaper()).toBe('data:image/png;base64,BBBB')
+    expect(await db.wallpapers.count()).toBe(1)
+  })
+
+  it('移除后读取为空', async () => {
+    await saveWallpaper('data:image/png;base64,AAAA')
+    await removeWallpaper()
+    expect(await getWallpaper()).toBeUndefined()
   })
 })
 

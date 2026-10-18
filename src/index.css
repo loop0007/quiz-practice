@@ -47,6 +47,43 @@ html.dark body {
   color: #e2e8f0;
 }
 
+/*
+ * E5 壁纸：只叠加一个固定背景层，页面结构与学生数据不变。
+ * 半透明遮罩用于压住图片细节，保证正文与卡片边缘的内容仍有足够对比度。
+ */
+html.has-wallpaper body {
+  background-color: transparent;
+}
+
+html.has-wallpaper body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgb(248 250 252 / 0.78), rgb(248 250 252 / 0.78)),
+    var(--wallpaper-image);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+html.dark.has-wallpaper body::before {
+  background-image:
+    linear-gradient(rgb(2 6 23 / 0.78), rgb(2 6 23 / 0.78)),
+    var(--wallpaper-image);
+}
+
+html.has-wallpaper header {
+  background-color: rgb(255 255 255 / 0.88);
+  backdrop-filter: blur(8px);
+}
+
+html.dark.has-wallpaper header {
+  background-color: rgb(15 23 42 / 0.88);
+}
+
 @layer base {
   :focus-visible {
     outline: 2px solid var(--color-brand);

@@ -1,5 +1,6 @@
 /**
- * 本地持久化层（M2 冻结；E4 以 version(2) 新增收藏夹表，既有表结构不变）。
+ * 本地持久化层（M2 冻结；E4 以 version(2) 新增收藏夹表，E5 以 version(3)
+ * 新增自定义壁纸表，既有表结构不变）。
  * 页面与组件不得直接访问 Dexie 表，统一通过本文件导出的 API。
  */
 import Dexie, { type Table } from 'dexie'
@@ -8,6 +9,7 @@ import type {
   Feedback,
   FeedbackType,
   PracticeSession,
+  WallpaperEntry,
   WrongEntry,
 } from '../types'
 import { createSessionId } from './id'
@@ -19,6 +21,7 @@ class AppDatabase extends Dexie {
   wrongBook!: Table<WrongEntry, string>
   feedback!: Table<Feedback, number>
   favorites!: Table<FavoriteEntry, string>
+  wallpapers!: Table<WallpaperEntry, string>
 
   constructor(name = DB_NAME) {
     super(name)
@@ -32,6 +35,13 @@ class AppDatabase extends Dexie {
       wrongBook: 'questionId, bankId, firstWrongAt',
       feedback: '++id, questionId, createdAt',
       favorites: 'questionId, bankId, createdAt',
+    })
+    this.version(3).stores({
+      sessions: 'id, bankId, startedAt, finishedAt',
+      wrongBook: 'questionId, bankId, firstWrongAt',
+      feedback: '++id, questionId, createdAt',
+      favorites: 'questionId, bankId, createdAt',
+      wallpapers: 'id',
     })
   }
 }
@@ -176,6 +186,24 @@ export async function listFavorites(): Promise<FavoriteEntry[]> {
 
 export async function removeFavorite(questionId: string): Promise<void> {
   await db.favorites.delete(questionId)
+}
+
+/** 本机只保留一张自定义壁纸，重复上传直接覆盖。 */
+export async function saveWallpaper(dataUrl: string): Promise<void> {
+  await db.wallpapers.put({
+    id: 'custom',
+    dataUrl,
+    updatedAt: Date.now(),
+  })
+}
+
+export async function getWallpaper(): Promise<string | undefined> {
+  const entry = await db.wallpapers.get('custom')
+  return entry?.dataUrl
+}
+
+export async function removeWallpaper(): Promise<void> {
+  await db.wallpapers.delete('custom')
 }
 
 export async function addFeedback(input: AddFeedbackInput): Promise<number> {

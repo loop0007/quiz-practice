@@ -9,6 +9,7 @@
  *   E2E_BASE_URL    复用已运行的预览地址（默认自动启动 vite preview）
  */
 import fs from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
 import { spawn } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
@@ -17,6 +18,9 @@ import { chromium } from 'playwright-core'
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const BASE = process.env.E2E_BASE_URL ?? 'http://127.0.0.1:4173'
 const SHOTS = path.join(ROOT, 'docs', 'screenshots', 'phase3')
+const WALLPAPER_FIXTURE = path.join(os.tmpdir(), 'quiz-practice-e5-wallpaper.png')
+const WALLPAPER_PNG_BASE64 =
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
 
 const failures = []
 let checks = 0
@@ -148,7 +152,17 @@ async function startBank(page, bankName) {
 }
 
 async function selectOption(page, key) {
-  const input = page.locator('article').first().locator(`input[value="${key}"]`)
+  // sr-only 输入框只有 1x1，直接 check 偶发点不到；改为点击可见 label 并确认勾选。
+  const article = page.locator('article').first()
+  const input = article.locator(`input[value="${key}"]`)
+  const label = article.locator(`label:has(input[value="${key}"])`)
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await label.click({ force: true })
+    if (await input.isChecked()) return
+    await sleep(100)
+    if (await input.isChecked()) return
+  }
   await input.check({ force: true })
 }
 
@@ -384,6 +398,7 @@ async function runDesktopFlow(browser, data) {
   await page.getByRole('link', { name: '查看错题本' }).click()
   await page.getByRole('heading', { name: '错题本累计' }).waitFor()
   const wrongArticle = page.locator('article').first()
+  await wrongArticle.waitFor({ timeout: 5000 })
   equal('错题本条目数', await page.locator('article').count(), 1)
   const wrongStem = normalize(
     await wrongArticle.locator(':scope > header + div').textContent(),
@@ -480,6 +495,7 @@ async function runDesktopFlow(browser, data) {
     timeout: 15000,
   })
   const assembleButton = page.getByRole('button', { name: /错题组卷/ })
+  await assembleButton.waitFor({ timeout: 5000 })
   equal('错题本按题库显示错题组卷入口', await assembleButton.count(), 1)
   check('错题组卷显示有效题数', (await assembleButton.innerText()).includes('1 题'))
   await assembleButton.click()
@@ -518,13 +534,15 @@ async function runDesktopFlow(browser, data) {
   await page.getByRole('heading', { name: '错题本累计' }).waitFor({
     timeout: 15000,
   })
+  await page.locator('article').first().waitFor({ timeout: 5000 })
   equal('答对组卷题后错题本仍保留记录', await page.locator('article').count(), 1)
 
   console.log('  · E4 收藏夹页面')
   await page.goto(`${BASE}/#/favorites`, { waitUntil: 'load' })
   await page.getByRole('heading', { name: '收藏夹' }).waitFor({ timeout: 15000 })
-  equal('收藏夹条目数', await page.locator('article').count(), 1)
   const favoriteArticle = page.locator('article').first()
+  await favoriteArticle.waitFor({ timeout: 5000 })
+  equal('收藏夹条目数', await page.locator('article').count(), 1)
   equal(
     '收藏夹题干与练习一致',
     normalize(
@@ -545,6 +563,112 @@ async function runDesktopFlow(browser, data) {
   await page.getByText('收藏夹是空的').waitFor({ timeout: 5000 })
   equal('取消收藏后 favorites 表为空', await indexedDbCount(page, 'favorites'), 0)
   await goHome(page)
+
+  console.log('  · E5 壁纸')
+  await page.getByRole('button', { name: '外观', exact: true }).click()
+  const appearance = page.locator('dialog[open]')
+  await appearance.waitFor({ timeout: 5000 })
+  equal(
+    '外观弹窗提供 3 套内置壁纸',
+    await appearance
+      .getByRole('button', { name: /^(晨曦|暮色|青野)$/ })
+      .count(),
+    3,
+  )
+  await appearance.getByRole('button', { name: '晨曦', exact: true }).click()
+  check(
+    '选择内置壁纸后应用 has-wallpaper',
+    await page.evaluate(() =>
+      document.documentElement.classList.contains('has-wallpaper'),
+    ),
+  )
+  const presetCss = await page.evaluate(() =>
+    document.documentElement.style.getPropertyValue('--wallpaper-image'),
+  )
+  check('内置壁纸写入 CSS 变量', presetCss.includes('linear-gradient'), presetCss)
+  equal(
+    '壁纸选择写入 localStorage',
+    await page.evaluate(() => localStorage.getItem('wallpaper')),
+    'aurora',
+  )
+  await appearance.getByRole('button', { name: '完成' }).click()
+  await noOverflow(page, '壁纸首页（1280）')
+  await page.screenshot({ path: path.join(SHOTS, 't3-08-wallpaper-desktop.png') })
+
+  await goHome(page)
+  await page.waitForFunction(
+    () => document.documentElement.classList.contains('has-wallpaper'),
+    null,
+    { timeout: 5000 },
+  )
+  check('刷新后内置壁纸保持', true)
+
+  console.log('  · E5 自定义壁纸')
+  fs.writeFileSync(WALLPAPER_FIXTURE, Buffer.from(WALLPAPER_PNG_BASE64, 'base64'))
+  await page.getByRole('button', { name: '外观', exact: true }).click()
+  const uploadDialog = page.locator('dialog[open]')
+  await uploadDialog.waitFor({ timeout: 5000 })
+  await uploadDialog.locator('input[type="file"]').setInputFiles(WALLPAPER_FIXTURE)
+  await page.waitForFunction(
+    () => localStorage.getItem('wallpaper') === 'custom',
+    null,
+    { timeout: 5000 },
+  )
+  const customCss = await page.evaluate(() =>
+    document.documentElement.style.getPropertyValue('--wallpaper-image'),
+  )
+  check(
+    '上传图片后启用自定义壁纸',
+    customCss.startsWith('url("data:image/png'),
+    customCss.slice(0, 60),
+  )
+  equal(
+    '自定义壁纸写入 wallpapers 表',
+    await indexedDbCount(page, 'wallpapers'),
+    1,
+  )
+  await uploadDialog.getByRole('button', { name: '完成' }).click()
+
+  await page.reload({ waitUntil: 'load' })
+  await page.getByRole('heading', { name: '选择题库' }).waitFor({ timeout: 15000 })
+  await page.waitForFunction(
+    () =>
+      document.documentElement.classList.contains('has-wallpaper') &&
+      document.documentElement.style
+        .getPropertyValue('--wallpaper-image')
+        .startsWith('url("data:image/png'),
+    null,
+    { timeout: 5000 },
+  )
+  check('刷新后自定义壁纸保持', true)
+
+  await page.getByRole('button', { name: '外观', exact: true }).click()
+  const removeDialog = page.locator('dialog[open]')
+  await removeDialog.waitFor({ timeout: 5000 })
+  await removeDialog.locator('input[type="file"]').setInputFiles({
+    name: 'note.txt',
+    mimeType: 'text/plain',
+    buffer: Buffer.from('not an image'),
+  })
+  await removeDialog.getByRole('alert').waitFor({ timeout: 5000 })
+  check(
+    '非图片文件被拒绝',
+    (await removeDialog.getByRole('alert').innerText()).includes('图片文件'),
+  )
+  await removeDialog.getByRole('button', { name: '移除图片' }).click()
+  await page.waitForFunction(
+    () => localStorage.getItem('wallpaper') === 'none',
+    null,
+    { timeout: 5000 },
+  )
+  check(
+    '移除图片后恢复无壁纸',
+    !(await page.evaluate(() =>
+      document.documentElement.classList.contains('has-wallpaper'),
+    )),
+  )
+  equal('移除后 wallpapers 表为空', await indexedDbCount(page, 'wallpapers'), 0)
+  await removeDialog.getByRole('button', { name: '完成' }).click()
 
   console.log('  · E1 章节/题型筛选')
   const javaCard = page.locator('article').filter({ hasText: 'Java程序设计题库' })
@@ -628,6 +752,36 @@ async function runMobileFlow(browser, options, label, startAtDark) {
   await noOverflow(page, `${label} 历史成绩`)
   await goHome(page)
 
+  console.log(`  · ${label} 外观壁纸`)
+  await page.getByRole('button', { name: '外观', exact: true }).click()
+  const appearance = page.locator('dialog[open]')
+  await appearance.waitFor({ timeout: 5000 })
+  await noOverflow(page, `${label} 外观弹窗`)
+  await appearance.getByRole('button', { name: '暮色', exact: true }).click()
+  await appearance.getByRole('button', { name: '完成' }).click()
+  await page.waitForFunction(
+    () => document.documentElement.classList.contains('has-wallpaper'),
+    null,
+    { timeout: 5000 },
+  )
+  check(`${label} 壁纸已应用`, true)
+  await noOverflow(page, `${label} 壁纸首页`)
+  await page.screenshot({
+    path: path.join(SHOTS, `t3-08-wallpaper-${label}.png`),
+  })
+
+  await page.getByRole('button', { name: '外观', exact: true }).click()
+  const resetDialog = page.locator('dialog[open]')
+  await resetDialog.waitFor({ timeout: 5000 })
+  await resetDialog.getByRole('button', { name: '无壁纸', exact: true }).click()
+  await resetDialog.getByRole('button', { name: '完成' }).click()
+  await page.waitForFunction(
+    () => !document.documentElement.classList.contains('has-wallpaper'),
+    null,
+    { timeout: 5000 },
+  )
+  check(`${label} 可恢复无壁纸`, true)
+
   await startBank(page, 'Web前端题库')
   await noOverflow(page, `${label} 答题页`)
 
@@ -658,6 +812,8 @@ async function runMobileFlow(browser, options, label, startAtDark) {
   await page.keyboard.press('Escape')
   await sheet.waitFor({ state: 'detached', timeout: 5000 })
   check(`${label} 题号抽屉可用 Escape 关闭`, true)
+  // 原生 dialog 从顶层移除与随后点击可能同帧，留出一次交互间隔。
+  await sleep(150)
 
   await selectOption(page, 'A')
   await submitMobile(page)
@@ -682,10 +838,9 @@ async function runMobileFlow(browser, options, label, startAtDark) {
 
   await page.getByRole('link', { name: '查看错题本' }).click()
   await page.getByRole('heading', { name: '错题本累计' }).waitFor()
-  check(
-    `${label} 错题本显示错题组卷入口`,
-    await page.getByRole('button', { name: /错题组卷/ }).isVisible(),
-  )
+  const mobileAssemble = page.getByRole('button', { name: /错题组卷/ })
+  await mobileAssemble.waitFor({ timeout: 5000 })
+  check(`${label} 错题本显示错题组卷入口`, await mobileAssemble.isVisible())
   await noOverflow(page, `${label} 错题本`)
 
   await page.getByRole('link', { name: '收藏夹' }).click()
