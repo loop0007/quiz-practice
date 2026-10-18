@@ -16,6 +16,7 @@ import QuestionCard from '@/components/QuestionCard'
 import QuestionPalette from '@/components/QuestionPalette'
 import { addFavorite, listFavorites, removeFavorite } from '@/lib/db'
 import { getSessionStats } from '@/lib/scoring'
+import { resolvePracticeShortcut } from '@/lib/shortcuts'
 import { usePracticeStore } from '@/store/usePracticeStore'
 
 export default function PracticePage() {
@@ -80,6 +81,78 @@ export default function PracticePage() {
       window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' })
     }
   }, [currentIndex])
+
+  /** E6：快捷键只读取当前会话状态；弹窗、输入框与组合键不接管。 */
+  const shortcutQuestion =
+    currentSession && questions.length > 0 ? questions[currentIndex] : null
+  const shortcutRecord = shortcutQuestion
+    ? currentSession?.answers[shortcutQuestion.id]
+    : undefined
+  const shortcutSelected = shortcutQuestion
+    ? shortcutRecord?.selected ?? drafts[shortcutQuestion.id] ?? []
+    : []
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (
+        event.defaultPrevented ||
+        event.repeat ||
+        event.altKey ||
+        event.ctrlKey ||
+        event.metaKey ||
+        !shortcutQuestion
+      ) {
+        return
+      }
+
+      const target = event.target
+      if (target instanceof HTMLElement) {
+        if (target.isContentEditable) return
+        if (target.tagName === 'TEXTAREA' || target.tagName === 'SELECT') return
+        if (target.tagName === 'INPUT') {
+          const type = (target as HTMLInputElement).type
+          if (type !== 'radio' && type !== 'checkbox') return
+        }
+      }
+      if (document.querySelector('dialog[open]')) return
+
+      const action = resolvePracticeShortcut({
+        key: event.key,
+        optionKeys: shortcutQuestion.options.map((option) => option.key),
+        locked: Boolean(shortcutRecord),
+        canSubmit: !shortcutRecord && shortcutSelected.length > 0,
+      })
+      if (!action) return
+
+      event.preventDefault()
+      if (action.type === 'select') {
+        select(
+          shortcutQuestion.id,
+          action.key,
+          shortcutQuestion.type === 'multi',
+        )
+      } else if (action.type === 'submit') {
+        void submitCurrent()
+      } else if (action.type === 'prev') {
+        if (currentIndex > 0) void goTo(currentIndex - 1)
+      } else if (currentIndex < questions.length - 1) {
+        void goTo(currentIndex + 1)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [
+    currentIndex,
+    drafts,
+    goTo,
+    questions.length,
+    select,
+    shortcutQuestion,
+    shortcutRecord,
+    shortcutSelected,
+    submitCurrent,
+  ])
 
   if (currentSession?.finishedAt != null) {
     return <Navigate to={`/result/${currentSession.id}`} replace />
@@ -314,6 +387,10 @@ export default function PracticePage() {
               <ChevronRight className="size-4" aria-hidden="true" />
             </button>
           </div>
+
+          <p className="mt-3 hidden text-center text-xs text-slate-500 lg:block dark:text-slate-400">
+            键盘：字母键选择答案 · Enter 提交 · ← / → 翻题
+          </p>
         </div>
 
         <aside className="hidden rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 lg:sticky lg:top-4 lg:block dark:border-slate-700 dark:bg-slate-900">

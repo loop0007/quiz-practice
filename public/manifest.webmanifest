@@ -1,0 +1,20 @@
+{
+  "id": "./",
+  "name": "在线刷题",
+  "short_name": "在线刷题",
+  "description": "基于本地题库的在线刷题网站",
+  "lang": "zh-CN",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f1f5f9",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "./favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

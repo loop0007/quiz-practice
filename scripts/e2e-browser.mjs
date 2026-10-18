@@ -670,6 +670,49 @@ async function runDesktopFlow(browser, data) {
   equal('移除后 wallpapers 表为空', await indexedDbCount(page, 'wallpapers'), 0)
   await removeDialog.getByRole('button', { name: '完成' }).click()
 
+  console.log('  · E6 键盘快捷键')
+  await goHome(page)
+  await startBank(page, 'Web前端题库')
+  await page.keyboard.press('b')
+  check(
+    '字母键选择对应选项',
+    await page.locator('article').first().locator('input[value="B"]').isChecked(),
+  )
+  check(
+    '键盘选择后可提交',
+    await page.getByRole('button', { name: '提交答案' }).first().isEnabled(),
+  )
+  await page.keyboard.press('Enter')
+  await page
+    .locator('article')
+    .first()
+    .getByText(/回答(正确|错误)/)
+    .waitFor({ timeout: 5000 })
+  check('Enter 提交答案', true)
+
+  await page.keyboard.press('ArrowRight')
+  await page.getByText(/第 2 \/ 118 题/).first().waitFor({ timeout: 5000 })
+  check('→ 进入下一题', true)
+  await page.keyboard.press('ArrowLeft')
+  await page.getByText(/第 1 \/ 118 题/).first().waitFor({ timeout: 5000 })
+  check('← 返回上一题', true)
+
+  await page
+    .locator('article')
+    .first()
+    .getByRole('button', { name: '反馈', exact: true })
+    .click()
+  const shortcutDialog = page.locator('dialog[open]')
+  await shortcutDialog.waitFor({ timeout: 5000 })
+  await page.keyboard.press('ArrowRight')
+  await shortcutDialog.getByRole('button', { name: '关闭' }).first().click()
+  await shortcutDialog.waitFor({ state: 'hidden', timeout: 5000 })
+  check(
+    '弹窗打开时快捷键不翻题',
+    (await page.locator('main').innerText()).includes('第 1 / 118 题'),
+  )
+  await goHome(page)
+
   console.log('  · E1 章节/题型筛选')
   const javaCard = page.locator('article').filter({ hasText: 'Java程序设计题库' })
   await javaCard.getByRole('button', { name: '按章节/题型筛选' }).click()
@@ -855,6 +898,47 @@ async function runMobileFlow(browser, options, label, startAtDark) {
   await context.close()
 }
 
+async function runOfflineFlow(browser) {
+  console.log('\n[E6] PWA 离线访问')
+  const { context, page, errors } = await openPage(browser, {
+    viewport: { width: 1280, height: 900 },
+    colorScheme: 'light',
+  })
+
+  await goHome(page)
+  await page.evaluate(async () => {
+    await navigator.serviceWorker.ready
+    return true
+  })
+  await page.waitForFunction(
+    () => navigator.serviceWorker.controller !== null,
+    null,
+    { timeout: 15000 },
+  )
+  check('Service Worker 已接管页面', true)
+  equal(
+    '页面声明 Web App Manifest',
+    await page.locator('link[rel="manifest"]').getAttribute('href'),
+    './manifest.webmanifest',
+  )
+
+  await context.setOffline(true)
+  await page.reload({ waitUntil: 'load' })
+  await page.getByRole('heading', { name: '选择题库' }).waitFor({
+    timeout: 15000,
+  })
+  check('离线刷新后首页可打开', true)
+  check('浏览器处于离线状态', await page.evaluate(() => !navigator.onLine))
+  await page.screenshot({ path: path.join(SHOTS, 't3-09-offline-home.png') })
+
+  await startBank(page, 'Web前端题库')
+  check('离线状态可开始练习', true)
+
+  await context.setOffline(false)
+  await errorSummary(page, errors, '离线流程')
+  await context.close()
+}
+
 async function main() {
   fs.mkdirSync(SHOTS, { recursive: true })
 
@@ -896,6 +980,7 @@ async function main() {
       '390-light',
       false,
     )
+    await runOfflineFlow(browser)
   } finally {
     await browser.close()
     if (server) server.kill()

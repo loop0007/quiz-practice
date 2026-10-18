@@ -63,7 +63,7 @@ pages（页面编排）
 | M9 | 体验基线 | 二 | P0 | M5–M8 | 移动端、深色、无障碍 | ✅ | 2026-10-17 | 49 项测试；build；375/390 与 1280 布局截图 |
 | M10 | 公网托管 | 二 | P0 | M2, M9 | HTTPS 公网地址、多端真机验证 | 🟨 | 2026-10-17 | GitHub Pages 已上线；HTTPS 200；待真机蜂窝/另一台电脑复验 |
 | T1–T5 | 测试 | 三 | P0 | M0–M10 | 测试记录与缺陷清单 | 🟨 | 2026-10-18 | T1–T4 通过（Vitest 56 + 浏览器 72）；T5 Linux/WSL 实测待环境 |
-| E1–E7 | 额外功能 | 四 | P2 | T5 | 可选增强 | 🟨 | 2026-10-18 | E1、E2、E3、E4、E5、E7 完成（Vitest 80 + 浏览器 135）；E6 未开始 |
+| E1–E7 | 额外功能 | 四 | P2 | T5 | 可选增强 | ✅ | 2026-10-18 | E1–E7 全部完成（Vitest 86 + 浏览器 148） |
 | U1 | UI 美化 | 五 | P1 | T5/E | 视觉统一与细节打磨 | ⬜ | | |
 | D1 | 交付 | 五后 | P0 | 全部 | `dist/`、README、AI 记录、公网地址 | ⬜ | | |
 
@@ -356,9 +356,7 @@ feedback:  '++id, questionId, createdAt'
 | E7 | 结果页错题重练 | 本轮未答对的题独立重练 | 低 | M6 | P1 |
 | — | 账号/云端/后端管理 | 超出本期范围 | 高 | — | 不做 |
 
-- [x] 从表中按剩余时间选择 1–2 个，优先 E1。（本次选择 E1）
-- [x] 每个功能完成后更新模块状态表、补测试、更新 README。（E1 已完成）
-- [ ] 时间不足直接放弃，不留下半成品入口。
+
 
 ### E1 按章节/题型筛选练习
 
@@ -410,6 +408,17 @@ feedback:  '++id, questionId, createdAt'
 
 **完成标记**：✅ 已完成｜日期：2026-10-18｜涉及文件：`src/types/index.ts`、`src/lib/wallpaper.ts`、`src/lib/wallpaper.test.ts`、`src/lib/db.ts`、`src/lib/db.test.ts`、`src/components/AppearanceDialog.tsx`、`src/components/Layout.tsx`、`src/pages/BankSelectPage.tsx`、`src/index.css`、`scripts/e2e-browser.mjs`、`README.md`、`plan.md`、`docs/测试记录.md`｜验证：Vitest 80 项、浏览器 135 项全部通过；`npm run build` 与 `check:source` 通过。内置壁纸与自定义图片均可刷新保持，移除后恢复无壁纸并清空 wallpapers 表，非图片文件被拒绝；375/390 外观弹窗与壁纸首页无横向溢出｜接口变更：`types` 新增 `WallpaperEntry`；db 新增 `saveWallpaper`/`getWallpaper`/`removeWallpaper` 与 `wallpapers` 表（version 3）；新增 `wallpaper.ts`｜影响模块：M9、T4、D1
 
+### E6 PWA 离线 / 键盘快捷键
+
+- [x] 答题页键盘快捷键：字母键按选项 key 选择、数字 1–9 按选项顺序选择，Enter 提交，← / → 翻题。
+- [x] 快捷键解析抽为纯函数 `resolvePracticeShortcut`；输入框、可编辑区域、已打开的原生 `dialog` 与已锁定题目均不触发。
+- [x] 桌面端答题页显示快捷键提示；不新增全局快捷键，不改 Session/判分/存储契约。
+- [x] 生产构建生成 Web App Manifest 与 Service Worker：预缓存 `dist` 静态资源，导航网络优先并离线回退缓存的 `index.html`，静态资源缓存优先。
+- [x] Service Worker 仅在 `import.meta.env.PROD` 注册，避免开发模式干扰热更新；缓存版本随构建内容哈希更新。
+- [x] 新增 6 项快捷键单测；无头浏览器追加 6 项键盘检查与 7 项离线检查（含离线开始练习）。
+
+**完成标记**：✅ 已完成｜日期：2026-10-18｜涉及文件：`src/lib/shortcuts.ts`、`src/lib/shortcuts.test.ts`、`src/pages/PracticePage.tsx`、`src/lib/pwa.ts`、`src/main.tsx`、`public/manifest.webmanifest`、`index.html`、`scripts/generate-sw.mjs`、`package.json`、`scripts/e2e-browser.mjs`、`README.md`、`plan.md`、`docs/测试记录.md`｜验证：Vitest 86 项、浏览器 148 项全部通过；`npm run build` 与 `check:source`（44 个源文件、92 条本地 import）通过。离线验收确认 Service Worker 接管、断网刷新可渲染首页并开始练习；键盘 B 选中、Enter 提交、←/→ 翻题、弹窗打开时按键被忽略｜接口变更：新增纯函数 `resolvePracticeShortcut` 与 `registerServiceWorker`；未改 Session/判分/存储契约｜影响模块：M5、M9、T4、D1
+
 ### E7 结果页错题重练
 
 - [x] 已交卷结果页新增“错题重练”入口，题数为本次答错 + 未作答。
@@ -420,7 +429,7 @@ feedback:  '++id, questionId, createdAt'
 
 **完成标记**：✅ 已完成｜日期：2026-10-18｜涉及文件：`src/lib/scoring.ts`、`src/lib/scoring.test.ts`、`src/store/usePracticeStore.test.ts`、`src/pages/ResultPage.tsx`、`scripts/e2e-browser.mjs`、`README.md`、`plan.md`、`docs/测试记录.md`｜验证：Vitest 68 项、浏览器 91 项全部通过；`npm run build` 与 `check:source` 通过。错题重练创建独立 session（原 118 题，重练 117 题），从零计分，sessions 表新增记录，原结果不受影响｜接口变更：`scoring.ts` 新增只读函数 `getRedoQuestionIds`；未改 Session/存储契约｜影响模块：M6、T3、T4、D1
 
-**完成标记**：🟨 进行中｜日期：2026-10-18｜验证：E1、E2、E3、E4、E5、E7 已完成（Vitest 80 项、浏览器 135 项）；E6 未开始｜接口变更：见 E1、E2、E3、E4、E5、E7｜影响模块：M2、M4、M5、M6、M7、M9、T3、T4、D1
+**完成标记**：✅ 已完成｜日期：2026-10-18｜验证：E1–E7 全部完成（Vitest 86 项、浏览器 148 项）｜接口变更：见 E1–E7｜影响模块：M2、M4、M5、M6、M7、M9、T3、T4、D1
 
 ## 5. 阶段五：UI 界面美化
 
