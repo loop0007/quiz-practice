@@ -462,6 +462,52 @@ async function runDesktopFlow(browser, data) {
   await page.goto(originalResultUrl, { waitUntil: 'load' })
   await page.getByText('本次成绩').waitFor({ timeout: 15000 })
   equal('原练习结果不受重练影响', (await readResultStats(page))['总题数'], '118')
+
+  console.log('  · E3 错题组卷')
+  await page.goto(`${BASE}/#/wrongbook`, { waitUntil: 'load' })
+  await page.getByRole('heading', { name: '错题本累计' }).waitFor({
+    timeout: 15000,
+  })
+  const assembleButton = page.getByRole('button', { name: /错题组卷/ })
+  equal('错题本按题库显示错题组卷入口', await assembleButton.count(), 1)
+  check('错题组卷显示有效题数', (await assembleButton.innerText()).includes('1 题'))
+  await assembleButton.click()
+  await page.waitForURL(/#\/practice\//, { timeout: 15000 })
+  await page.getByText(/第 1 \/ 1 题/).first().waitFor({ timeout: 15000 })
+  const assembleSessionId = page.url().split('/practice/')[1]
+  check(
+    '错题组卷创建新的独立 session',
+    ![originalSessionId, redoSessionId].includes(assembleSessionId),
+  )
+  equal('错题组卷首题与错题本一致', await stemText(page), normalize(q1.stem))
+  check(
+    '错题组卷从零开始计分',
+    (await page.locator('main').innerText()).includes('已答 0'),
+  )
+
+  for (const key of q1.answer) {
+    await selectOption(page, key)
+  }
+  await submitDesktop(page)
+  await page.locator('article').first().getByText('回答正确').waitFor({
+    timeout: 5000,
+  })
+  await page.getByRole('button', { name: '交卷' }).first().click()
+  await page.waitForURL(/#\/result\//, { timeout: 15000 })
+  await page.getByText('本次成绩').waitFor({ timeout: 15000 })
+  const assembleStats = await readResultStats(page)
+  equal('错题组卷总题数', assembleStats['总题数'], '1')
+  equal('错题组卷答对', assembleStats['答对'], '1')
+  equal('错题组卷正确率', assembleStats['正确率'], '100%')
+  check('错题组卷成绩为独立记录', page.url().includes(assembleSessionId))
+  equal('sessions 表存在 3 条独立记录', await indexedDbCount(page, 'sessions'), 3)
+  await page.screenshot({ path: path.join(SHOTS, 't3-06-wrongbook-result.png') })
+
+  await page.goto(`${BASE}/#/wrongbook`, { waitUntil: 'load' })
+  await page.getByRole('heading', { name: '错题本累计' }).waitFor({
+    timeout: 15000,
+  })
+  equal('答对组卷题后错题本仍保留记录', await page.locator('article').count(), 1)
   await goHome(page)
 
   console.log('  · E1 章节/题型筛选')
@@ -600,6 +646,10 @@ async function runMobileFlow(browser, options, label, startAtDark) {
 
   await page.getByRole('link', { name: '查看错题本' }).click()
   await page.getByRole('heading', { name: '错题本累计' }).waitFor()
+  check(
+    `${label} 错题本显示错题组卷入口`,
+    await page.getByRole('button', { name: /错题组卷/ }).isVisible(),
+  )
   await noOverflow(page, `${label} 错题本`)
   await errorSummary(page, errors, label)
 

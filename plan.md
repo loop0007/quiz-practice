@@ -63,7 +63,7 @@ pages（页面编排）
 | M9 | 体验基线 | 二 | P0 | M5–M8 | 移动端、深色、无障碍 | ✅ | 2026-10-17 | 49 项测试；build；375/390 与 1280 布局截图 |
 | M10 | 公网托管 | 二 | P0 | M2, M9 | HTTPS 公网地址、多端真机验证 | 🟨 | 2026-10-17 | GitHub Pages 已上线；HTTPS 200；待真机蜂窝/另一台电脑复验 |
 | T1–T5 | 测试 | 三 | P0 | M0–M10 | 测试记录与缺陷清单 | 🟨 | 2026-10-18 | T1–T4 通过（Vitest 56 + 浏览器 72）；T5 Linux/WSL 实测待环境 |
-| E1–E7 | 额外功能 | 四 | P2 | T5 | 可选增强 | 🟨 | 2026-10-18 | E1、E2、E7 完成（Vitest 68 + 浏览器 91）；E3–E6 未开始 |
+| E1–E7 | 额外功能 | 四 | P2 | T5 | 可选增强 | 🟨 | 2026-10-18 | E1、E2、E3、E7 完成（Vitest 71 + 浏览器 104）；E4–E6 未开始 |
 | U1 | UI 美化 | 五 | P1 | T5/E | 视觉统一与细节打磨 | ⬜ | | |
 | D1 | 交付 | 五后 | P0 | 全部 | `dist/`、README、AI 记录、公网地址 | ⬜ | | |
 
@@ -380,6 +380,15 @@ feedback:  '++id, questionId, createdAt'
 
 **完成标记**：✅ 已完成｜日期：2026-10-18｜涉及文件：`src/lib/db.ts`、`src/lib/db.test.ts`、`src/lib/history.ts`、`src/lib/history.test.ts`、`src/pages/HistoryPage.tsx`、`src/App.tsx`、`src/components/Layout.tsx`、`scripts/e2e-browser.mjs`、`README.md`、`plan.md`、`docs/测试记录.md`｜验证：Vitest 64 项、浏览器 80 项全部通过；`npm run build` 与 `check:source` 通过｜接口变更：db 新增只读 `listFinishedSessions` 与 `FinishedSession` 类型；新增 `history.ts`｜影响模块：M6、T4、D1
 
+### E3 错题组卷练习
+
+- [x] 错题本按题库新增“错题组卷”入口，显示可组卷的有效题数。
+- [x] 新增 `getWrongBookQuestionIds` 纯函数：按题库筛选、剔除题库中已失效的题目、按题号升序。
+- [x] 复用 `createSession` 冻结题目快照创建独立 session；答对后错题本记录仍保留，成绩独立进入历史。
+- [x] 新增 3 项组卷派生单测；无头浏览器追加 11 项桌面检查与 2 项移动端入口检查。
+
+**完成标记**：✅ 已完成｜日期：2026-10-18｜涉及文件：`src/lib/wrongbook.ts`、`src/lib/wrongbook.test.ts`、`src/pages/WrongBookPage.tsx`、`scripts/e2e-browser.mjs`、`README.md`、`plan.md`、`docs/测试记录.md`｜验证：Vitest 71 项、浏览器 104 项全部通过；`npm run build` 与 `check:source` 通过。1 道累计错题组卷为 1 题练习，从零计分，答对后正确率 100%，sessions 表新增第 3 条记录，错题本记录保留｜接口变更：新增只读 `getWrongBookQuestionIds`；未改 Session/存储契约｜影响模块：M7、T3、T4、D1
+
 ### E7 结果页错题重练
 
 - [x] 已交卷结果页新增“错题重练”入口，题数为本次答错 + 未作答。
@@ -390,7 +399,7 @@ feedback:  '++id, questionId, createdAt'
 
 **完成标记**：✅ 已完成｜日期：2026-10-18｜涉及文件：`src/lib/scoring.ts`、`src/lib/scoring.test.ts`、`src/store/usePracticeStore.test.ts`、`src/pages/ResultPage.tsx`、`scripts/e2e-browser.mjs`、`README.md`、`plan.md`、`docs/测试记录.md`｜验证：Vitest 68 项、浏览器 91 项全部通过；`npm run build` 与 `check:source` 通过。错题重练创建独立 session（原 118 题，重练 117 题），从零计分，sessions 表新增记录，原结果不受影响｜接口变更：`scoring.ts` 新增只读函数 `getRedoQuestionIds`；未改 Session/存储契约｜影响模块：M6、T3、T4、D1
 
-**完成标记**：🟨 进行中｜日期：2026-10-18｜验证：E1、E2、E7 已完成（Vitest 68 项、浏览器 91 项）；E3–E6 未开始｜接口变更：见 E1、E2、E7｜影响模块：M4、M6、T3、T4、D1
+**完成标记**：🟨 进行中｜日期：2026-10-18｜验证：E1、E2、E3、E7 已完成（Vitest 71 项、浏览器 104 项）；E4–E6 未开始｜接口变更：见 E1、E2、E3、E7｜影响模块：M4、M6、M7、T3、T4、D1
 
 ## 5. 阶段五：UI 界面美化
 

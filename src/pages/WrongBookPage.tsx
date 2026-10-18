@@ -1,16 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   AlertTriangle,
   ArrowLeft,
   BookOpenCheck,
   CheckCircle2,
+  ListChecks,
   Loader2,
   XCircle,
 } from 'lucide-react'
 import MarkdownContent from '@/components/MarkdownContent'
 import { banks, getQuestion } from '@/lib/banks'
-import { listWrong } from '@/lib/db'
+import { createSession, listWrong } from '@/lib/db'
+import { getWrongBookQuestionIds } from '@/lib/wrongbook'
 import type { Question, QuestionType, WrongEntry } from '@/types'
 
 const TYPE_LABELS: Record<QuestionType, string> = {
@@ -208,9 +210,12 @@ function WrongItem({ entry }: { entry: WrongEntry }) {
 }
 
 export default function WrongBookPage() {
+  const navigate = useNavigate()
   const [entries, setEntries] = useState<WrongEntry[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [pendingBankId, setPendingBankId] = useState<string | null>(null)
+  const [actionError, setActionError] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -233,6 +238,23 @@ export default function WrongBookPage() {
   }, [])
 
   const groups = useMemo(() => groupEntries(entries ?? []), [entries])
+
+  async function handleAssemble(group: WrongGroup) {
+    if (pendingBankId) return
+
+    const questionIds = getWrongBookQuestionIds(group.entries, group.bankId)
+    if (questionIds.length === 0) return
+
+    setPendingBankId(group.bankId)
+    setActionError(null)
+    try {
+      const next = await createSession({ bankId: group.bankId, questionIds })
+      navigate(`/practice/${next.id}`)
+    } catch {
+      setActionError('创建错题组卷失败，请重试。')
+      setPendingBankId(null)
+    }
+  }
 
   if (loading) {
     return (
@@ -294,6 +316,9 @@ export default function WrongBookPage() {
         <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
           跨多次练习累计，同一道题只保留一条记录；重复答错会累加次数，但首次答错时间保持不变。与结果页的“本次错题”不是同一口径。
         </p>
+        <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+          可按题库把累计错题组卷成新一轮练习，成绩独立记录，不影响已有结果；已不在题库中的错题不会进入组卷。
+        </p>
         <Link
           to="/"
           className="mt-4 inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-[var(--color-border)] px-3 text-sm font-medium hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
@@ -303,25 +328,56 @@ export default function WrongBookPage() {
         </Link>
       </div>
 
+      {actionError && (
+        <div
+          role="alert"
+          className="mt-4 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/50 dark:text-red-300"
+        >
+          <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          <span>{actionError}</span>
+        </div>
+      )}
+
       <div className="mt-5 space-y-6">
-        {groups.map((group) => (
-          <section key={group.bankId} aria-labelledby={`bank-${group.bankId}`}>
-            <h2
-              id={`bank-${group.bankId}`}
-              className="mb-2.5 flex items-baseline justify-between gap-2 px-1"
-            >
-              <span className="text-sm font-semibold">{group.name}</span>
-              <span className="text-xs tabular-nums text-slate-500 dark:text-slate-400">
-                {group.entries.length} 题
-              </span>
-            </h2>
-            <div className="space-y-3">
-              {group.entries.map((entry) => (
-                <WrongItem key={entry.questionId} entry={entry} />
-              ))}
-            </div>
-          </section>
-        ))}
+        {groups.map((group) => {
+          const assembleIds = getWrongBookQuestionIds(group.entries, group.bankId)
+
+          return (
+            <section key={group.bankId} aria-labelledby={`bank-${group.bankId}`}>
+              <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2 px-1">
+                <h2
+                  id={`bank-${group.bankId}`}
+                  className="flex items-baseline gap-2"
+                >
+                  <span className="text-sm font-semibold">{group.name}</span>
+                  <span className="text-xs tabular-nums text-slate-500 dark:text-slate-400">
+                    {group.entries.length} 题
+                  </span>
+                </h2>
+                {assembleIds.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => void handleAssemble(group)}
+                    disabled={pendingBankId !== null}
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-blue-600 px-3 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 dark:disabled:bg-slate-700 dark:disabled:text-slate-400"
+                  >
+                    {pendingBankId === group.bankId ? (
+                      <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                    ) : (
+                      <ListChecks className="size-4" aria-hidden="true" />
+                    )}
+                    错题组卷（{assembleIds.length} 题）
+                  </button>
+                )}
+              </div>
+              <div className="space-y-3">
+                {group.entries.map((entry) => (
+                  <WrongItem key={entry.questionId} entry={entry} />
+                ))}
+              </div>
+            </section>
+          )
+        })}
       </div>
     </section>
   )
