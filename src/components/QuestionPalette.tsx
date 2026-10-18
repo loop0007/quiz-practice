@@ -66,7 +66,7 @@ export default function QuestionPalette({
                 current ? '，当前题' : ''
               }`}
               aria-current={current ? 'true' : undefined}
-              className={`relative min-h-11 rounded-md border px-1 py-1 text-xs font-medium tabular-nums transition-colors ${statusClass} ${
+              className={`relative min-h-11 rounded-lg border px-1 py-1 text-xs font-medium tabular-nums transition-colors ${statusClass} ${
                 current
                   ? 'ring-2 ring-blue-500 ring-offset-1 dark:ring-offset-slate-900'
                   : ''

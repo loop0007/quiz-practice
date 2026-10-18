@@ -53,13 +53,13 @@ export default function HistoryPage() {
 
   if (error) {
     return (
-      <section className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-8 text-center dark:border-slate-700 dark:bg-slate-900">
+      <section className="rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-8 text-center shadow-soft backdrop-blur-sm dark:border-slate-700/70 dark:bg-slate-900/80">
         <AlertTriangle className="mx-auto size-8 text-amber-500" aria-hidden="true" />
-        <h1 className="mt-3 text-lg font-semibold">无法读取历史成绩</h1>
+        <h1 className="mt-3 font-display text-xl font-semibold">无法读取历史成绩</h1>
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">{error}</p>
         <Link
-          to="/"
-          className="mt-5 inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-700"
+          to="/banks"
+          className="mt-5 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-blue-600 px-5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
           返回题库
@@ -75,22 +75,31 @@ export default function HistoryPage() {
   return (
     <section className="space-y-4">
       <header>
-        <h1 className="text-2xl font-bold">历史成绩</h1>
-        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+        <p className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.22em] text-blue-700 uppercase dark:text-blue-300">
+          <span
+            aria-hidden="true"
+            className="inline-block size-1.5 rounded-full bg-blue-500"
+          />
+          History · {list.length} Sessions
+        </p>
+        <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight sm:text-5xl">
+          历史成绩
+        </h1>
+        <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-600 dark:text-slate-400">
           已交卷的练习按交卷时间倒序；记录只保存在本机浏览器。
         </p>
       </header>
 
       {list.length === 0 ? (
-        <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-8 text-center dark:border-slate-700 dark:bg-slate-900">
+        <div className="rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-10 text-center shadow-soft backdrop-blur-sm dark:border-slate-700/70 dark:bg-slate-900/80">
           <HistoryIcon className="mx-auto size-10 text-slate-400" aria-hidden="true" />
-          <h2 className="mt-3 text-lg font-semibold">还没有已完成的练习</h2>
+          <h2 className="mt-3 font-display text-xl font-semibold">还没有已完成的练习</h2>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
             完成并交卷后，成绩会出现在这里。
           </p>
           <Link
-            to="/"
-            className="mt-5 inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-700"
+            to="/banks"
+            className="mt-5 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-blue-600 px-5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
           >
             <ArrowLeft className="size-4" aria-hidden="true" />
             去题库练习
@@ -98,27 +107,27 @@ export default function HistoryPage() {
         </div>
       ) : (
         <>
-          <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 dark:border-slate-700 dark:bg-slate-900">
+          <div className="rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-5 shadow-soft backdrop-blur-sm sm:p-6 dark:border-slate-700/70 dark:bg-slate-900/80">
             <h2 className="text-sm font-semibold">累计统计</h2>
             <dl
               aria-label="历史成绩汇总"
               className="mt-3 grid grid-cols-3 gap-2 sm:gap-3"
             >
-              <div className="rounded-lg bg-slate-50 px-3 py-2.5 dark:bg-slate-950/50">
+              <div className="rounded-2xl bg-slate-50/90 px-3 py-3 dark:bg-slate-950/50">
                 <dt className="text-xs text-slate-500 dark:text-slate-400">已完成练习</dt>
-                <dd className="mt-0.5 text-xl font-semibold tabular-nums">
+                <dd className="mt-1 font-display text-2xl font-semibold tabular-nums">
                   {summary.sessions} 次
                 </dd>
               </div>
-              <div className="rounded-lg bg-slate-50 px-3 py-2.5 dark:bg-slate-950/50">
+              <div className="rounded-2xl bg-slate-50/90 px-3 py-3 dark:bg-slate-950/50">
                 <dt className="text-xs text-slate-500 dark:text-slate-400">累计答对</dt>
-                <dd className="mt-0.5 text-xl font-semibold tabular-nums">
+                <dd className="mt-1 font-display text-2xl font-semibold tabular-nums">
                   {summary.correct} / {summary.total}
                 </dd>
               </div>
-              <div className="rounded-lg bg-slate-50 px-3 py-2.5 dark:bg-slate-950/50">
+              <div className="rounded-2xl bg-slate-50/90 px-3 py-3 dark:bg-slate-950/50">
                 <dt className="text-xs text-slate-500 dark:text-slate-400">平均正确率</dt>
-                <dd className="mt-0.5 text-xl font-semibold tabular-nums text-blue-600 dark:text-blue-400">
+                <dd className="mt-1 font-display text-2xl font-semibold tabular-nums text-blue-600 dark:text-blue-400">
                   {summaryAccuracy}%
                 </dd>
               </div>
@@ -136,7 +145,7 @@ export default function HistoryPage() {
 
               return (
                 <li key={session.id}>
-                  <article className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+                  <article className="rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-5 shadow-soft backdrop-blur-sm transition-colors hover:border-blue-300/80 dark:border-slate-700/70 dark:bg-slate-900/80 dark:hover:border-blue-800">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <h2 className="text-base font-semibold">
@@ -146,7 +155,7 @@ export default function HistoryPage() {
                           交卷于 {formatFinishedAt(session.finishedAt)}
                         </p>
                       </div>
-                      <p className="text-2xl font-bold tabular-nums text-blue-600 dark:text-blue-400">
+                      <p className="font-display text-3xl font-semibold tabular-nums text-blue-600 dark:text-blue-400">
                         {accuracy}%
                       </p>
                     </div>
@@ -158,7 +167,7 @@ export default function HistoryPage() {
 
                     <Link
                       to={`/result/${session.id}`}
-                      className="mt-3 inline-flex min-h-11 items-center gap-1 rounded-lg px-2 text-sm font-medium text-blue-700 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-blue-950/50"
+                      className="mt-4 inline-flex min-h-11 items-center gap-1 rounded-full border border-blue-200/80 bg-blue-50/60 px-4 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-100 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-950/70"
                     >
                       查看结果
                       <ChevronRight className="size-4" aria-hidden="true" />

@@ -33,10 +33,10 @@ export default function QuestionCard({
   const locked = Boolean(record)
 
   return (
-    <article className="min-w-0 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm sm:p-6 dark:border-slate-700 dark:bg-slate-900">
-      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3 dark:border-slate-700">
+    <article className="min-w-0 rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-4 shadow-soft backdrop-blur-sm sm:p-7 dark:border-slate-700/70 dark:bg-slate-900/80">
+      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/80 pb-3 dark:border-slate-700">
         <div className="flex items-center gap-2">
-          <span className="rounded bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
+          <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
             {TYPE_LABELS[question.type]}
           </span>
           <span className="text-xs text-slate-500 dark:text-slate-400">
@@ -50,7 +50,7 @@ export default function QuestionCard({
           <button
             type="button"
             onClick={() => setFeedbackOpen(true)}
-            className="inline-flex min-h-11 items-center gap-1 rounded-md px-2 text-xs text-slate-500 hover:bg-slate-100 hover:text-blue-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-blue-400"
+            className="inline-flex min-h-11 items-center gap-1 rounded-full px-2.5 text-xs text-slate-500 transition-colors hover:bg-slate-100 hover:text-blue-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-blue-300"
           >
             <Flag className="size-3.5" aria-hidden="true" />
             反馈
@@ -99,7 +99,7 @@ export default function QuestionCard({
           return (
             <label
               key={option.key}
-              className={`flex items-start gap-3 rounded-xl border p-3 transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-blue-500 has-[:focus-visible]:ring-offset-1 dark:has-[:focus-visible]:ring-offset-slate-900 ${labelClass} ${
+              className={`flex items-start gap-3 rounded-2xl border p-3.5 transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-blue-500 has-[:focus-visible]:ring-offset-1 dark:has-[:focus-visible]:ring-offset-slate-900 ${labelClass} ${
                 locked ? 'cursor-default' : 'cursor-pointer'
               }`}
             >
@@ -114,8 +114,8 @@ export default function QuestionCard({
               />
               <span
                 aria-hidden="true"
-                className={`mt-0.5 flex size-6 shrink-0 items-center justify-center border text-xs font-semibold tabular-nums ${
-                  multi ? 'rounded-md' : 'rounded-full'
+                className={`mt-0.5 flex size-7 shrink-0 items-center justify-center border text-xs font-semibold tabular-nums ${
+                  multi ? 'rounded-lg' : 'rounded-full'
                 } ${indicatorClass}`}
               >
                 {option.key}
@@ -150,7 +150,7 @@ export default function QuestionCard({
         <div
           role="status"
           aria-live="polite"
-          className={`mt-5 rounded-xl border p-4 ${
+          className={`mt-5 rounded-2xl border p-4 ${
             record.correct
               ? 'border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/40'
               : 'border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/40'

@@ -4,8 +4,8 @@ export type ResolvedTheme = 'light' | 'dark'
 export const THEME_STORAGE_KEY = 'theme'
 
 const THEME_COLORS: Record<ResolvedTheme, string> = {
-  light: '#ffffff',
-  dark: '#0b1220',
+  light: '#f3ede1',
+  dark: '#14110d',
 }
 
 /** 未设置、旧值或非法值统一回退为跟随系统。 */

@@ -35,11 +35,11 @@ export default function MobilePaletteSheet({
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose()
       }}
-      className="fixed inset-x-0 bottom-0 top-auto m-0 flex max-h-[85dvh] w-full max-w-none flex-col overflow-hidden rounded-t-2xl border-0 bg-[var(--color-surface)] p-0 text-slate-900 shadow-2xl backdrop:bg-slate-900/50 dark:bg-slate-900 dark:text-slate-100"
+      className="fixed inset-x-0 bottom-0 top-auto m-0 flex max-h-[85dvh] w-full max-w-none flex-col overflow-hidden rounded-t-[1.75rem] border-0 bg-white/95 p-0 text-slate-900 shadow-2xl backdrop:bg-slate-950/45 backdrop:backdrop-blur-sm dark:bg-slate-900/95 dark:text-slate-100"
     >
-      <div className="flex shrink-0 items-start justify-between gap-3 border-b border-slate-200 px-4 py-3 dark:border-slate-700">
+      <div className="flex shrink-0 items-start justify-between gap-3 border-b border-slate-200/80 px-5 py-4 dark:border-slate-700">
         <div>
-          <h2 id={titleId} className="text-sm font-semibold">
+          <h2 id={titleId} className="font-display text-lg font-semibold">
             题号导航
           </h2>
           <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
@@ -50,7 +50,7 @@ export default function MobilePaletteSheet({
           type="button"
           onClick={onClose}
           aria-label="关闭题号导航"
-          className="-mr-1 inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+          className="-mr-1 inline-flex size-11 shrink-0 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
         >
           <X className="size-5" aria-hidden="true" />
         </button>

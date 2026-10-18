@@ -171,7 +171,7 @@ export default function PracticePage() {
 
   if (!currentSession || questions.length === 0) {
     return (
-      <section className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-8 text-center dark:border-slate-700 dark:bg-slate-900">
+      <section className="rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-8 text-center shadow-soft backdrop-blur-sm dark:border-slate-700/70 dark:bg-slate-900/80">
         <AlertTriangle
           className="mx-auto size-8 text-amber-500"
           aria-hidden="true"
@@ -181,8 +181,8 @@ export default function PracticePage() {
           {error ?? '练习记录不存在或已损坏。'}
         </p>
         <Link
-          to="/"
-          className="mt-5 inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          to="/banks"
+          className="mt-5 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-blue-600 px-5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
           返回题库
@@ -252,8 +252,8 @@ export default function PracticePage() {
     <section className="pb-24 lg:pb-0">
       <div className="mb-4 flex items-center justify-between gap-3">
         <Link
-          to="/"
-          className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm text-slate-600 hover:bg-white hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-900"
+          to="/banks"
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-full px-3 text-sm text-slate-600 transition-colors hover:bg-white/70 hover:text-blue-700 dark:text-slate-300 dark:hover:bg-slate-900/70 dark:hover:text-blue-300"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
           题库
@@ -264,7 +264,7 @@ export default function PracticePage() {
             onClick={() => void handleToggleFavorite()}
             disabled={favoritePending}
             aria-pressed={favorited}
-            className={`inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-60 ${
+            className={`inline-flex min-h-11 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
               favorited
                 ? 'border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200 dark:hover:bg-amber-950/70'
                 : 'border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800'
@@ -284,7 +284,7 @@ export default function PracticePage() {
           <button
             type="button"
             onClick={handleFinish}
-            className="hidden min-h-11 items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3 text-sm font-medium text-amber-800 hover:bg-amber-100 lg:inline-flex dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200 dark:hover:bg-amber-950/70"
+            className="hidden min-h-11 items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-4 text-sm font-medium text-amber-800 transition-colors hover:bg-amber-100 lg:inline-flex dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200 dark:hover:bg-amber-950/70"
           >
             <CheckCheck className="size-4" aria-hidden="true" />
             交卷
@@ -292,9 +292,9 @@ export default function PracticePage() {
         </div>
       </div>
 
-      <div className="mb-4 rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 dark:border-slate-700 dark:bg-slate-900">
+      <div className="mb-4 rounded-[1.5rem] border border-slate-200/80 bg-white/80 px-4 py-3.5 shadow-soft backdrop-blur-sm dark:border-slate-700/70 dark:bg-slate-900/75">
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-xs text-slate-600 dark:text-slate-300">
-          <span className="tabular-nums">
+          <span className="font-medium tabular-nums">
             第 {currentIndex + 1} / {stats.total} 题
           </span>
           <span className="tabular-nums">
@@ -302,9 +302,9 @@ export default function PracticePage() {
             {Math.round(stats.accuracy * 100)}%
           </span>
         </div>
-        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
+        <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-slate-200/80 dark:bg-slate-800">
           <div
-            className="h-full rounded-full bg-blue-600 transition-[width]"
+            className="h-full rounded-full bg-gradient-to-r from-blue-500 to-amber-400 transition-[width]"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -313,7 +313,7 @@ export default function PracticePage() {
       {favoriteError && (
         <div
           role="alert"
-          className="mb-4 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/50 dark:text-red-300"
+          className="mb-4 flex items-start gap-2 rounded-2xl border border-red-200 bg-red-50/80 p-3.5 text-sm text-red-700 shadow-sm backdrop-blur dark:border-red-900 dark:bg-red-950/50 dark:text-red-300"
         >
           <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
           <span>{favoriteError}</span>
@@ -323,7 +323,7 @@ export default function PracticePage() {
       {error && (
         <div
           role="alert"
-          className="mb-4 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/50 dark:text-red-300"
+          className="mb-4 flex items-start gap-2 rounded-2xl border border-red-200 bg-red-50/80 p-3.5 text-sm text-red-700 shadow-sm backdrop-blur dark:border-red-900 dark:bg-red-950/50 dark:text-red-300"
         >
           <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
           <span>{error}</span>
@@ -346,7 +346,7 @@ export default function PracticePage() {
               type="button"
               onClick={() => void submitCurrent()}
               disabled={!canSubmit}
-              className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 sm:flex-none dark:disabled:bg-slate-700 dark:disabled:text-slate-400"
+              className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-full bg-blue-600 px-6 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 sm:flex-none dark:disabled:bg-slate-700 dark:disabled:text-slate-400"
             >
               {submitting ? (
                 <Loader2 className="size-4 animate-spin" aria-hidden="true" />
@@ -372,7 +372,7 @@ export default function PracticePage() {
               type="button"
               onClick={() => void goTo(currentIndex - 1)}
               disabled={currentIndex === 0}
-              className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-sm font-medium hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
+              className="inline-flex min-h-11 items-center gap-1 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-4 text-sm font-medium transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
             >
               <ChevronLeft className="size-4" aria-hidden="true" />
               上一题
@@ -381,7 +381,7 @@ export default function PracticePage() {
               type="button"
               onClick={() => void goTo(currentIndex + 1)}
               disabled={currentIndex === questions.length - 1}
-              className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-sm font-medium hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
+              className="inline-flex min-h-11 items-center gap-1 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-4 text-sm font-medium transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
             >
               下一题
               <ChevronRight className="size-4" aria-hidden="true" />
@@ -393,7 +393,7 @@ export default function PracticePage() {
           </p>
         </div>
 
-        <aside className="hidden rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 lg:sticky lg:top-4 lg:block dark:border-slate-700 dark:bg-slate-900">
+        <aside className="hidden rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-4 shadow-soft backdrop-blur-sm lg:sticky lg:top-4 lg:block dark:border-slate-700/70 dark:bg-slate-900/80">
           <QuestionPalette
             questions={questions}
             session={currentSession}
@@ -405,7 +405,7 @@ export default function PracticePage() {
 
       <nav
         aria-label="答题操作"
-        className="fixed inset-x-0 bottom-0 z-30 border-t border-[var(--color-border)] bg-white/95 backdrop-blur lg:hidden dark:border-slate-700 dark:bg-slate-900/95"
+        className="fixed inset-x-0 bottom-0 z-30 border-t border-[var(--color-border)] bg-white/90 shadow-[0_-18px_40px_-30px_rgb(74_52_28/0.5)] backdrop-blur-xl lg:hidden dark:border-slate-700 dark:bg-slate-900/90"
         style={{ paddingBottom: 'calc(0.375rem + env(safe-area-inset-bottom, 0px))' }}
       >
         <div className="mx-auto flex max-w-4xl items-stretch gap-1 px-2 pt-1.5">
@@ -431,7 +431,7 @@ export default function PracticePage() {
             type="button"
             onClick={() => void submitCurrent()}
             disabled={!canSubmit}
-            className="flex min-h-12 flex-1 items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 dark:disabled:bg-slate-700 dark:disabled:text-slate-400"
+            className="flex min-h-12 flex-1 items-center justify-center gap-1.5 rounded-2xl bg-blue-600 px-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 dark:disabled:bg-slate-700 dark:disabled:text-slate-400"
           >
             {submitting ? (
               <Loader2 className="size-4 animate-spin" aria-hidden="true" />

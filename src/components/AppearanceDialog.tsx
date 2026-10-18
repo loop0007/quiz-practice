@@ -32,7 +32,7 @@ function readFileAsDataUrl(file: File): Promise<string> {
 }
 
 function optionClass(active: boolean): string {
-  return `flex min-h-11 flex-col overflow-hidden rounded-lg border text-left transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-blue-500 has-[:focus-visible]:ring-offset-1 dark:has-[:focus-visible]:ring-offset-slate-900 ${
+  return `flex min-h-11 flex-col overflow-hidden rounded-2xl border text-left transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-blue-500 has-[:focus-visible]:ring-offset-1 dark:has-[:focus-visible]:ring-offset-slate-900 ${
     active
       ? 'border-blue-600 ring-1 ring-blue-600 dark:border-blue-500 dark:ring-blue-500'
       : 'border-slate-200 hover:border-blue-400 dark:border-slate-700 dark:hover:border-blue-500'
@@ -128,11 +128,11 @@ export default function AppearanceDialog({ onClose }: AppearanceDialogProps) {
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose()
       }}
-      className="w-[min(92vw,30rem)] rounded-xl border border-slate-200 bg-white p-0 text-slate-900 shadow-xl backdrop:bg-slate-900/50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+      className="w-[min(92vw,30rem)] rounded-[1.75rem] border border-slate-200 bg-white/95 p-0 text-slate-900 shadow-2xl backdrop:bg-slate-950/45 backdrop:backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/95 dark:text-slate-100"
     >
-      <div className="flex items-start justify-between gap-3 border-b border-slate-200 px-4 py-3 dark:border-slate-700">
+      <div className="flex items-start justify-between gap-3 border-b border-slate-200/80 px-5 py-4 dark:border-slate-700">
         <div>
-          <h2 id={titleId} className="text-sm font-semibold">
+          <h2 id={titleId} className="font-display text-lg font-semibold">
             外观
           </h2>
           <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
@@ -143,13 +143,13 @@ export default function AppearanceDialog({ onClose }: AppearanceDialogProps) {
           type="button"
           onClick={onClose}
           aria-label="关闭"
-          className="-mr-1 inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+          className="-mr-1 inline-flex size-11 shrink-0 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
         >
           <X className="size-4" aria-hidden="true" />
         </button>
       </div>
 
-      <div className="px-4 py-4">
+      <div className="px-5 py-5">
         <h3 className="text-sm font-medium">壁纸</h3>
         <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
           选择内置壁纸，或上传一张本机图片（最大 5 MB）。
@@ -254,7 +254,7 @@ export default function AppearanceDialog({ onClose }: AppearanceDialogProps) {
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={pending}
-            className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-slate-200 px-3 text-xs font-medium hover:bg-slate-50 disabled:opacity-60 dark:border-slate-700 dark:hover:bg-slate-800"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-slate-200 px-4 text-xs font-medium transition-colors hover:bg-slate-50 disabled:opacity-60 dark:border-slate-700 dark:hover:bg-slate-800"
           >
             <ImagePlus className="size-3.5" aria-hidden="true" />
             {customDataUrl ? '更换图片' : '选择图片'}
@@ -264,7 +264,7 @@ export default function AppearanceDialog({ onClose }: AppearanceDialogProps) {
               type="button"
               onClick={() => void handleRemoveCustom()}
               disabled={pending}
-              className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-xs font-medium text-red-600 hover:bg-red-50 disabled:opacity-60 dark:text-red-400 dark:hover:bg-red-950/50"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-full px-3 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60 dark:text-red-400 dark:hover:bg-red-950/50"
             >
               <Trash2 className="size-3.5" aria-hidden="true" />
               移除图片
@@ -275,7 +275,7 @@ export default function AppearanceDialog({ onClose }: AppearanceDialogProps) {
         {error && (
           <p
             role="alert"
-            className="mt-3 rounded-lg border border-red-200 bg-red-50 p-2.5 text-xs text-red-700 dark:border-red-900 dark:bg-red-950/50 dark:text-red-300"
+            className="mt-3 rounded-2xl border border-red-200 bg-red-50 p-3 text-xs text-red-700 dark:border-red-900 dark:bg-red-950/50 dark:text-red-300"
           >
             {error}
           </p>
@@ -285,7 +285,7 @@ export default function AppearanceDialog({ onClose }: AppearanceDialogProps) {
           <button
             type="button"
             onClick={onClose}
-            className="min-h-11 rounded-lg bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-700"
+            className="min-h-11 rounded-full bg-blue-600 px-5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
           >
             完成
           </button>

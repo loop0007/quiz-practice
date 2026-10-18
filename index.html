@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#ffffff" />
+    <meta name="theme-color" content="#f3ede1" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <title>在线刷题</title>
@@ -22,9 +22,9 @@
           var root = document.documentElement
           if (dark) root.classList.add('dark')
           root.style.colorScheme = dark ? 'dark' : 'light'
-          root.style.backgroundColor = dark ? '#0b1220' : '#f1f5f9'
+          root.style.backgroundColor = dark ? '#14110d' : '#f3ede1'
           var meta = document.querySelector('meta[name="theme-color"]')
-          if (meta) meta.setAttribute('content', dark ? '#0b1220' : '#ffffff')
+          if (meta) meta.setAttribute('content', dark ? '#14110d' : '#f3ede1')
         } catch (e) {}
       })()
     </script>

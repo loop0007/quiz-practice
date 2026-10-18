@@ -64,7 +64,7 @@ pages（页面编排）
 | M10 | 公网托管 | 二 | P0 | M2, M9 | HTTPS 公网地址、多端真机验证 | 🟨 | 2026-10-17 | GitHub Pages 已上线；HTTPS 200；待真机蜂窝/另一台电脑复验 |
 | T1–T5 | 测试 | 三 | P0 | M0–M10 | 测试记录与缺陷清单 | 🟨 | 2026-10-18 | T1–T4 通过（Vitest 56 + 浏览器 72）；T5 Linux/WSL 实测待环境 |
 | E1–E7 | 额外功能 | 四 | P2 | T5 | 可选增强 | ✅ | 2026-10-18 | E1–E7 全部完成（Vitest 86 + 浏览器 148） |
-| U1 | UI 美化 | 五 | P1 | T5/E | 视觉统一与细节打磨 | ⬜ | | |
+| U1 | UI 美化 | 五 | P1 | T5/E | 视觉统一与细节打磨 | ✅ | 2026-10-18 | 暖色纸感 token、首页/题库列表/题库内侧、菜单与全站卡片统一 |
 | D1 | 交付 | 五后 | P0 | 全部 | `dist/`、README、AI 记录、公网地址 | ⬜ | | |
 
 ## 1. 阶段一：初始化与题库转换
@@ -435,18 +435,26 @@ feedback:  '++id, questionId, createdAt'
 
 > 功能已稳定后再做；只改样式、布局、组件结构，不改数据/判分/存储。
 
-- [ ] 建立设计 token：颜色、间距、字号、圆角、阴影；浅色/深色两套。
-- [ ] 题库卡片：层级、题量信息、继续/开始按钮。
-- [ ] 答题页：题干层级、选项卡片、选中/正确/错误状态、解析区。
-- [ ] 题号侧栏/移动端抽屉：状态图例、当前题强调。
-- [ ] 结果页：成绩卡片、正确率、错题/未答/异常分栏。
-- [ ] 错题本：分组、答案对照、空状态。
-- [ ] 反馈弹窗、404、加载/空状态。
-- [ ] 动效克制；尊重 `prefers-reduced-motion`。
-- [ ] 375/768/1280 宽度、浅色/深色下检查溢出与对比度。
-- [ ] 验收：只改样式相关文件；构建和核心流程回归通过。
+- [x] 建立设计 token：颜色、间距、字号、圆角、阴影；浅色/深色两套。
+- [x] 题库卡片：层级、题量信息、继续/开始按钮。
+- [x] 答题页：题干层级、选项卡片、选中/正确/错误状态、解析区。
+- [x] 题号侧栏/移动端抽屉：状态图例、当前题强调。
+- [x] 结果页：成绩卡片、正确率、错题/未答/异常分栏。
+- [x] 错题本：分组、答案对照、空状态。
+- [x] 反馈弹窗、404、加载/空状态。
+- [x] 动效克制；尊重 `prefers-reduced-motion`。
+- [x] 375/768/1280 宽度、浅色/深色下检查溢出与对比度。
+- [x] 验收：只改样式相关文件；构建和核心流程回归通过。
 
-**完成标记**：⬜ 未开始｜日期：____｜验证：____｜接口变更：无
+**追加信息架构调整（用户指定）**：
+
+- [x] 壁纸遮罩透明度降为原来的三分之一（0.82 → 0.27）。
+- [x] 外观、反馈、历史成绩、错题本、收藏夹等按参考站右上角文字菜单排布；移动端收入汉堡菜单。
+- [x] 新增首页，题库入口移动到顶部菜单。
+- [x] 题库筛选改为点击题库卡片进入题库内侧后选择。
+- [x] “开始练习”按钮从题库卡片移动到题库内侧。
+
+**完成标记**：✅ 已完成｜日期：2026-10-18｜涉及文件：`src/index.css`、`src/lib/theme.ts`、`index.html`、`public/manifest.webmanifest`、`src/App.tsx`、`src/components/{Layout,QuestionCard,QuestionPalette,ThemeToggle,AppearanceDialog,FeedbackDialog,MobilePaletteSheet,AccuracyHint}.tsx`、`src/pages/{HomePage,BankSelectPage,BankDetailPage,PracticePage,ResultPage,WrongBookPage,FavoritesPage,HistoryPage,NotFoundPage}.tsx`、`scripts/e2e-browser.mjs`；删除被题库内侧取代的 `src/components/PracticeFilterDialog.tsx`｜验证：`npm test` 86 项、`npm run test:e2e` 152 项、`npm run check:source`（45 个源文件、95 条本地 import）与 `npm run build` 均通过；无头 Edge 检查 1280/390/375 布局、浅色/深色、壁纸、触控尺寸、横向溢出与控制台报错，另截图抽查题库列表、题库内侧、汉堡菜单与自定义壁纸｜接口变更：新增路由 `/`（首页）、`/banks`（题库列表）、`/banks/:bankId`（题库内侧）；`PracticeFilterDialog` 移除；既有 Session/判分/存储 API 不变｜影响模块：M4、M9、T3/T4、U1
 
 ## 6. 交付检查（D1）
 

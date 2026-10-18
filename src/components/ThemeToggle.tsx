@@ -55,7 +55,7 @@ export default function ThemeToggle() {
         }}
         aria-label={`主题：${label}，当前显示${resolved === 'dark' ? '深色' : '浅色'}；点击切换为${next}`}
         title={`主题：${label}（点击切换为${next}）`}
-        className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg px-2 text-slate-600 hover:bg-slate-100 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-blue-400"
+        className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full px-2.5 text-slate-600 transition-colors hover:bg-slate-100 hover:text-blue-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-blue-300"
       >
         <Icon className="size-5" aria-hidden="true" />
         <span className="hidden text-xs font-medium sm:inline">{label}</span>

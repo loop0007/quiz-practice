@@ -1,12 +1,27 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
-import { BookOpenCheck, History, SquarePen, Star } from 'lucide-react'
+import {
+  BookOpenCheck,
+  Menu,
+  MessageSquarePlus,
+  Palette,
+  X,
+} from 'lucide-react'
 import { getWallpaper } from '@/lib/db'
 import { applyWallpaper, readStoredWallpaper } from '@/lib/wallpaper'
+import AppearanceDialog from './AppearanceDialog'
+import FeedbackDialog from './FeedbackDialog'
 import ThemeToggle from './ThemeToggle'
 
 export default function Layout() {
   const { pathname } = useLocation()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [appearanceOpen, setAppearanceOpen] = useState(false)
+  const [feedbackOpen, setFeedbackOpen] = useState(false)
+
+  useEffect(() => {
+    setMenuOpen(false)
+  }, [pathname])
 
   useEffect(() => {
     let cancelled = false
@@ -32,67 +47,198 @@ export default function Layout() {
     }
   }, [])
 
+  useEffect(() => {
+    if (!menuOpen) return
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setMenuOpen(false)
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [menuOpen])
+
+  const navItems = [
+    { to: '/', label: '首页', active: pathname === '/' },
+    { to: '/banks', label: '题库', active: pathname.startsWith('/banks') },
+    { to: '/history', label: '历史成绩', active: pathname === '/history' },
+    { to: '/wrongbook', label: '错题本', active: pathname === '/wrongbook' },
+    { to: '/favorites', label: '收藏夹', active: pathname === '/favorites' },
+  ]
+
   return (
     <div className="min-h-dvh">
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-3 focus:text-sm focus:font-medium focus:text-blue-700 focus:shadow-lg dark:focus:bg-slate-900 dark:focus:text-blue-300"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-white focus:px-4 focus:py-3 focus:text-sm focus:font-medium focus:text-blue-700 focus:shadow-lg dark:focus:bg-slate-900 dark:focus:text-blue-300"
       >
         跳到主要内容
       </a>
 
-      <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-        <div className="mx-auto flex h-14 max-w-4xl items-center justify-between gap-2 px-4">
+      {/* 暖色柔光与细网格：纯装饰，不参与布局和读屏。 */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 -z-20 overflow-hidden"
+      >
+        <div className="page-grid absolute inset-0" />
+        <div className="animate-float-slow absolute -right-40 -top-48 size-[34rem] rounded-full bg-blue-400/15 blur-3xl dark:bg-blue-900/20" />
+        <div className="absolute -left-48 top-1/3 size-[28rem] rounded-full bg-amber-200/35 blur-3xl dark:bg-amber-950/20" />
+      </div>
+
+      <header className="sticky top-0 z-40 px-3 pt-3 sm:px-4">
+        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-2 rounded-full border border-slate-200/80 bg-white/80 px-3 shadow-soft backdrop-blur-xl sm:px-5 dark:border-slate-700/70 dark:bg-slate-900/75">
           <Link
             to="/"
-            className="inline-flex min-h-11 items-center gap-2 rounded-lg font-semibold hover:text-blue-600"
+            className="inline-flex min-h-11 items-center gap-2.5 rounded-full pr-2 font-semibold tracking-tight"
           >
-            <BookOpenCheck className="size-5 text-blue-600" aria-hidden="true" />
-            在线刷题
+            <span className="flex size-9 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm dark:bg-blue-500 dark:text-slate-950">
+              <BookOpenCheck className="size-4.5" aria-hidden="true" />
+            </span>
+            <span className="flex flex-col leading-none">
+              <span className="font-display text-[17px] font-semibold tracking-tight">
+                在线刷题
+              </span>
+              <span className="mt-1 text-[9px] font-medium tracking-[0.22em] text-slate-500 uppercase dark:text-slate-400">
+                Quiz Studio
+              </span>
+            </span>
           </Link>
-          <nav
-            aria-label="主导航"
-            className="flex items-center gap-1 text-sm text-slate-600 dark:text-slate-300"
-          >
-            <Link
-              to="/history"
-              aria-label="历史成绩"
-              aria-current={pathname === '/history' ? 'page' : undefined}
-              className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-lg px-2 hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-slate-800 dark:hover:text-blue-400"
+          <div className="flex items-center gap-1">
+            <nav
+              aria-label="主导航"
+              className="hidden items-center gap-0.5 text-sm text-slate-600 md:flex dark:text-slate-300"
             >
-              <History className="size-4" aria-hidden="true" />
-              <span className="hidden sm:inline">历史成绩</span>
-            </Link>
-            <Link
-              to="/wrongbook"
-              aria-label="错题本"
-              aria-current={pathname === '/wrongbook' ? 'page' : undefined}
-              className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-lg px-2 hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-slate-800 dark:hover:text-blue-400"
+              {navItems.map(({ to, label, active }) => (
+                <Link
+                  key={to}
+                  to={to}
+                  aria-label={label}
+                  aria-current={active ? 'page' : undefined}
+                  className={`inline-flex min-h-11 items-center rounded-full px-3 font-medium transition-colors ${
+                    active
+                      ? 'text-blue-700 dark:text-blue-300'
+                      : 'hover:text-blue-700 dark:hover:text-blue-300'
+                  }`}
+                >
+                  {label}
+                </Link>
+              ))}
+              <span
+                aria-hidden="true"
+                className="mx-1.5 h-5 w-px bg-slate-200 dark:bg-slate-700"
+              />
+              <button
+                type="button"
+                onClick={() => setAppearanceOpen(true)}
+                className="inline-flex min-h-11 items-center gap-1.5 rounded-full px-3 font-medium transition-colors hover:text-blue-700 dark:hover:text-blue-300"
+              >
+                <Palette className="size-4" aria-hidden="true" />
+                外观
+              </button>
+              <button
+                type="button"
+                onClick={() => setFeedbackOpen(true)}
+                className="inline-flex min-h-11 items-center gap-1.5 rounded-full px-3 font-medium transition-colors hover:text-blue-700 dark:hover:text-blue-300"
+              >
+                <MessageSquarePlus className="size-4" aria-hidden="true" />
+                反馈
+              </button>
+              <ThemeToggle />
+            </nav>
+
+            <button
+              type="button"
+              onClick={() => setMenuOpen((open) => !open)}
+              aria-label={menuOpen ? '关闭菜单' : '打开菜单'}
+              aria-expanded={menuOpen}
+              className="inline-flex size-11 items-center justify-center rounded-full text-slate-600 transition-colors hover:bg-slate-100 hover:text-blue-700 md:hidden dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-blue-300"
             >
-              <SquarePen className="size-4" aria-hidden="true" />
-              <span className="hidden sm:inline">错题本</span>
-            </Link>
-            <Link
-              to="/favorites"
-              aria-label="收藏夹"
-              aria-current={pathname === '/favorites' ? 'page' : undefined}
-              className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-lg px-2 hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-slate-800 dark:hover:text-blue-400"
-            >
-              <Star className="size-4" aria-hidden="true" />
-              <span className="hidden sm:inline">收藏夹</span>
-            </Link>
-            <ThemeToggle />
-          </nav>
+              {menuOpen ? (
+                <X className="size-5" aria-hidden="true" />
+              ) : (
+                <Menu className="size-5" aria-hidden="true" />
+              )}
+            </button>
+          </div>
         </div>
+
+        {menuOpen && (
+          <nav
+            aria-label="移动端菜单"
+            className="absolute inset-x-3 top-full mt-2 md:hidden"
+          >
+            <div className="mx-auto max-w-5xl rounded-[1.75rem] border border-slate-200/80 bg-white/95 p-2.5 shadow-lift backdrop-blur-xl dark:border-slate-700/70 dark:bg-slate-900/95">
+              <div className="grid grid-cols-2 gap-1">
+                {navItems.map(({ to, label, active }) => (
+                  <Link
+                    key={to}
+                    to={to}
+                    aria-current={active ? 'page' : undefined}
+                    className={`inline-flex min-h-11 items-center justify-between rounded-2xl px-3 text-sm font-medium transition-colors ${
+                      active
+                        ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300'
+                        : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
+                    }`}
+                  >
+                    {label}
+                    <span
+                      aria-hidden="true"
+                      className={`size-1.5 rounded-full bg-blue-500 ${
+                        active ? 'opacity-100' : 'opacity-0'
+                      }`}
+                    />
+                  </Link>
+                ))}
+              </div>
+
+              <div className="mt-1.5 grid grid-cols-2 gap-1 border-t border-slate-200/80 pt-1.5 dark:border-slate-700">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false)
+                    setAppearanceOpen(true)
+                  }}
+                  className="inline-flex min-h-11 items-center gap-2 rounded-2xl px-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+                >
+                  <Palette className="size-4" aria-hidden="true" />
+                  外观
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false)
+                    setFeedbackOpen(true)
+                  }}
+                  className="inline-flex min-h-11 items-center gap-2 rounded-2xl px-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+                >
+                  <MessageSquarePlus className="size-4" aria-hidden="true" />
+                  反馈
+                </button>
+              </div>
+
+              <div className="mt-1.5 flex items-center justify-between border-t border-slate-200/80 px-1 pt-1.5 dark:border-slate-700">
+                <span className="px-2 text-xs text-slate-500 dark:text-slate-400">
+                  主题
+                </span>
+                <ThemeToggle />
+              </div>
+            </div>
+          </nav>
+        )}
       </header>
 
       <main
         id="main-content"
         tabIndex={-1}
-        className="mx-auto max-w-4xl px-4 py-6 focus:outline-none"
+        className="mx-auto max-w-5xl px-4 py-7 focus:outline-none sm:px-6 sm:py-10"
       >
         <Outlet />
       </main>
+
+      {appearanceOpen && (
+        <AppearanceDialog onClose={() => setAppearanceOpen(false)} />
+      )}
+      {feedbackOpen && <FeedbackDialog onClose={() => setFeedbackOpen(false)} />}
     </div>
   )
 }

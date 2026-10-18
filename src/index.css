@@ -4,21 +4,66 @@
 
 @theme {
   --font-sans:
-    system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    'Inter', system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei',
+    sans-serif;
+  --font-display:
+    'Songti SC', 'STSong', 'Noto Serif SC', 'Source Han Serif SC', Georgia,
+    'Times New Roman', serif;
 
-  --color-surface: #ffffff;
-  --color-surface-muted: #f1f5f9;
-  --color-border: #e2e8f0;
-  --color-ink: #0f172a;
-  --color-ink-muted: #475569;
-  --color-brand: #2563eb;
+  /* 阶段五：暖米色纸感画布 + 不背单词式橙色强调。 */
+  --color-white: #fffcf5;
+  --color-surface: #fffcf5;
+  --color-surface-muted: #f3ede1;
+  --color-border: #e6ddcb;
+  --color-ink: #241f19;
+  --color-ink-muted: #72685a;
+  --color-brand: #c2410c;
+  --color-brand-bright: #f26b21;
 
-  --color-success: #16a34a;
-  --color-danger: #dc2626;
-  --color-warning: #d97706;
+  /* 重映射中性色与主色阶，既有页面的 slate/blue 类随主题一起变暖。 */
+  --color-slate-50: #faf7f0;
+  --color-slate-100: #f4eee2;
+  --color-slate-200: #e9e1d2;
+  --color-slate-300: #d6cab6;
+  --color-slate-400: #b0a490;
+  --color-slate-500: #8b8070;
+  --color-slate-600: #6c6253;
+  --color-slate-700: #514a3f;
+  --color-slate-800: #383229;
+  --color-slate-900: #24201a;
+  --color-slate-950: #171410;
 
-  --radius-card: 0.75rem;
+  --color-blue-50: #fff2e7;
+  --color-blue-100: #ffe3cf;
+  --color-blue-200: #ffc7a6;
+  --color-blue-300: #fdba74;
+  --color-blue-400: #fb923c;
+  --color-blue-500: #f26b21;
+  --color-blue-600: #c2410c;
+  --color-blue-700: #9a3412;
+  --color-blue-800: #7c2d12;
+  --color-blue-900: #65250f;
+  --color-blue-950: #3d1508;
+
+  --color-success: #15803d;
+  --color-danger: #b91c1c;
+  --color-warning: #b45309;
+
+  --radius-card: 1.75rem;
+  --shadow-soft: 0 22px 60px -32px rgb(74 52 28 / 0.32);
+  --shadow-lift: 0 28px 70px -34px rgb(74 52 28 / 0.42);
+  --animate-float-slow: float-slow 10s ease-in-out infinite;
   --spacing-safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -12px, 0);
+  }
 }
 
 /* 首屏主题由 index.html 内联脚本先写入，这里保持同色避免闪烁。 */
@@ -29,7 +74,7 @@ html {
 
 html.dark {
   color-scheme: dark;
-  background-color: #0b1220;
+  background-color: #14110d;
 }
 
 body {
@@ -43,8 +88,41 @@ body {
 }
 
 html.dark body {
-  background-color: #0b1220;
-  color: #e2e8f0;
+  background-color: #14110d;
+  color: #f2eadc;
+}
+
+::selection {
+  background-color: var(--color-brand-bright);
+  color: #fffdf7;
+}
+
+/* StyleKit 式细网格：只作背景纹理，不参与布局与交互。 */
+.page-grid {
+  background-image:
+    linear-gradient(rgb(36 31 25 / 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(36 31 25 / 0.045) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, black 20%, transparent 78%);
+}
+
+html.dark .page-grid {
+  background-image:
+    linear-gradient(rgb(242 234 220 / 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(242 234 220 / 0.05) 1px, transparent 1px);
+}
+
+/* 编辑式大号底纹字：装饰层，读屏忽略。 */
+.editorial-ornament {
+  font-family: var(--font-display);
+  line-height: 0.78;
+  letter-spacing: -0.06em;
+  color: rgb(36 31 25 / 0.055);
+  user-select: none;
+}
+
+html.dark .editorial-ornament {
+  color: rgb(242 234 220 / 0.07);
 }
 
 /*
@@ -62,7 +140,7 @@ html.has-wallpaper body::before {
   z-index: -1;
   pointer-events: none;
   background-image:
-    linear-gradient(rgb(248 250 252 / 0.78), rgb(248 250 252 / 0.78)),
+    linear-gradient(rgb(250 247 240 / 0.27), rgb(250 247 240 / 0.27)),
     var(--wallpaper-image);
   background-position: center;
   background-size: cover;
@@ -71,27 +149,26 @@ html.has-wallpaper body::before {
 
 html.dark.has-wallpaper body::before {
   background-image:
-    linear-gradient(rgb(2 6 23 / 0.78), rgb(2 6 23 / 0.78)),
+    linear-gradient(rgb(20 17 13 / 0.27), rgb(20 17 13 / 0.27)),
     var(--wallpaper-image);
 }
 
-html.has-wallpaper header {
-  background-color: rgb(255 255 255 / 0.88);
-  backdrop-filter: blur(8px);
+html.has-wallpaper header > div {
+  background-color: rgb(255 252 245 / 0.82);
 }
 
-html.dark.has-wallpaper header {
-  background-color: rgb(15 23 42 / 0.88);
+html.dark.has-wallpaper header > div {
+  background-color: rgb(32 28 23 / 0.82);
 }
 
 @layer base {
   :focus-visible {
-    outline: 2px solid var(--color-brand);
+    outline: 2px solid var(--color-brand-bright);
     outline-offset: 2px;
   }
 
   html.dark :focus-visible {
-    outline-color: #60a5fa;
+    outline-color: #fb923c;
   }
 }
 

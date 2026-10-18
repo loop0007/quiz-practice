@@ -112,15 +112,15 @@ export default function ResultPage() {
 
   if (!session) {
     return (
-      <section className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-8 text-center dark:border-slate-700 dark:bg-slate-900">
+      <section className="rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-8 text-center shadow-soft backdrop-blur-sm dark:border-slate-700/70 dark:bg-slate-900/80">
         <AlertTriangle className="mx-auto size-8 text-amber-500" aria-hidden="true" />
-        <h1 className="mt-3 text-lg font-semibold">无法打开练习结果</h1>
+        <h1 className="mt-3 font-display text-xl font-semibold">无法打开练习结果</h1>
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
           {error ?? '练习记录不存在或已损坏。'}
         </p>
         <Link
-          to="/"
-          className="mt-5 inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          to="/banks"
+          className="mt-5 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-blue-600 px-5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
           返回题库
@@ -181,22 +181,27 @@ export default function ResultPage() {
 
   return (
     <section className="space-y-4">
-      <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm sm:p-6 dark:border-slate-700 dark:bg-slate-900">
-        <p className="text-xs text-slate-500 dark:text-slate-400">
-          {bank?.name ?? session.bankId} · 练习结果
+      <div className="relative overflow-hidden rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-5 shadow-soft backdrop-blur-sm sm:p-7 dark:border-slate-700/70 dark:bg-slate-900/80">
+        <p className="relative text-[11px] font-semibold tracking-[0.2em] text-blue-700 uppercase dark:text-blue-300">
+          {bank?.name ?? session.bankId} · Result
+        </p>
+        <p className="relative mt-1 text-xs text-slate-500 dark:text-slate-400">
+          练习结果
           {session.finishedAt != null && ` · 交卷于 ${formatTime(session.finishedAt)}`}
         </p>
 
-        <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
+        <div className="relative mt-3 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-lg font-semibold">本次成绩</h1>
-            <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+            <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+              本次成绩
+            </h1>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
               答对 <span className="font-semibold">{stats.correct}</span> /{' '}
               {stats.total} 题
             </p>
           </div>
           <div className="text-right">
-            <p className="text-4xl font-bold tabular-nums text-blue-600 dark:text-blue-400">
+            <p className="font-display text-5xl font-semibold tabular-nums text-blue-600 sm:text-6xl dark:text-blue-400">
               {accuracyPercent}%
             </p>
             <p className="mt-1 flex items-center justify-end gap-1 text-xs text-slate-500 dark:text-slate-400">
@@ -206,15 +211,15 @@ export default function ResultPage() {
           </div>
         </div>
 
-        <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
+        <div className="relative mt-4 h-2 overflow-hidden rounded-full bg-slate-200/80 dark:bg-slate-800">
           <div
-            className="h-full rounded-full bg-blue-600 transition-[width]"
+            className="h-full rounded-full bg-gradient-to-r from-blue-500 to-amber-400 transition-[width]"
             style={{ width: `${accuracyPercent}%` }}
           />
         </div>
 
         {session.finishedAt == null && (
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-amber-200 bg-amber-50/80 p-3.5 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
             <span>本次练习尚未交卷，以上为当前作答进度。</span>
             <Link
               to={`/practice/${session.id}`}
@@ -233,10 +238,10 @@ export default function ResultPage() {
           {statItems.map((item) => (
             <div
               key={item.label}
-              className="rounded-lg bg-slate-50 px-3 py-2.5 dark:bg-slate-950/50"
+              className="rounded-2xl bg-slate-50/90 px-3 py-3 dark:bg-slate-950/50"
             >
               <dt className="text-xs text-slate-500 dark:text-slate-400">{item.label}</dt>
-              <dd className={`mt-0.5 text-xl font-semibold tabular-nums ${item.tone}`}>
+              <dd className={`mt-1 font-display text-2xl font-semibold tabular-nums ${item.tone}`}>
                 {item.value}
               </dd>
             </div>
@@ -244,7 +249,7 @@ export default function ResultPage() {
         </dl>
       </div>
 
-      <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 dark:border-slate-700 dark:bg-slate-900">
+      <div className="rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-5 shadow-soft backdrop-blur-sm dark:border-slate-700/70 dark:bg-slate-900/80">
         <header className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="text-sm font-semibold">本次错题</h2>
           <span className="text-xs text-slate-500 dark:text-slate-400">
@@ -256,7 +261,7 @@ export default function ResultPage() {
             {wrongNumbers.map((number) => (
               <li
                 key={number}
-                className="rounded-md border border-red-200 bg-red-50 px-2.5 py-1 text-sm font-medium tabular-nums text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300"
+                className="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-sm font-medium tabular-nums text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300"
               >
                 第 {number} 题
               </li>
@@ -270,7 +275,7 @@ export default function ResultPage() {
         )}
       </div>
 
-      <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 dark:border-slate-700 dark:bg-slate-900">
+      <div className="rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-5 shadow-soft backdrop-blur-sm dark:border-slate-700/70 dark:bg-slate-900/80">
         <header className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="text-sm font-semibold">本次未作答题号</h2>
           <span className="text-xs text-slate-500 dark:text-slate-400">
@@ -282,7 +287,7 @@ export default function ResultPage() {
             {unansweredNumbers.map((number) => (
               <li
                 key={number}
-                className="rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1 text-sm font-medium tabular-nums text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+                className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-sm font-medium tabular-nums text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
               >
                 第 {number} 题
               </li>
@@ -299,7 +304,7 @@ export default function ResultPage() {
         </p>
       </div>
 
-      <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 dark:border-slate-700 dark:bg-slate-900">
+      <div className="rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-5 shadow-soft backdrop-blur-sm dark:border-slate-700/70 dark:bg-slate-900/80">
         <h2 className="text-sm font-semibold">错题本累计</h2>
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
           {wrongEntries
@@ -314,7 +319,7 @@ export default function ResultPage() {
       {actionError && (
         <div
           role="alert"
-          className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/50 dark:text-red-300"
+          className="flex items-start gap-2 rounded-2xl border border-red-200 bg-red-50/80 p-3.5 text-sm text-red-700 shadow-sm backdrop-blur dark:border-red-900 dark:bg-red-950/50 dark:text-red-300"
         >
           <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
           <span>{actionError}</span>
@@ -323,15 +328,15 @@ export default function ResultPage() {
 
       <div className="flex flex-wrap gap-2">
         <Link
-          to="/"
-          className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-4 text-sm font-medium hover:bg-slate-50 sm:flex-none dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
+          to="/banks"
+          className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-full border border-slate-200/90 bg-white/75 px-5 text-sm font-medium backdrop-blur transition-colors hover:bg-white hover:text-blue-700 sm:flex-none dark:border-slate-700 dark:bg-slate-900/70 dark:hover:bg-slate-800 dark:hover:text-blue-300"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
           返回题库
         </Link>
         <Link
           to="/wrongbook"
-          className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-4 text-sm font-medium hover:bg-slate-50 sm:flex-none dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
+          className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-full border border-slate-200/90 bg-white/75 px-5 text-sm font-medium backdrop-blur transition-colors hover:bg-white hover:text-blue-700 sm:flex-none dark:border-slate-700 dark:bg-slate-900/70 dark:hover:bg-slate-800 dark:hover:text-blue-300"
         >
           <SquarePen className="size-4" aria-hidden="true" />
           查看错题本
@@ -354,7 +359,7 @@ export default function ResultPage() {
             type="button"
             onClick={() => void handleRedo()}
             disabled={pendingAction !== null}
-            className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 sm:flex-none dark:disabled:bg-slate-700 dark:disabled:text-slate-400"
+            className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-full bg-blue-600 px-5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 sm:flex-none dark:disabled:bg-slate-700 dark:disabled:text-slate-400"
           >
             {pendingAction === 'redo' ? (
               <Loader2 className="size-4 animate-spin" aria-hidden="true" />

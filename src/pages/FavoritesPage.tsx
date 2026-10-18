@@ -114,13 +114,13 @@ export default function FavoritesPage() {
 
   if (error) {
     return (
-      <section className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-8 text-center dark:border-slate-700 dark:bg-slate-900">
+      <section className="rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-8 text-center shadow-soft backdrop-blur-sm dark:border-slate-700/70 dark:bg-slate-900/80">
         <AlertTriangle className="mx-auto size-8 text-amber-500" aria-hidden="true" />
-        <h1 className="mt-3 text-lg font-semibold">无法打开收藏夹</h1>
+        <h1 className="mt-3 font-display text-xl font-semibold">无法打开收藏夹</h1>
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">{error}</p>
         <Link
-          to="/"
-          className="mt-5 inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-700"
+          to="/banks"
+          className="mt-5 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-blue-600 px-5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
           返回题库
@@ -131,18 +131,18 @@ export default function FavoritesPage() {
 
   if (!entries || entries.length === 0) {
     return (
-      <section className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-10 text-center dark:border-slate-700 dark:bg-slate-900">
+      <section className="rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-10 text-center shadow-soft backdrop-blur-sm dark:border-slate-700/70 dark:bg-slate-900/80">
         <Star
           className="mx-auto size-10 text-amber-500 dark:text-amber-400"
           aria-hidden="true"
         />
-        <h1 className="mt-3 text-lg font-semibold">收藏夹是空的</h1>
+        <h1 className="mt-3 font-display text-xl font-semibold">收藏夹是空的</h1>
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
           答题页点击顶部的“收藏”，之后可以在这里集中查看。
         </p>
         <Link
-          to="/"
-          className="mt-5 inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-700"
+          to="/banks"
+          className="mt-5 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-blue-600 px-5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
           去刷题
@@ -153,19 +153,30 @@ export default function FavoritesPage() {
 
   return (
     <section>
-      <div className="rounded-[var(--radius-card)] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 dark:border-slate-700 dark:bg-slate-900">
+      <div className="rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-5 shadow-soft backdrop-blur-sm sm:p-6 dark:border-slate-700/70 dark:bg-slate-900/80">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h1 className="text-lg font-semibold">收藏夹</h1>
+          <div>
+            <p className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.22em] text-blue-700 uppercase dark:text-blue-300">
+              <span
+                aria-hidden="true"
+                className="inline-block size-1.5 rounded-full bg-blue-500"
+              />
+              Favorites
+            </p>
+            <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight">
+              收藏夹
+            </h1>
+          </div>
           <span className="text-sm tabular-nums text-slate-600 dark:text-slate-300">
             共 {entries.length} 题
           </span>
         </div>
-        <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+        <p className="mt-3 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
           收藏只保存在本机，按收藏时间倒序展示；同一道题只保留一条记录。
         </p>
         <Link
-          to="/"
-          className="mt-4 inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-[var(--color-border)] px-3 text-sm font-medium hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
+          to="/banks"
+          className="mt-4 inline-flex min-h-11 items-center gap-1.5 rounded-full border border-slate-200/90 bg-white/70 px-4 text-sm font-medium transition-colors hover:bg-white hover:text-blue-700 dark:border-slate-700 dark:bg-slate-900/60 dark:hover:bg-slate-800 dark:hover:text-blue-300"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
           返回题库
@@ -175,7 +186,7 @@ export default function FavoritesPage() {
       {actionError && (
         <div
           role="alert"
-          className="mt-4 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/50 dark:text-red-300"
+          className="mt-4 flex items-start gap-2 rounded-2xl border border-red-200 bg-red-50/80 p-3.5 text-sm text-red-700 shadow-sm backdrop-blur dark:border-red-900 dark:bg-red-950/50 dark:text-red-300"
         >
           <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
           <span>{actionError}</span>
@@ -202,7 +213,7 @@ export default function FavoritesPage() {
                   return (
                     <article
                       key={entry.questionId}
-                      className="rounded-xl border border-amber-200 bg-amber-50/60 p-4 dark:border-amber-900 dark:bg-amber-950/30"
+                      className="rounded-[var(--radius-card)] border border-amber-200 bg-amber-50/60 p-5 shadow-sm backdrop-blur-sm dark:border-amber-900 dark:bg-amber-950/30"
                     >
                       <header className="flex flex-wrap items-center justify-between gap-2">
                         <span className="text-sm font-medium text-amber-800 dark:text-amber-200">
@@ -227,7 +238,7 @@ export default function FavoritesPage() {
                           type="button"
                           onClick={() => void handleRemove(entry.questionId)}
                           disabled={pendingId !== null}
-                          className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-red-200 px-3 text-sm font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-red-900 dark:text-red-300 dark:hover:bg-red-950/40"
+                          className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-red-200 px-4 text-sm font-medium text-red-700 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-red-900 dark:text-red-300 dark:hover:bg-red-950/40"
                         >
                           <Trash2 className="size-4" aria-hidden="true" />
                           {pendingId === entry.questionId ? '取消中…' : '取消收藏'}
@@ -240,11 +251,11 @@ export default function FavoritesPage() {
                 return (
                   <article
                     key={entry.questionId}
-                    className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900"
+                    className="rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-5 shadow-soft backdrop-blur-sm dark:border-slate-700/70 dark:bg-slate-900/80"
                   >
                     <header className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-slate-200 pb-2.5 dark:border-slate-700">
                       <div className="flex items-center gap-2">
-                        <span className="rounded bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
+                        <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
                           {TYPE_LABELS[question.type]}
                         </span>
                         <span className="text-xs text-slate-500 dark:text-slate-400">
@@ -265,7 +276,7 @@ export default function FavoritesPage() {
                         type="button"
                         onClick={() => void handleRemove(entry.questionId)}
                         disabled={pendingId !== null}
-                        className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-red-200 px-3 text-sm font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-red-900 dark:text-red-300 dark:hover:bg-red-950/40"
+                        className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-red-200 px-4 text-sm font-medium text-red-700 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-red-900 dark:text-red-300 dark:hover:bg-red-950/40"
                       >
                         <Trash2 className="size-4" aria-hidden="true" />
                         {pendingId === entry.questionId ? '取消中…' : '取消收藏'}

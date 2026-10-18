@@ -141,14 +141,40 @@ async function errorSummary(page, errors, label) {
 
 async function goHome(page) {
   await page.goto(`${BASE}/#/`, { waitUntil: 'load' })
-  await page.getByRole('heading', { name: '选择题库' }).waitFor({ timeout: 15000 })
+  await page
+    .getByRole('heading', { name: '把刷题，变成每天的小进步' })
+    .waitFor({ timeout: 15000 })
+}
+
+async function goBanks(page) {
+  await page.goto(`${BASE}/#/banks`, { waitUntil: 'load' })
+  await page.getByRole('heading', { name: '题库', exact: true }).waitFor({
+    timeout: 15000,
+  })
+}
+
+async function openBank(page, bankName) {
+  await goBanks(page)
+  await page.getByRole('link', { name: `进入${bankName}` }).click()
+  await page
+    .getByRole('heading', { name: bankName, exact: true })
+    .waitFor({ timeout: 15000 })
 }
 
 async function startBank(page, bankName) {
-  const card = page.locator('article').filter({ hasText: bankName })
-  await card.getByRole('button', { name: '开始练习' }).click()
+  if (!page.url().includes('/#/banks/')) {
+    await openBank(page, bankName)
+  }
+  await page.getByRole('button', { name: '开始练习' }).click()
   await page.waitForURL(/#\/practice\//, { timeout: 15000 })
   await page.getByText(/第 1 \/ 118 题/).first().waitFor({ timeout: 15000 })
+}
+
+async function openMobileMenu(page) {
+  await page.getByRole('button', { name: '打开菜单' }).click()
+  await page
+    .getByRole('navigation', { name: '移动端菜单' })
+    .waitFor({ timeout: 5000 })
 }
 
 async function selectOption(page, key) {
@@ -254,12 +280,33 @@ async function runDesktopFlow(browser, data) {
   await goHome(page)
   await page.screenshot({ path: path.join(SHOTS, 't3-01-home-desktop.png') })
 
-  const cards = page.locator('article')
-  equal('首页题库数量', await cards.count(), 2)
-  const homeText = await page.locator('main').innerText()
-  check('首页显示 Java 有效题量 218', homeText.includes('218'))
-  check('首页显示 Web 有效题量 118', homeText.includes('118'))
+  const homeText = normalize(await page.locator('main').innerText())
+  check('首页显示总有效题 336', homeText.includes('有效题336'))
+  check('首页说明数据仅保存在本机', homeText.includes('数据只保存在本机浏览器'))
+  check(
+    '首页提供去题库入口',
+    await page.getByRole('link', { name: /去题库开始/ }).isVisible(),
+  )
   await noOverflow(page, '首页（1280）')
+
+  console.log('  · 题库列表与题库内侧')
+  await goBanks(page)
+  equal('题库页题库数量', await page.locator('article').count(), 2)
+  equal(
+    '题库卡片不再提供开始练习按钮',
+    await page.getByRole('button', { name: '开始练习' }).count(),
+    0,
+  )
+  await page.getByRole('link', { name: '进入Web前端题库' }).click()
+  await page
+    .getByRole('heading', { name: 'Web前端题库', exact: true })
+    .waitFor({ timeout: 15000 })
+  check('点击题库卡片进入题库内侧', page.url().includes('/#/banks/web'))
+  check(
+    '开始练习按钮位于题库内侧',
+    await page.getByRole('button', { name: '开始练习' }).isVisible(),
+  )
+  await goHome(page)
 
   console.log('  · 通用反馈')
   await page.getByRole('button', { name: '反馈', exact: true }).click()
@@ -434,7 +481,7 @@ async function runDesktopFlow(browser, data) {
   await goHome(page)
 
   console.log('  · E2 历史成绩')
-  await page.getByRole('link', { name: '历史成绩' }).click()
+  await page.getByRole('link', { name: '历史成绩', exact: true }).click()
   await page.getByRole('heading', { name: '历史成绩' }).waitFor({ timeout: 15000 })
   const historyText = normalize(await page.locator('main').innerText())
   check(
@@ -630,7 +677,9 @@ async function runDesktopFlow(browser, data) {
   await uploadDialog.getByRole('button', { name: '完成' }).click()
 
   await page.reload({ waitUntil: 'load' })
-  await page.getByRole('heading', { name: '选择题库' }).waitFor({ timeout: 15000 })
+  await page
+    .getByRole('heading', { name: '把刷题，变成每天的小进步' })
+    .waitFor({ timeout: 15000 })
   await page.waitForFunction(
     () =>
       document.documentElement.classList.contains('has-wallpaper') &&
@@ -714,20 +763,17 @@ async function runDesktopFlow(browser, data) {
   await goHome(page)
 
   console.log('  · E1 章节/题型筛选')
-  const javaCard = page.locator('article').filter({ hasText: 'Java程序设计题库' })
-  await javaCard.getByRole('button', { name: '按章节/题型筛选' }).click()
-  const filterDialog = page.locator('dialog[open]')
-  await filterDialog.waitFor({ timeout: 5000 })
-
-  await filterDialog.locator('label').filter({ hasText: '单选' }).click()
-  await filterDialog.locator('label').filter({ hasText: '多选' }).click()
+  await openBank(page, 'Java程序设计题库')
+  const filterPanel = page.locator('aside')
+  await filterPanel.locator('label').filter({ hasText: '单选' }).click()
+  await filterPanel.locator('label').filter({ hasText: '多选' }).click()
   check(
-    '筛选弹窗显示可练习 15 道判断题',
-    normalize(await filterDialog.innerText()).includes('将练习15道题'),
-    normalize(await filterDialog.innerText()).slice(0, 120),
+    '题库内侧显示可练习 15 道判断题',
+    normalize(await filterPanel.innerText()).includes('将练习15道题'),
+    normalize(await filterPanel.innerText()).slice(0, 120),
   )
 
-  await filterDialog.getByRole('button', { name: '开始练习' }).click()
+  await filterPanel.getByRole('button', { name: '开始练习' }).click()
   await page.waitForURL(/#\/practice\//, { timeout: 15000 })
   await page.getByText(/第 1 \/ 15 题/).first().waitFor({ timeout: 15000 })
   const firstJudge = Object.values(data.questions)
@@ -789,13 +835,15 @@ async function runMobileFlow(browser, options, label, startAtDark) {
   check(`${label} 首页触控目标不小于 44px`, targets.length === 0, JSON.stringify(targets))
 
   console.log(`  · ${label} 历史成绩空状态`)
-  await page.getByRole('link', { name: '历史成绩' }).click()
+  await openMobileMenu(page)
+  await page.getByRole('link', { name: '历史成绩', exact: true }).click()
   await page.getByRole('heading', { name: '历史成绩' }).waitFor({ timeout: 15000 })
   await page.getByText('还没有已完成的练习').waitFor({ timeout: 5000 })
   await noOverflow(page, `${label} 历史成绩`)
   await goHome(page)
 
   console.log(`  · ${label} 外观壁纸`)
+  await openMobileMenu(page)
   await page.getByRole('button', { name: '外观', exact: true }).click()
   const appearance = page.locator('dialog[open]')
   await appearance.waitFor({ timeout: 5000 })
@@ -813,6 +861,7 @@ async function runMobileFlow(browser, options, label, startAtDark) {
     path: path.join(SHOTS, `t3-08-wallpaper-${label}.png`),
   })
 
+  await openMobileMenu(page)
   await page.getByRole('button', { name: '外观', exact: true }).click()
   const resetDialog = page.locator('dialog[open]')
   await resetDialog.waitFor({ timeout: 5000 })
@@ -886,6 +935,7 @@ async function runMobileFlow(browser, options, label, startAtDark) {
   check(`${label} 错题本显示错题组卷入口`, await mobileAssemble.isVisible())
   await noOverflow(page, `${label} 错题本`)
 
+  await openMobileMenu(page)
   await page.getByRole('link', { name: '收藏夹' }).click()
   await page.getByRole('heading', { name: '收藏夹' }).waitFor({ timeout: 5000 })
   check(
@@ -924,9 +974,9 @@ async function runOfflineFlow(browser) {
 
   await context.setOffline(true)
   await page.reload({ waitUntil: 'load' })
-  await page.getByRole('heading', { name: '选择题库' }).waitFor({
-    timeout: 15000,
-  })
+  await page
+    .getByRole('heading', { name: '把刷题，变成每天的小进步' })
+    .waitFor({ timeout: 15000 })
   check('离线刷新后首页可打开', true)
   check('浏览器处于离线状态', await page.evaluate(() => !navigator.onLine))
   await page.screenshot({ path: path.join(SHOTS, 't3-09-offline-home.png') })

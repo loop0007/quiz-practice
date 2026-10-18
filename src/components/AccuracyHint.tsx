@@ -91,7 +91,7 @@ export default function AccuracyHint() {
         <span
           id={tooltipId}
           role="tooltip"
-          className="absolute right-0 top-full z-20 mt-1.5 w-56 rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-left text-xs leading-relaxed text-slate-700 shadow-lg dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
+          className="absolute right-0 top-full z-20 mt-1.5 w-56 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left text-xs leading-relaxed text-slate-700 shadow-lg dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
         >
           {HINT_TEXT}
         </span>
