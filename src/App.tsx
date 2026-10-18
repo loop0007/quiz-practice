@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom'
 import Layout from '@/components/Layout'
 import BankSelectPage from '@/pages/BankSelectPage'
+import HistoryPage from '@/pages/HistoryPage'
 import PracticePage from '@/pages/PracticePage'
 import ResultPage from '@/pages/ResultPage'
 import WrongBookPage from '@/pages/WrongBookPage'
@@ -13,6 +14,7 @@ export default function App() {
         <Route index element={<BankSelectPage />} />
         <Route path="practice/:sessionId" element={<PracticePage />} />
         <Route path="result/:sessionId" element={<ResultPage />} />
+        <Route path="history" element={<HistoryPage />} />
         <Route path="wrongbook" element={<WrongBookPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>

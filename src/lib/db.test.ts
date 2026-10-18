@@ -9,6 +9,7 @@ import {
   findActiveSession,
   getSession,
   listFeedback,
+  listFinishedSessions,
   listWrong,
   removeWrong,
   saveSession,
@@ -83,6 +84,23 @@ describe('会话', () => {
     await saveSession(older)
     expect(await findActiveSession('java')).toBeUndefined()
     expect(await findActiveSession('web')).toBeUndefined()
+  })
+
+  it('历史成绩只包含已交卷会话，按交卷时间倒序', async () => {
+    const older = await createSession({ bankId: 'java', questionIds: ['java:1'] })
+    older.finishedAt = 1000
+    await saveSession(older)
+
+    const newer = await createSession({ bankId: 'web', questionIds: ['web:1'] })
+    newer.finishedAt = 3000
+    await saveSession(newer)
+
+    const active = await createSession({ bankId: 'java', questionIds: ['java:2'] })
+
+    const history = await listFinishedSessions()
+    expect(history.map((session) => session.id)).toEqual([newer.id, older.id])
+    expect(history.some((session) => session.id === active.id)).toBe(false)
+    expect(history.every((session) => session.finishedAt != null)).toBe(true)
   })
 
   it('删除会话后不再返回', async () => {

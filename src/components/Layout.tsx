@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from 'react-router-dom'
-import { BookOpenCheck, SquarePen } from 'lucide-react'
+import { BookOpenCheck, History, SquarePen } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 
 export default function Layout() {
@@ -27,6 +27,14 @@ export default function Layout() {
             aria-label="主导航"
             className="flex items-center gap-1 text-sm text-slate-600 dark:text-slate-300"
           >
+            <Link
+              to="/history"
+              aria-current={pathname === '/history' ? 'page' : undefined}
+              className="inline-flex min-h-11 items-center gap-1 rounded-lg px-2 hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-slate-800 dark:hover:text-blue-400"
+            >
+              <History className="size-4" aria-hidden="true" />
+              历史成绩
+            </Link>
             <Link
               to="/wrongbook"
               aria-current={pathname === '/wrongbook' ? 'page' : undefined}

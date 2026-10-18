@@ -407,6 +407,30 @@ async function runDesktopFlow(browser, data) {
   check('未知路由显示 404 页面', true)
   await goHome(page)
 
+  console.log('  · E2 历史成绩')
+  await page.getByRole('link', { name: '历史成绩' }).click()
+  await page.getByRole('heading', { name: '历史成绩' }).waitFor({ timeout: 15000 })
+  const historyText = normalize(await page.locator('main').innerText())
+  check(
+    '历史成绩显示 1 次已完成练习',
+    historyText.includes('已完成练习1次'),
+    historyText.slice(0, 120),
+  )
+  check(
+    '历史成绩显示累计答对 1 / 118 题',
+    historyText.includes('累计答对1/118'),
+    historyText.slice(0, 120),
+  )
+  check(
+    '历史成绩显示平均正确率 1%',
+    historyText.includes('平均正确率1%'),
+    historyText.slice(0, 120),
+  )
+  await page.getByRole('link', { name: '查看结果' }).first().click()
+  await page.getByText('本次成绩').waitFor({ timeout: 15000 })
+  check('历史成绩可打开对应结果页', page.url().includes('/#/result/'))
+  await goHome(page)
+
   console.log('  · E1 章节/题型筛选')
   const javaCard = page.locator('article').filter({ hasText: 'Java程序设计题库' })
   await javaCard.getByRole('button', { name: '按章节/题型筛选' }).click()
@@ -481,6 +505,13 @@ async function runMobileFlow(browser, options, label, startAtDark) {
         .filter((item) => item.width < 44 || item.height < 44),
     )
   check(`${label} 首页触控目标不小于 44px`, targets.length === 0, JSON.stringify(targets))
+
+  console.log(`  · ${label} 历史成绩空状态`)
+  await page.getByRole('link', { name: '历史成绩' }).click()
+  await page.getByRole('heading', { name: '历史成绩' }).waitFor({ timeout: 15000 })
+  await page.getByText('还没有已完成的练习').waitFor({ timeout: 5000 })
+  await noOverflow(page, `${label} 历史成绩`)
+  await goHome(page)
 
   await startBank(page, 'Web前端题库')
   await noOverflow(page, `${label} 答题页`)

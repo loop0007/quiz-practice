@@ -72,6 +72,19 @@ export async function saveSession(session: PracticeSession): Promise<void> {
   await db.sessions.put(session)
 }
 
+export interface FinishedSession extends PracticeSession {
+  /** 已交卷会话一定有交卷时间。 */
+  finishedAt: number
+}
+
+/** 按交卷时间倒序返回已完成的会话；未交卷会话不进入历史成绩。 */
+export async function listFinishedSessions(): Promise<FinishedSession[]> {
+  const sessions = await db.sessions.toArray()
+  return sessions
+    .filter((session): session is FinishedSession => session.finishedAt != null)
+    .sort((a, b) => b.finishedAt - a.finishedAt)
+}
+
 /** 返回该题库最近一次未交卷的会话。 */
 export async function findActiveSession(
   bankId: string,

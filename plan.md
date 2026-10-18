@@ -63,7 +63,7 @@ pages（页面编排）
 | M9 | 体验基线 | 二 | P0 | M5–M8 | 移动端、深色、无障碍 | ✅ | 2026-10-17 | 49 项测试；build；375/390 与 1280 布局截图 |
 | M10 | 公网托管 | 二 | P0 | M2, M9 | HTTPS 公网地址、多端真机验证 | 🟨 | 2026-10-17 | GitHub Pages 已上线；HTTPS 200；待真机蜂窝/另一台电脑复验 |
 | T1–T5 | 测试 | 三 | P0 | M0–M10 | 测试记录与缺陷清单 | 🟨 | 2026-10-18 | T1–T4 通过（Vitest 56 + 浏览器 72）；T5 Linux/WSL 实测待环境 |
-| E1–E5 | 额外功能 | 四 | P2 | T5 | 可选增强 | 🟨 | 2026-10-18 | E1 筛选练习完成（Vitest 60 + 浏览器 74）；E2–E6 未开始 |
+| E1–E5 | 额外功能 | 四 | P2 | T5 | 可选增强 | 🟨 | 2026-10-18 | E1、E2 完成（Vitest 64 + 浏览器 80）；E3–E6 未开始 |
 | U1 | UI 美化 | 五 | P1 | T5/E | 视觉统一与细节打磨 | ⬜ | | |
 | D1 | 交付 | 五后 | P0 | 全部 | `dist/`、README、AI 记录、公网地址 | ⬜ | | |
 
@@ -369,7 +369,17 @@ feedback:  '++id, questionId, createdAt'
 
 **完成标记**：✅ 已完成｜日期：2026-10-18｜涉及文件：`src/lib/banks.ts`、`src/lib/banks.test.ts`、`src/components/PracticeFilterDialog.tsx`、`src/pages/BankSelectPage.tsx`、`src/pages/PracticePage.tsx`、`scripts/e2e-browser.mjs`、`README.md`、`plan.md`、`docs/测试记录.md`｜验证：Vitest 60 项、浏览器 74 项全部通过；`npm run build` 与 `check:source` 通过｜接口变更：`getBankQuestions` 新增可选 `filter` 参数（`QuestionFilter`）；新增筛选弹窗组件｜影响模块：M4、T3、D1
 
-**完成标记**：🟨 进行中｜日期：2026-10-18｜验证：E1 已完成（Vitest 60 项、浏览器 74 项）；E2–E6 未开始｜接口变更：见 E1｜影响模块：M4、T3、D1
+### E2 历史成绩统计
+
+- [x] `db.ts` 新增 `listFinishedSessions`：只返回已交卷会话，按交卷时间倒序。
+- [x] 新增 `history.ts` 汇总函数：练习次数、累计答对/总题数、平均正确率（未答计入分母）。
+- [x] 新增 `/history` 页面：累计统计 + 已完成练习列表，可进入对应结果页；空状态与读取失败兜底。
+- [x] 主导航增加“历史成绩”入口。
+- [x] 新增 4 项单测；无头浏览器追加 6 项检查（桌面汇总/跳转 4 项、移动空状态 2 项）。
+
+**完成标记**：✅ 已完成｜日期：2026-10-18｜涉及文件：`src/lib/db.ts`、`src/lib/db.test.ts`、`src/lib/history.ts`、`src/lib/history.test.ts`、`src/pages/HistoryPage.tsx`、`src/App.tsx`、`src/components/Layout.tsx`、`scripts/e2e-browser.mjs`、`README.md`、`plan.md`、`docs/测试记录.md`｜验证：Vitest 64 项、浏览器 80 项全部通过；`npm run build` 与 `check:source` 通过｜接口变更：db 新增只读 `listFinishedSessions` 与 `FinishedSession` 类型；新增 `history.ts`｜影响模块：M6、T4、D1
+
+**完成标记**：🟨 进行中｜日期：2026-10-18｜验证：E1、E2 已完成（Vitest 64 项、浏览器 80 项）；E3–E6 未开始｜接口变更：见 E1、E2｜影响模块：M4、M6、T3、T4、D1
 
 ## 5. 阶段五：UI 界面美化
 
