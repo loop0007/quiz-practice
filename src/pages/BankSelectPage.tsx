@@ -4,7 +4,6 @@ import {
   BookOpen,
   ChevronRight,
   Layers,
-  SlidersHorizontal,
 } from 'lucide-react'
 import { banks } from '@/lib/banks'
 import type { BankMeta } from '@/types'
@@ -53,80 +52,66 @@ export default function BankSelectPage() {
         </Link>
       </header>
 
-      <div className="grid gap-4 sm:grid-cols-2 sm:gap-5">
+      <ul aria-label="题库列表" className="space-y-3">
         {banks.map((bank, bankIndex) => (
-          <Link
-            key={bank.id}
-            to={`/banks/${bank.id}`}
-            aria-label={`进入${bank.name}`}
-            className="group block rounded-[var(--radius-card)] focus-visible:outline-offset-4"
-          >
-            <article className="hover-lift relative flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-5 shadow-soft backdrop-blur-sm group-hover:border-blue-300/80 sm:p-6 dark:border-slate-700/70 dark:bg-slate-900/80 dark:group-hover:border-blue-700">
-              <span
-                aria-hidden="true"
-                className="editorial-ornament pointer-events-none absolute -right-1 -top-7 text-[7.5rem]"
-              >
-                {bank.name.slice(0, 1)}
-              </span>
-
-              <div className="relative flex items-start justify-between gap-3">
-                <div>
+          <li key={bank.id}>
+            <Link
+              to={`/banks/${bank.id}`}
+              aria-label={`进入${bank.name}`}
+              className="group block rounded-[var(--radius-card)] focus-visible:outline-offset-4"
+            >
+              <article className="hover-lift flex flex-wrap items-center justify-between gap-4 rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-5 shadow-soft backdrop-blur-sm group-hover:border-blue-300/80 dark:border-slate-700/70 dark:bg-slate-900/80 dark:group-hover:border-blue-700">
+                <div className="min-w-0">
                   <p className="text-[10px] font-semibold tracking-[0.24em] text-blue-700 uppercase dark:text-blue-300">
                     Bank {String(bankIndex + 1).padStart(2, '0')}
                   </p>
-                  <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight">
+                  <h2 className="mt-1 font-display text-xl font-semibold tracking-tight sm:text-2xl">
                     {bank.name}
                   </h2>
-                </div>
-                {bank.anomalyCount > 0 && (
-                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-200/80 bg-amber-50/80 px-2.5 py-1 text-xs text-amber-800 dark:border-amber-900 dark:bg-amber-950/60 dark:text-amber-300">
-                    <AlertTriangle className="size-3" aria-hidden="true" />
-                    异常 {bank.anomalyCount} 题
-                  </span>
-                )}
-              </div>
 
-              <div className="relative mt-5 flex items-baseline gap-2">
-                <span className="font-display text-5xl leading-none font-semibold tabular-nums">
-                  {bank.validCount}
-                </span>
-                <span className="text-sm text-slate-600 dark:text-slate-300">道有效题</span>
-              </div>
-
-              <p className="relative mt-2 text-xs text-slate-500 dark:text-slate-400">
-                共 {bank.parsedCount} 题
-                {bank.anomalyCount > 0 && `，${bank.anomalyCount} 题异常不参与练习`}
-              </p>
-
-              <dl className="relative mt-4 flex flex-wrap gap-1.5 text-xs text-slate-600 dark:text-slate-300">
-                {TYPE_LABELS.map(({ key, label }) => (
-                  <div
-                    key={key}
-                    className="flex items-center gap-1.5 rounded-full bg-slate-100/90 px-2.5 py-1 dark:bg-slate-800/80"
-                  >
-                    <dt>{label}</dt>
-                    <dd className="font-semibold tabular-nums">{bank.typeCounts[key]}</dd>
+                  <div className="mt-2.5 flex flex-wrap items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300">
+                    {TYPE_LABELS.map(({ key, label }) => (
+                      <span
+                        key={key}
+                        className="inline-flex items-center gap-1.5 rounded-full bg-slate-100/90 px-2.5 py-1 dark:bg-slate-800/80"
+                      >
+                        {label}
+                        <span className="font-semibold tabular-nums">
+                          {bank.typeCounts[key]}
+                        </span>
+                      </span>
+                    ))}
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100/90 px-2.5 py-1 dark:bg-slate-800/80">
+                      <Layers className="size-3.5 text-slate-400" aria-hidden="true" />
+                      {bank.chapters.length} 个章节
+                    </span>
+                    {bank.anomalyCount > 0 && (
+                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-200/80 bg-amber-50/80 px-2.5 py-1 text-amber-800 dark:border-amber-900 dark:bg-amber-950/60 dark:text-amber-300">
+                        <AlertTriangle className="size-3" aria-hidden="true" />
+                        异常 {bank.anomalyCount} 题
+                      </span>
+                    )}
                   </div>
-                ))}
-                <div className="flex items-center gap-1.5 rounded-full bg-slate-100/90 px-2.5 py-1 dark:bg-slate-800/80">
-                  <Layers className="size-3.5 text-slate-400" aria-hidden="true" />
-                  <dd>{bank.chapters.length} 个章节</dd>
                 </div>
-              </dl>
 
-              <div className="relative mt-auto flex items-center justify-between gap-3 pt-6">
-                <span className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-700 dark:text-blue-300">
-                  <SlidersHorizontal className="size-4" aria-hidden="true" />
-                  进入题库 · 筛选练习
-                </span>
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm transition-transform duration-300 group-hover:translate-x-0.5 dark:bg-blue-500 dark:text-slate-950">
-                  <ChevronRight className="size-5" aria-hidden="true" />
-                </span>
-              </div>
-            </article>
-          </Link>
+                <div className="flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-end">
+                  <p className="text-right">
+                    <span className="font-display text-3xl font-semibold tabular-nums text-blue-600 dark:text-blue-400">
+                      {bank.validCount}
+                    </span>
+                    <span className="ml-1.5 text-xs text-slate-500 dark:text-slate-400">
+                      道有效题
+                    </span>
+                  </p>
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm transition-transform duration-300 group-hover:translate-x-0.5 dark:bg-blue-500 dark:text-slate-950">
+                    <ChevronRight className="size-5" aria-hidden="true" />
+                  </span>
+                </div>
+              </article>
+            </Link>
+          </li>
         ))}
-      </div>
+      </ul>
     </section>
   )
 }

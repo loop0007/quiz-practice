@@ -352,7 +352,7 @@ export default function WrongBookPage() {
       const next = await createSession({ bankId: group.bankId, questionIds })
       navigate(`/practice/${next.id}`)
     } catch {
-      setActionError('创建错题组卷失败，请重试。')
+      setActionError('创建重练失败，请重试。')
       setPendingBankId(null)
     }
   }
@@ -490,14 +490,15 @@ export default function WrongBookPage() {
                     type="button"
                     onClick={() => void handleAssemble(group)}
                     disabled={pendingBankId !== null}
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-blue-600 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 dark:disabled:bg-slate-700 dark:disabled:text-slate-400"
+                    aria-label={`重练${group.name}错题`}
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-blue-600 px-3 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 dark:disabled:bg-slate-700 dark:disabled:text-slate-400"
                   >
                     {pendingBankId === group.bankId ? (
                       <Loader2 className="size-4 animate-spin" aria-hidden="true" />
                     ) : (
                       <ListChecks className="size-4" aria-hidden="true" />
                     )}
-                    错题组卷（{assembleIds.length} 题）
+                    重练
                   </button>
                 ) : null
               }

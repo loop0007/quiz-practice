@@ -27,6 +27,8 @@ import ThemeToggle from './ThemeToggle'
 export default function Layout() {
   const { pathname } = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
+  // 答题页含 fixed 底栏，开场动画的 filter/transform 会临时改变其包含块，因此深链接进入时跳过。
+  const [openingAnimation] = useState(() => !pathname.startsWith('/practice'))
   const [appearanceOpen, setAppearanceOpen] = useState(false)
   const [feedbackOpen, setFeedbackOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
@@ -103,7 +105,7 @@ export default function Layout() {
   ]
 
   return (
-    <div className="min-h-dvh">
+    <div className={`min-h-dvh${openingAnimation ? ' animate-blur-in' : ''}`}>
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-white focus:px-4 focus:py-3 focus:text-sm focus:font-medium focus:text-blue-700 focus:shadow-lg dark:focus:bg-slate-900 dark:focus:text-blue-300"
@@ -124,16 +126,18 @@ export default function Layout() {
       {/* 动态特效层位于壁纸之上、正文之下；关闭或减少动态效果时不渲染。 */}
       <BackgroundEffects />
 
-      <header className="app-topbar sticky top-0 z-40 px-3 pt-3 sm:px-4">
-        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-2 rounded-full border border-slate-200/80 bg-white/80 px-3 shadow-soft backdrop-blur-xl sm:px-5 dark:border-slate-700/70 dark:bg-slate-900/75">
+      {/* 移动端隐藏品牌文字、把五个入口放进顶栏；桌面端的品牌、导航与“三”菜单保持原样。 */}
+      <header className="app-topbar sticky top-0 z-40 px-2 pt-3 sm:px-4">
+        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-2 rounded-full border border-slate-200/80 bg-white/80 px-2 shadow-soft backdrop-blur-xl sm:px-5 dark:border-slate-700/70 dark:bg-slate-900/75">
           <Link
             to="/"
-            className="inline-flex min-h-11 items-center gap-2.5 rounded-full pr-2 font-semibold tracking-tight"
+            aria-label="在线刷题首页"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center gap-2.5 rounded-full pr-0 font-semibold tracking-tight md:min-w-0 md:justify-start md:pr-2"
           >
             <span className="flex size-9 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm dark:bg-blue-500 dark:text-slate-950">
               <BookOpenCheck className="size-4.5" aria-hidden="true" />
             </span>
-            <span className="flex flex-col leading-none">
+            <span className="hidden flex-col leading-none md:flex">
               <span className="font-display text-[17px] font-semibold tracking-tight">
                 在线刷题
               </span>
@@ -142,10 +146,10 @@ export default function Layout() {
               </span>
             </span>
           </Link>
-          <div className="flex items-center gap-1">
+          <div className="flex min-w-0 flex-1 items-center gap-1 md:flex-none">
             <nav
               aria-label="主导航"
-              className="hidden items-center gap-0.5 text-sm text-slate-600 md:flex dark:text-slate-300"
+              className="flex min-w-0 flex-1 items-center justify-center gap-0.5 text-xs text-slate-600 md:flex-none md:text-sm dark:text-slate-300"
             >
               {navItems.map(({ to, label, active }) => (
                 <Link
@@ -153,13 +157,30 @@ export default function Layout() {
                   to={to}
                   aria-label={label}
                   aria-current={active ? 'page' : undefined}
-                  className={`inline-flex min-h-11 items-center rounded-full px-3 font-medium transition-colors ${
+                  className={`inline-flex min-h-11 flex-1 items-center justify-center rounded-full px-1.5 font-medium transition-colors sm:px-2 md:flex-none md:px-3 ${
                     active
-                      ? 'text-blue-700 dark:text-blue-300'
+                      ? 'bg-blue-50 text-blue-700 md:bg-transparent dark:bg-blue-950/60 dark:text-blue-300 md:dark:bg-transparent'
                       : 'hover:text-blue-700 dark:hover:text-blue-300'
                   }`}
                 >
-                  {label}
+                  {label === '历史成绩' ? (
+                    <>
+                      <span className="md:hidden">历史</span>
+                      <span className="hidden md:inline">历史成绩</span>
+                    </>
+                  ) : label === '错题本' ? (
+                    <>
+                      <span className="md:hidden">错题</span>
+                      <span className="hidden md:inline">错题本</span>
+                    </>
+                  ) : label === '收藏夹' ? (
+                    <>
+                      <span className="md:hidden">收藏</span>
+                      <span className="hidden md:inline">收藏夹</span>
+                    </>
+                  ) : (
+                    label
+                  )}
                 </Link>
               ))}
             </nav>
@@ -185,30 +206,7 @@ export default function Layout() {
                   className="absolute right-0 top-full z-50 mt-2 w-[min(18rem,calc(100vw-2rem))]"
                 >
                   <div className="rounded-[1.75rem] border border-slate-200/80 bg-white/95 p-2.5 shadow-lift backdrop-blur-xl dark:border-slate-700/70 dark:bg-slate-900/95">
-                    <div className="grid grid-cols-2 gap-1 md:hidden">
-                      {navItems.map(({ to, label, active }) => (
-                        <Link
-                          key={to}
-                          to={to}
-                          aria-current={active ? 'page' : undefined}
-                          className={`inline-flex min-h-11 items-center justify-between rounded-2xl px-3 text-sm font-medium transition-colors ${
-                            active
-                              ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300'
-                              : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
-                          }`}
-                        >
-                          {label}
-                          <span
-                            aria-hidden="true"
-                            className={`size-1.5 rounded-full bg-blue-500 ${
-                              active ? 'opacity-100' : 'opacity-0'
-                            }`}
-                          />
-                        </Link>
-                      ))}
-                    </div>
-
-                    <div className="mt-1.5 grid gap-1 border-t border-slate-200/80 pt-1.5 md:mt-0 md:border-t-0 md:pt-0 dark:border-slate-700">
+                    <div className="grid gap-1">
                       <button
                         type="button"
                         onClick={() => {

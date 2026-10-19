@@ -320,17 +320,18 @@ export default function ResultPage() {
         </div>
       )}
 
-      <div className="flex flex-wrap gap-2">
+      {/* 移动端四个操作统一为等宽纵向按钮；桌面端恢复为一行胶囊按钮。 */}
+      <div role="group" aria-label="结果操作" className="grid gap-2 sm:flex sm:flex-wrap">
         <Link
           to="/banks"
-          className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-full border border-slate-200/90 bg-white/75 px-5 text-sm font-medium backdrop-blur transition-colors hover:bg-white hover:text-blue-700 sm:flex-none dark:border-slate-700 dark:bg-slate-900/70 dark:hover:bg-slate-800 dark:hover:text-blue-300"
+          className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-full border border-slate-200/90 bg-white/75 px-5 text-sm font-medium backdrop-blur transition-colors hover:bg-white hover:text-blue-700 sm:w-auto dark:border-slate-700 dark:bg-slate-900/70 dark:hover:bg-slate-800 dark:hover:text-blue-300"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
           返回题库
         </Link>
         <Link
           to="/wrongbook"
-          className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-full border border-slate-200/90 bg-white/75 px-5 text-sm font-medium backdrop-blur transition-colors hover:bg-white hover:text-blue-700 sm:flex-none dark:border-slate-700 dark:bg-slate-900/70 dark:hover:bg-slate-800 dark:hover:text-blue-300"
+          className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-full border border-slate-200/90 bg-white/75 px-5 text-sm font-medium backdrop-blur transition-colors hover:bg-white hover:text-blue-700 sm:w-auto dark:border-slate-700 dark:bg-slate-900/70 dark:hover:bg-slate-800 dark:hover:text-blue-300"
         >
           <SquarePen className="size-4" aria-hidden="true" />
           查看错题本
@@ -339,7 +340,7 @@ export default function ResultPage() {
           type="button"
           onClick={() => void handleReplay()}
           disabled={pendingAction !== null}
-          className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-4 text-sm font-medium hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
+          className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-full border border-slate-200/90 bg-white/75 px-5 text-sm font-medium backdrop-blur transition-colors hover:bg-white hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto dark:border-slate-700 dark:bg-slate-900/70 dark:hover:bg-slate-800 dark:hover:text-blue-300"
         >
           {pendingAction === 'replay' ? (
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />
@@ -353,7 +354,7 @@ export default function ResultPage() {
             type="button"
             onClick={() => void handleRedo()}
             disabled={pendingAction !== null}
-            className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-full bg-blue-600 px-5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 sm:flex-none dark:disabled:bg-slate-700 dark:disabled:text-slate-400"
+            className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-full bg-blue-600 px-5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 sm:w-auto dark:disabled:bg-slate-700 dark:disabled:text-slate-400"
           >
             {pendingAction === 'redo' ? (
               <Loader2 className="size-4 animate-spin" aria-hidden="true" />

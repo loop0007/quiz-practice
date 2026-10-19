@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, BookOpenCheck, ListChecks, Sparkles, WifiOff } from 'lucide-react'
+import { ArrowRight, BookOpenCheck, Sparkles, WifiOff } from 'lucide-react'
 import { banks } from '@/lib/banks'
 import { listFavorites, listFinishedSessions, listWrong } from '@/lib/db'
 
@@ -71,13 +71,6 @@ export default function HomePage() {
               去题库开始
               <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
-            <Link
-              to="/history"
-              className="inline-flex min-h-12 items-center gap-2 rounded-full border border-slate-200/90 bg-white/70 px-5 text-sm font-medium shadow-sm backdrop-blur transition-colors hover:border-blue-300 hover:bg-white hover:text-blue-700 dark:border-slate-700 dark:bg-slate-900/60 dark:hover:border-blue-700 dark:hover:text-blue-300"
-            >
-              <ListChecks className="size-4" aria-hidden="true" />
-              查看历史成绩
-            </Link>
           </div>
 
           <dl className="mt-8 grid max-w-lg grid-cols-3 gap-2">
@@ -113,7 +106,7 @@ export default function HomePage() {
             aria-hidden="true"
             className="absolute -inset-5 rounded-[2.5rem] bg-blue-400/10 blur-2xl dark:bg-blue-900/20"
           />
-          <div className="relative overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white/75 p-6 shadow-soft backdrop-blur-xl dark:border-slate-700/70 dark:bg-slate-900/70 sm:p-7">
+          <div className="relative overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white/75 p-5 shadow-soft backdrop-blur-xl dark:border-slate-700/70 dark:bg-slate-900/70 sm:p-6">
             <span
               aria-hidden="true"
               className="absolute -right-12 -top-14 size-40 rounded-full border border-blue-300/40 dark:border-blue-800/60"
@@ -132,12 +125,12 @@ export default function HomePage() {
               </span>
             </div>
 
-            <p className="mt-5 font-display text-6xl leading-none font-semibold tabular-nums">
+            <p className="mt-3 font-display text-5xl leading-none font-semibold tabular-nums sm:text-6xl">
               {stats ? stats.finished : '—'}
             </p>
-            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">次已完成练习</p>
+            <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-300">次已完成练习</p>
 
-            <div className="mt-6 grid grid-cols-2 divide-x divide-slate-200/80 border-y border-slate-200/80 py-3 text-center dark:divide-slate-700 dark:border-slate-700">
+            <div className="mt-4 grid grid-cols-2 divide-x divide-slate-200/80 border-y border-slate-200/80 py-2.5 text-center dark:divide-slate-700 dark:border-slate-700">
               <div>
                 <p className="text-[10px] tracking-wider text-slate-500 dark:text-slate-400">
                   错题本
@@ -158,7 +151,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <p className="mt-4 text-xs text-slate-500 dark:text-slate-400">
+            <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
               数据只保存在本机浏览器
             </p>
           </div>

@@ -59,6 +59,8 @@
   --animate-page-in: fade-in-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
   /* 答题页含 fixed 底部操作栏，只淡入不位移，避免动画期间 fixed 参照系改变。 */
   --animate-page-fade: page-fade 0.3s ease-out backwards;
+  /* 首次进入：整页从轻微放大与模糊中柔和显现。 */
+  --animate-blur-in: blur-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) backwards;
   --spacing-safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
@@ -90,6 +92,20 @@
   }
   to {
     opacity: 1;
+  }
+}
+
+/* 开场软聚焦：结束帧不保留 filter / transform，避免长期创建固定定位包含块。 */
+@keyframes blur-in {
+  from {
+    opacity: 0;
+    filter: blur(14px);
+    transform: scale(1.012);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: none;
   }
 }
 

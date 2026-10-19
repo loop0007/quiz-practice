@@ -302,6 +302,12 @@ async function runDesktopFlow(browser, data) {
     `${introMotion.headingDelay} → ${introMotion.ctaDelay}`,
   )
 
+  const openingMotion = await page.evaluate(() => {
+    const shell = document.querySelector('#root > div')
+    return shell ? getComputedStyle(shell).animationName : ''
+  })
+  check('首次进入使用模糊开场动画', openingMotion === 'blur-in', openingMotion)
+
   const homeText = normalize(await page.locator('main').innerText())
   check('首页显示总有效题 336', homeText.includes('有效题336'))
   check('首页说明数据仅保存在本机', homeText.includes('数据只保存在本机浏览器'))
@@ -663,10 +669,14 @@ async function runDesktopFlow(browser, data) {
   await page.getByRole('heading', { name: '错题本', exact: true }).waitFor({
     timeout: 15000,
   })
-  const assembleButton = page.getByRole('button', { name: /错题组卷/ })
+  const assembleButton = page.getByRole('button', { name: /^重练/ })
   await assembleButton.waitFor({ timeout: 5000 })
-  equal('错题本按题库显示错题组卷入口', await assembleButton.count(), 1)
-  check('错题组卷显示有效题数', (await assembleButton.innerText()).includes('1 题'))
+  equal('错题本按题库显示重练入口', await assembleButton.count(), 1)
+  equal(
+    '重练按钮不显示题数',
+    (await assembleButton.innerText()).trim(),
+    '重练',
+  )
   await assembleButton.click()
   await page.waitForURL(/#\/practice\//, { timeout: 15000 })
   await page.getByText(/第 1 \/ 1 题/).first().waitFor({ timeout: 15000 })
@@ -1050,6 +1060,25 @@ async function runMobileFlow(browser, options, label, startAtDark) {
     path: path.join(SHOTS, `t4-${label}-home.png`),
   })
 
+  console.log(`  · ${label} 移动端顶栏`)
+  for (const name of ['首页', '题库', '历史成绩', '错题本', '收藏夹']) {
+    check(
+      `${label} 顶栏显示${name}入口`,
+      await page.getByRole('link', { name, exact: true }).isVisible(),
+    )
+  }
+  check(
+    `${label} 移动端隐藏“在线刷题”品牌文字`,
+    !(await page
+      .locator('header')
+      .getByText('在线刷题', { exact: true })
+      .isVisible()),
+  )
+  check(
+    `${label} 移动端顶栏提供“三”菜单入口`,
+    await page.getByRole('button', { name: '打开菜单' }).isVisible(),
+  )
+
   const targets = await page
     .locator('header a, header button, main button')
     .evaluateAll((nodes) =>
@@ -1071,7 +1100,6 @@ async function runMobileFlow(browser, options, label, startAtDark) {
   check(`${label} 首页触控目标不小于 44px`, targets.length === 0, JSON.stringify(targets))
 
   console.log(`  · ${label} 历史成绩空状态`)
-  await openHeaderMenu(page)
   await page.getByRole('link', { name: '历史成绩', exact: true }).click()
   await page.getByRole('heading', { name: '历史成绩' }).waitFor({ timeout: 15000 })
   await page.getByText('还没有已完成的练习').waitFor({ timeout: 5000 })
@@ -1160,19 +1188,53 @@ async function runMobileFlow(browser, options, label, startAtDark) {
     `${label} 结果页显示错题重练入口`,
     await page.getByRole('button', { name: /错题重练/ }).isVisible(),
   )
+
+  const resultActions = page.getByRole('group', { name: '结果操作' })
+  const actionControls = resultActions.locator('a, button')
+  equal(`${label} 结果页提供四个操作`, await actionControls.count(), 4)
+  const actionShapes = await actionControls.evaluateAll((nodes) =>
+    nodes.map((node) => {
+      const rect = node.getBoundingClientRect()
+      return {
+        width: Math.round(rect.width),
+        height: Math.round(rect.height),
+        radius: getComputedStyle(node).borderRadius,
+      }
+    }),
+  )
+  const [firstShape] = actionShapes
+  check(
+    `${label} 结果页四个操作等宽等高`,
+    actionShapes.every(
+      (shape) =>
+        Math.abs(shape.width - firstShape.width) <= 1 &&
+        Math.abs(shape.height - firstShape.height) <= 1,
+    ),
+    JSON.stringify(actionShapes),
+  )
+  check(
+    `${label} 结果页四个操作圆角一致`,
+    actionShapes.every((shape) => shape.radius === firstShape.radius),
+    JSON.stringify(actionShapes),
+  )
+
   await page.screenshot({
     path: path.join(SHOTS, `t4-${label}-result.png`),
   })
 
   await page.getByRole('link', { name: '查看错题本' }).click()
   await page.getByRole('heading', { name: '错题本', exact: true }).waitFor()
-  const mobileAssemble = page.getByRole('button', { name: /错题组卷/ })
+  const mobileAssemble = page.getByRole('button', { name: /^重练/ })
   await mobileAssemble.waitFor({ timeout: 5000 })
-  check(`${label} 错题本显示错题组卷入口`, await mobileAssemble.isVisible())
+  check(`${label} 错题本显示重练入口`, await mobileAssemble.isVisible())
+  equal(
+    `${label} 重练按钮不显示题数`,
+    (await mobileAssemble.innerText()).trim(),
+    '重练',
+  )
   await noOverflow(page, `${label} 错题本`)
 
-  await openHeaderMenu(page)
-  await page.getByRole('link', { name: '收藏夹' }).click()
+  await page.getByRole('link', { name: '收藏夹', exact: true }).click()
   await page.getByRole('heading', { name: '收藏夹', exact: true }).waitFor({ timeout: 5000 })
   check(
     `${label} 收藏夹显示空状态`,
