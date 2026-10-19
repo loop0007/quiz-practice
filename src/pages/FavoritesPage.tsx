@@ -4,10 +4,12 @@ import {
   AlertTriangle,
   ArrowLeft,
   CheckSquare,
+  ChevronDown,
   Loader2,
   Star,
   Trash2,
 } from 'lucide-react'
+import CollapsibleGroup from '@/components/CollapsibleGroup'
 import MarkdownContent from '@/components/MarkdownContent'
 import SelectionCheckbox from '@/components/SelectionCheckbox'
 import { banks, getQuestion } from '@/lib/banks'
@@ -74,6 +76,7 @@ export default function FavoritesPage() {
   const [batchMode, setBatchMode] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [batchPending, setBatchPending] = useState(false)
+  const [expandedBanks, setExpandedBanks] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     let cancelled = false
@@ -101,6 +104,32 @@ export default function FavoritesPage() {
     [entries],
   )
   const allSelected = allIds.length > 0 && selectedIds.size === allIds.length
+  const allGroupsExpanded =
+    groups.length > 0 && groups.every((group) => expandedBanks.has(group.bankId))
+
+  function toggleGroup(bankId: string) {
+    setExpandedBanks((previous) => {
+      const next = new Set(previous)
+      if (next.has(bankId)) next.delete(bankId)
+      else next.add(bankId)
+      return next
+    })
+  }
+
+  function toggleAllGroups() {
+    setExpandedBanks(
+      allGroupsExpanded ? new Set() : new Set(groups.map((group) => group.bankId)),
+    )
+  }
+
+  function toggleBatchMode() {
+    // 进入批量管理时展开全部分组，避免隐藏的题目无法勾选。
+    if (!batchMode) {
+      setExpandedBanks(new Set(groups.map((group) => group.bankId)))
+    }
+    setBatchMode(!batchMode)
+    setSelectedIds(new Set())
+  }
 
   function toggleSelect(questionId: string) {
     setSelectedIds((previous) => {
@@ -182,22 +211,37 @@ export default function FavoritesPage() {
 
   if (!entries || entries.length === 0) {
     return (
-      <section className="rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-10 text-center shadow-soft backdrop-blur-sm dark:border-slate-700/70 dark:bg-slate-900/80">
-        <Star
-          className="mx-auto size-10 text-amber-500 dark:text-amber-400"
-          aria-hidden="true"
-        />
-        <h1 className="mt-3 font-display text-xl font-semibold">收藏夹是空的</h1>
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-          答题页点击顶部的“收藏”，之后可以在这里集中查看。
-        </p>
-        <Link
-          to="/banks"
-          className="mt-5 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-blue-600 px-5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
-        >
-          <ArrowLeft className="size-4" aria-hidden="true" />
-          去刷题
-        </Link>
+      <section>
+        <header className="mb-5">
+          <p className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.22em] text-blue-700 uppercase dark:text-blue-300">
+            <span
+              aria-hidden="true"
+              className="inline-block size-1.5 rounded-full bg-blue-500"
+            />
+            Favorites
+          </p>
+          <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight sm:text-5xl">
+            收藏夹
+          </h1>
+        </header>
+
+        <div className="rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-10 text-center shadow-soft backdrop-blur-sm dark:border-slate-700/70 dark:bg-slate-900/80">
+          <Star
+            className="mx-auto size-10 text-amber-500 dark:text-amber-400"
+            aria-hidden="true"
+          />
+          <h2 className="mt-3 font-display text-xl font-semibold">收藏夹是空的</h2>
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+            答题页点击顶部的“收藏”，之后可以在这里集中查看。
+          </p>
+          <Link
+            to="/banks"
+            className="mt-5 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-blue-600 px-5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+          >
+            <ArrowLeft className="size-4" aria-hidden="true" />
+            去刷题
+          </Link>
+        </div>
       </section>
     )
   }
@@ -223,10 +267,18 @@ export default function FavoritesPage() {
           </span>
           <button
             type="button"
-            onClick={() => {
-              setBatchMode((mode) => !mode)
-              setSelectedIds(new Set())
-            }}
+            onClick={toggleAllGroups}
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-slate-200/90 bg-white/70 px-4 text-sm font-medium transition-colors hover:bg-white hover:text-blue-700 dark:border-slate-700 dark:bg-slate-900/60 dark:hover:bg-slate-800 dark:hover:text-blue-300"
+          >
+            <ChevronDown
+              className={`size-4 transition-transform ${allGroupsExpanded ? 'rotate-180' : ''}`}
+              aria-hidden="true"
+            />
+            {allGroupsExpanded ? '收起全部' : '展开全部'}
+          </button>
+          <button
+            type="button"
+            onClick={toggleBatchMode}
             aria-pressed={batchMode}
             className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-slate-200/90 bg-white/70 px-4 text-sm font-medium transition-colors hover:bg-white hover:text-blue-700 dark:border-slate-700 dark:bg-slate-900/60 dark:hover:bg-slate-800 dark:hover:text-blue-300"
           >
@@ -246,101 +298,53 @@ export default function FavoritesPage() {
         </div>
       )}
 
-      <div className="mt-5 space-y-6">
+      <div className="mt-3 space-y-2.5">
         {groups.map((group) => (
-          <section key={group.bankId} aria-labelledby={`favorites-${group.bankId}`}>
-            <h2
-              id={`favorites-${group.bankId}`}
-              className="mb-2.5 flex items-baseline justify-between gap-2 px-1"
-            >
-              <span className="text-sm font-semibold">{group.name}</span>
-              <span className="text-xs tabular-nums text-slate-500 dark:text-slate-400">
-                {group.entries.length} 题
-              </span>
-            </h2>
-            <div className="space-y-3">
-              {group.entries.map((entry) => {
-                const question = getQuestion(entry.questionId)
+          <CollapsibleGroup
+            key={group.bankId}
+            headingId={`favorites-${group.bankId}`}
+            title={group.name}
+            countText={`${group.entries.length} 题`}
+            expanded={expandedBanks.has(group.bankId)}
+            onToggle={() => toggleGroup(group.bankId)}
+          >
+            {group.entries.map((entry) => {
+              const question = getQuestion(entry.questionId)
 
-                if (!question) {
-                  return (
-                    <article
-                      key={entry.questionId}
-                      className="rounded-[var(--radius-card)] border border-amber-200 bg-amber-50/60 p-5 shadow-sm backdrop-blur-sm dark:border-amber-900 dark:bg-amber-950/30"
-                    >
-                      <header className="flex flex-wrap items-center justify-between gap-2">
-                        <div className="flex items-center gap-2">
-                          {batchMode && (
-                            <SelectionCheckbox
-                              label={`选择记录 ${entry.questionId}`}
-                              checked={selectedIds.has(entry.questionId)}
-                              onChange={() => toggleSelect(entry.questionId)}
-                            />
-                          )}
-                          <span className="text-sm font-medium text-amber-800 dark:text-amber-200">
-                            题目缺失
-                          </span>
-                        </div>
-                        <span className="text-xs text-slate-500 dark:text-slate-400">
-                          收藏于：{formatTime(entry.createdAt)}
-                        </span>
-                      </header>
-                      <p className="mt-2 flex items-start gap-1.5 text-sm text-slate-700 dark:text-slate-200">
-                        <AlertTriangle
-                          className="mt-0.5 size-4 shrink-0 text-amber-500"
-                          aria-hidden="true"
-                        />
-                        该题已不在当前题库中（可能因解析异常被排除），暂时无法展示题干。
-                      </p>
-                      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                        记录 ID：{entry.questionId}
-                      </p>
-                      <div className="mt-3 flex justify-end">
-                        <button
-                          type="button"
-                          onClick={() => void handleRemove(entry.questionId)}
-                          disabled={pendingId !== null}
-                          className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-red-200 px-4 text-sm font-medium text-red-700 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-red-900 dark:text-red-300 dark:hover:bg-red-950/40"
-                        >
-                          <Trash2 className="size-4" aria-hidden="true" />
-                          {pendingId === entry.questionId ? '取消中…' : '取消收藏'}
-                        </button>
-                      </div>
-                    </article>
-                  )
-                }
-
+              if (!question) {
                 return (
                   <article
                     key={entry.questionId}
-                    className="rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-5 shadow-soft backdrop-blur-sm dark:border-slate-700/70 dark:bg-slate-900/80"
+                    className="rounded-[var(--radius-card)] border border-amber-200 bg-amber-50/60 p-3.5 shadow-sm backdrop-blur-sm sm:p-4 dark:border-amber-900 dark:bg-amber-950/30"
                   >
-                    <header className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-slate-200 pb-2.5 dark:border-slate-700">
+                    <header className="flex flex-wrap items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
                         {batchMode && (
                           <SelectionCheckbox
-                            label={`选择第 ${question.number} 题`}
+                            label={`选择记录 ${entry.questionId}`}
                             checked={selectedIds.has(entry.questionId)}
                             onChange={() => toggleSelect(entry.questionId)}
                           />
                         )}
-                        <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
-                          {TYPE_LABELS[question.type]}
-                        </span>
-                        <span className="text-xs text-slate-500 dark:text-slate-400">
-                          题号 {question.number}
+                        <span className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                          题目缺失
                         </span>
                       </div>
-                      <span className="text-xs tabular-nums text-slate-500 dark:text-slate-400">
+                      <span className="text-xs text-slate-500 dark:text-slate-400">
                         收藏于：{formatTime(entry.createdAt)}
                       </span>
                     </header>
-
-                    <MarkdownContent className="mt-3 text-sm leading-relaxed">
-                      {question.stem}
-                    </MarkdownContent>
-
-                    <div className="mt-3 flex justify-end">
+                    <p className="mt-2 flex items-start gap-1.5 text-sm text-slate-700 dark:text-slate-200">
+                      <AlertTriangle
+                        className="mt-0.5 size-4 shrink-0 text-amber-500"
+                        aria-hidden="true"
+                      />
+                      该题已不在当前题库中（可能因解析异常被排除），暂时无法展示题干。
+                    </p>
+                    <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                      记录 ID：{entry.questionId}
+                    </p>
+                    <div className="mt-2 flex justify-end">
                       <button
                         type="button"
                         onClick={() => void handleRemove(entry.questionId)}
@@ -353,9 +357,59 @@ export default function FavoritesPage() {
                     </div>
                   </article>
                 )
-              })}
-            </div>
-          </section>
+              }
+
+              return (
+                <article
+                  key={entry.questionId}
+                  className="hover-lift rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-3.5 shadow-soft backdrop-blur-sm sm:p-4 dark:border-slate-700/70 dark:bg-slate-900/80"
+                >
+                  <header className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-slate-200 pb-2 dark:border-slate-700">
+                    <div className="flex items-center gap-2">
+                      {batchMode && (
+                        <SelectionCheckbox
+                          label={`选择第 ${question.number} 题`}
+                          checked={selectedIds.has(entry.questionId)}
+                          onChange={() => toggleSelect(entry.questionId)}
+                        />
+                      )}
+                      <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
+                        {TYPE_LABELS[question.type]}
+                      </span>
+                      <span className="text-xs text-slate-500 dark:text-slate-400">
+                        题号 {question.number}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs tabular-nums text-slate-500 dark:text-slate-400">
+                        收藏于：{formatTime(entry.createdAt)}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => void handleRemove(entry.questionId)}
+                        disabled={pendingId !== null}
+                        aria-label="取消收藏"
+                        className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full border border-red-200 px-2.5 text-xs font-medium text-red-700 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 sm:min-w-0 sm:px-3.5 sm:text-sm dark:border-red-900 dark:text-red-300 dark:hover:bg-red-950/40"
+                      >
+                        {pendingId === entry.questionId ? (
+                          <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                        ) : (
+                          <Trash2 className="size-3.5" aria-hidden="true" />
+                        )}
+                        <span className="hidden sm:inline">
+                          {pendingId === entry.questionId ? '取消中…' : '取消收藏'}
+                        </span>
+                      </button>
+                    </div>
+                  </header>
+
+                  <MarkdownContent className="mt-2 text-sm leading-relaxed">
+                    {question.stem}
+                  </MarkdownContent>
+                </article>
+              )
+            })}
+          </CollapsibleGroup>
         ))}
       </div>
 

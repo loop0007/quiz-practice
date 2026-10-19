@@ -139,7 +139,7 @@ export default function HistoryPage() {
 
               return (
                 <li key={session.id}>
-                  <article className="rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-5 shadow-soft backdrop-blur-sm transition-colors hover:border-blue-300/80 dark:border-slate-700/70 dark:bg-slate-900/80 dark:hover:border-blue-800">
+                  <article className="hover-lift rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-5 shadow-soft backdrop-blur-sm hover:border-blue-300/80 dark:border-slate-700/70 dark:bg-slate-900/80 dark:hover:border-blue-800">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <h2 className="text-base font-semibold">

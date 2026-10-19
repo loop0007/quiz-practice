@@ -278,7 +278,29 @@ async function runDesktopFlow(browser, data) {
   })
 
   await goHome(page)
+  // 等首屏淡入上移动画结束再截图，避免截到半透明的中间帧。
+  await sleep(950)
   await page.screenshot({ path: path.join(SHOTS, 't3-01-home-desktop.png') })
+
+  const introMotion = await page.evaluate(() => {
+    const heading = document.querySelector('main h1')
+    const cta = [...document.querySelectorAll('main a')]
+      .find((link) => link.textContent?.includes('去题库开始'))
+      ?.parentElement
+    return {
+      heading: heading ? getComputedStyle(heading).animationName : '',
+      headingDelay: heading ? getComputedStyle(heading).animationDelay : '',
+      cta: cta ? getComputedStyle(cta).animationName : '',
+      ctaDelay: cta ? getComputedStyle(cta).animationDelay : '',
+    }
+  })
+  check('首屏标题使用淡入上移动画', introMotion.heading === 'fade-in-up')
+  check(
+    '行动按钮以更晚的延迟淡入上移',
+    introMotion.cta === 'fade-in-up' &&
+      parseFloat(introMotion.ctaDelay) > parseFloat(introMotion.headingDelay),
+    `${introMotion.headingDelay} → ${introMotion.ctaDelay}`,
+  )
 
   const homeText = normalize(await page.locator('main').innerText())
   check('首页显示总有效题 336', homeText.includes('有效题336'))
@@ -297,15 +319,42 @@ async function runDesktopFlow(browser, data) {
     await page.getByRole('button', { name: '开始练习' }).count(),
     0,
   )
+  check(
+    '页面切换使用淡入上移动画',
+    (
+      (await page.locator('main > div').getAttribute('class')) ?? ''
+    ).includes('animate-page-in'),
+  )
+
+  const bankCard = page.locator('article').first()
+  const restingShadow = await bankCard.evaluate(
+    (element) => getComputedStyle(element).boxShadow,
+  )
+  await bankCard.hover()
+  await sleep(320)
+  const liftedCard = await bankCard.evaluate((element) => ({
+    transform: getComputedStyle(element).transform,
+    shadow: getComputedStyle(element).boxShadow,
+  }))
+  check('悬停题库卡片向上浮动', liftedCard.transform !== 'none')
+  check('悬停时阴影增强', liftedCard.shadow !== restingShadow)
+  await page.screenshot({ path: path.join(SHOTS, 't3-12-hover-lift.png') })
+  await page.mouse.move(2, 2)
+  await sleep(320)
+  check(
+    '移开后卡片平滑回落',
+    (await bankCard.evaluate((element) => getComputedStyle(element).transform)) ===
+      'none',
+  )
+
   await page.getByRole('link', { name: '进入Web前端题库' }).click()
   await page
     .getByRole('heading', { name: 'Web前端题库', exact: true })
     .waitFor({ timeout: 15000 })
   check('点击题库卡片进入题库内侧', page.url().includes('/#/banks/web'))
-  check(
-    '开始练习按钮位于题库内侧',
-    await page.getByRole('button', { name: '开始练习' }).isVisible(),
-  )
+  const startButton = page.getByRole('button', { name: '开始练习' })
+  await startButton.waitFor({ timeout: 5000 })
+  check('开始练习按钮位于题库内侧', await startButton.isVisible())
   await goHome(page)
 
   console.log('  · 通用反馈')
@@ -326,8 +375,33 @@ async function runDesktopFlow(browser, data) {
   await helpDialog.getByRole('button', { name: '知道了' }).click()
   await helpDialog.waitFor({ state: 'hidden', timeout: 5000 })
 
+  console.log('  · 下载为应用')
+  await openHeaderMenu(page)
+  await page.getByRole('button', { name: '下载为应用', exact: true }).click()
+  const installDialog = page.locator('dialog[open]')
+  await installDialog.waitFor({ timeout: 5000 })
+  check(
+    '“三”菜单提供下载为应用入口',
+    await installDialog
+      .getByRole('heading', { name: '下载为应用', exact: true })
+      .isVisible(),
+  )
+  check(
+    '安装弹窗提供手动添加说明',
+    (await installDialog.innerText()).includes('添加到主屏幕'),
+  )
+  await page.screenshot({ path: path.join(SHOTS, 't3-13-install-dialog.png') })
+  await installDialog.getByRole('button', { name: '关闭' }).last().click()
+  await installDialog.waitFor({ state: 'hidden', timeout: 5000 })
+
   console.log('  · 开始 Web 题库练习')
   await startBank(page, 'Web前端题库')
+  check(
+    '答题页切换仅淡入以保护固定底栏',
+    (
+      (await page.locator('main > div').getAttribute('class')) ?? ''
+    ).includes('animate-page-fade'),
+  )
   const practiceStem = await stemText(page)
   equal('首题题干与题库数据一致', practiceStem, normalize(q1.stem))
 
@@ -470,6 +544,18 @@ async function runDesktopFlow(browser, data) {
   console.log('  · 错题本对照')
   await page.getByRole('link', { name: '查看错题本' }).click()
   await page.getByRole('heading', { name: '错题本', exact: true }).waitFor()
+  const wrongGroupToggle = page.locator('main button[aria-expanded]').first()
+  await wrongGroupToggle.waitFor({ timeout: 5000 })
+  check(
+    '错题本分组默认收起',
+    (await wrongGroupToggle.getAttribute('aria-expanded')) === 'false',
+  )
+  equal('收起时错题卡片不渲染', await page.locator('article').count(), 0)
+  await wrongGroupToggle.click()
+  check(
+    '点击分组后展开错题卡片',
+    (await wrongGroupToggle.getAttribute('aria-expanded')) === 'true',
+  )
   const wrongArticle = page.locator('article').first()
   await wrongArticle.waitFor({ timeout: 5000 })
   equal('错题本条目数', await page.locator('article').count(), 1)
@@ -500,6 +586,7 @@ async function runDesktopFlow(browser, data) {
     await wrongArticle.locator(':scope > div').last().textContent(),
   )
   equal('同一题在练习与错题本中解析一致', wrongExplanation, practiceExplanation)
+  await sleep(300)
   await page.screenshot({ path: path.join(SHOTS, 't3-04-wrongbook-desktop.png') })
 
   console.log('  · 深链接与 404')
@@ -616,12 +703,25 @@ async function runDesktopFlow(browser, data) {
   await page.getByRole('heading', { name: '错题本', exact: true }).waitFor({
     timeout: 15000,
   })
+  await page.locator('main button[aria-expanded]').first().click()
   await page.locator('article').first().waitFor({ timeout: 5000 })
   equal('答对组卷题后错题本仍保留记录', await page.locator('article').count(), 1)
 
   console.log('  · E4 收藏夹页面')
   await page.goto(`${BASE}/#/favorites`, { waitUntil: 'load' })
-  await page.getByRole('heading', { name: '收藏夹' }).waitFor({ timeout: 15000 })
+  await page.getByRole('heading', { name: '收藏夹', exact: true }).waitFor({ timeout: 15000 })
+  const favoriteGroupToggle = page.locator('main button[aria-expanded]').first()
+  await favoriteGroupToggle.waitFor({ timeout: 5000 })
+  check(
+    '收藏夹分组默认收起',
+    (await favoriteGroupToggle.getAttribute('aria-expanded')) === 'false',
+  )
+  equal('收起时收藏卡片不渲染', await page.locator('article').count(), 0)
+  await favoriteGroupToggle.click()
+  check(
+    '点击分组后展开收藏卡片',
+    (await favoriteGroupToggle.getAttribute('aria-expanded')) === 'true',
+  )
   const favoriteArticle = page.locator('article').first()
   await favoriteArticle.waitFor({ timeout: 5000 })
   equal('收藏夹条目数', await page.locator('article').count(), 1)
@@ -640,7 +740,13 @@ async function runDesktopFlow(browser, data) {
     '收藏夹显示取消收藏入口',
     await favoriteArticle.getByRole('button', { name: '取消收藏' }).isVisible(),
   )
+  await sleep(300)
   await page.screenshot({ path: path.join(SHOTS, 't3-07-favorites-desktop.png') })
+
+  await favoriteGroupToggle.click()
+  equal('再次点击分组可收起收藏卡片', await page.locator('article').count(), 0)
+  await favoriteGroupToggle.click()
+  await favoriteArticle.waitFor({ timeout: 5000 })
 
   await page.getByRole('button', { name: '批量管理' }).click()
   await favoriteArticle.getByRole('checkbox').first().check()
@@ -665,11 +771,11 @@ async function runDesktopFlow(browser, data) {
   const appearance = page.locator('dialog[open]')
   await appearance.waitFor({ timeout: 5000 })
   equal(
-    '外观弹窗提供 3 套内置壁纸',
+    '外观弹窗提供 4 套内置壁纸',
     await appearance
-      .getByRole('button', { name: /^(晨曦|暮色|青野)$/ })
+      .getByRole('button', { name: /^(云霞|晨曦|暮色|青野)$/ })
       .count(),
-    3,
+    4,
   )
   await appearance.getByRole('button', { name: '晨曦', exact: true }).click()
   check(
@@ -770,6 +876,84 @@ async function runDesktopFlow(browser, data) {
   equal('移除后 wallpapers 表为空', await indexedDbCount(page, 'wallpapers'), 0)
   await removeDialog.getByRole('button', { name: '完成' }).click()
 
+  console.log('  · E5 动态特效')
+  await goHome(page)
+  await openHeaderMenu(page)
+  await page.getByRole('button', { name: '外观', exact: true }).click()
+  const effectDialog = page.locator('dialog[open]')
+  await effectDialog.waitFor({ timeout: 5000 })
+  equal(
+    '外观弹窗提供 4 种动态特效',
+    await effectDialog
+      .getByRole('button', { name: /^(关闭特效|樱花飘落|动态线条|粒子动画)$/ })
+      .count(),
+    4,
+  )
+  await effectDialog.getByRole('button', { name: '樱花飘落', exact: true }).click()
+  check(
+    '选择特效后渲染 Canvas',
+    (await page.locator('canvas[data-effect="sakura"]').count()) === 1,
+  )
+  equal(
+    '特效选择写入 localStorage',
+    await page.evaluate(() => localStorage.getItem('effect')),
+    'sakura',
+  )
+  check(
+    '特效 Canvas 不拦截指针事件',
+    await page
+      .locator('canvas[data-effect="sakura"]')
+      .evaluate((element) => getComputedStyle(element).pointerEvents === 'none'),
+  )
+  await page.screenshot({ path: path.join(SHOTS, 't3-10-effect-dialog.png') })
+  await effectDialog.getByRole('button', { name: '完成' }).click()
+  await sleep(400)
+  await page.screenshot({ path: path.join(SHOTS, 't3-11-effect-sakura.png') })
+
+  await page.reload({ waitUntil: 'load' })
+  await page
+    .getByRole('heading', { name: '把刷题，变成每天的小进步' })
+    .waitFor({ timeout: 15000 })
+  await page
+    .locator('canvas[data-effect="sakura"]')
+    .waitFor({ timeout: 5000 })
+  check('刷新后特效保持', true)
+
+  await openHeaderMenu(page)
+  await page.getByRole('button', { name: '外观', exact: true }).click()
+  const switchDialog = page.locator('dialog[open]')
+  await switchDialog.waitFor({ timeout: 5000 })
+  await switchDialog.getByRole('button', { name: '动态线条', exact: true }).click()
+  check(
+    '切换特效只保留一个 Canvas',
+    (await page.locator('canvas[data-effect]').count()) === 1 &&
+      (await page.locator('canvas[data-effect="lines"]').count()) === 1,
+  )
+
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page
+    .waitForFunction(() => document.querySelector('canvas[data-effect]') === null, null, {
+      timeout: 5000,
+    })
+  check('减少动态效果时不渲染 Canvas', true)
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
+  await page
+    .locator('canvas[data-effect="lines"]')
+    .waitFor({ timeout: 5000 })
+  check('恢复动态效果后重新渲染', true)
+
+  await switchDialog.getByRole('button', { name: '关闭特效', exact: true }).click()
+  check(
+    '关闭特效后移除 Canvas',
+    (await page.locator('canvas[data-effect]').count()) === 0,
+  )
+  equal(
+    '关闭特效写入 localStorage',
+    await page.evaluate(() => localStorage.getItem('effect')),
+    'none',
+  )
+  await switchDialog.getByRole('button', { name: '完成' }).click()
+
   console.log('  · E6 键盘快捷键')
   await goHome(page)
   await startBank(page, 'Web前端题库')
@@ -861,6 +1045,7 @@ async function runMobileFlow(browser, options, label, startAtDark) {
     check(`${label} 深色背景非白色`, background !== 'rgb(255, 255, 255)', background)
   }
   await noOverflow(page, `${label} 首页`)
+  await sleep(950)
   await page.screenshot({
     path: path.join(SHOTS, `t4-${label}-home.png`),
   })
@@ -988,7 +1173,7 @@ async function runMobileFlow(browser, options, label, startAtDark) {
 
   await openHeaderMenu(page)
   await page.getByRole('link', { name: '收藏夹' }).click()
-  await page.getByRole('heading', { name: '收藏夹' }).waitFor({ timeout: 5000 })
+  await page.getByRole('heading', { name: '收藏夹', exact: true }).waitFor({ timeout: 5000 })
   check(
     `${label} 收藏夹显示空状态`,
     await page.getByText('收藏夹是空的').isVisible(),

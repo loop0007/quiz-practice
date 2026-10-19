@@ -13,6 +13,8 @@ import { fileURLToPath } from 'node:url'
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const SRC = path.join(ROOT, 'src')
 const EXTENSIONS = ['.ts', '.tsx', '.js', '.jsx', '.css', '.json']
+// Vite 可通过 ?url 直接 import 图片，解析大小写时也要覆盖这些扩展名。
+const ASSET_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.svg', '.webp', '.gif']
 const failures = []
 
 function walk(dir) {
@@ -47,7 +49,7 @@ function exactCaseExists(absPath) {
 function resolveLocal(absBase) {
   const candidates = [
     absBase,
-    ...EXTENSIONS.map((extension) => `${absBase}${extension}`),
+    ...[...EXTENSIONS, ...ASSET_EXTENSIONS].map((extension) => `${absBase}${extension}`),
     ...EXTENSIONS.map((extension) => path.join(absBase, `index${extension}`)),
   ]
   for (const candidate of candidates) {
@@ -68,7 +70,10 @@ const FATAL_PATTERNS = [
   { re: /file:\/\//, label: 'file:// 引用' },
 ]
 
-const sourceFiles = walk(SRC)
+// 只检查文本源文件；图片等二进制资源不参与调试残留/路径扫描。
+const sourceFiles = walk(SRC).filter((file) =>
+  EXTENSIONS.includes(path.extname(file).toLowerCase()),
+)
 let checkedImports = 0
 
 for (const file of sourceFiles) {
@@ -98,9 +103,11 @@ for (const file of sourceFiles) {
       continue
     }
 
-    const absBase = spec.startsWith('@/')
-      ? path.join(SRC, spec.slice(2))
-      : path.resolve(path.dirname(file), spec)
+    // 去掉 Vite 的 ?url / ?raw 等查询后缀后再按实际文件名比对。
+    const specPath = spec.split('?')[0]
+    const absBase = specPath.startsWith('@/')
+      ? path.join(SRC, specPath.slice(2))
+      : path.resolve(path.dirname(file), specPath)
 
     if (!resolveLocal(absBase)) {
       failures.push(

@@ -5,7 +5,6 @@ import {
   ArrowLeft,
   Loader2,
   Play,
-  RotateCcw,
   SlidersHorizontal,
 } from 'lucide-react'
 import { getBank, getBankQuestions } from '@/lib/banks'
@@ -105,16 +104,6 @@ export default function BankDetailPage() {
     }
   }
 
-  function handleRestart() {
-    if (!bank) return
-    if (
-      !window.confirm('重新开始会新建一次练习，上次未完成的进度将无法继续。确定吗？')
-    ) {
-      return
-    }
-    void startPractice(getBankQuestions(bank.id).map((question) => question.id))
-  }
-
   return (
     <section>
       <Link
@@ -125,62 +114,47 @@ export default function BankDetailPage() {
         题库
       </Link>
 
-      <div className="mt-4 grid gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(20rem,0.95fr)] lg:items-start lg:gap-8">
-        <div>
-          <p className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.22em] text-blue-700 uppercase dark:text-blue-300">
-            <span
-              aria-hidden="true"
-              className="inline-block size-1.5 rounded-full bg-blue-500"
-            />
-            Selected Bank
-          </p>
-          <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight sm:text-5xl">
-            {bank.name}
-          </h1>
-          <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-            选择章节与题型，开始一轮练习。
-          </p>
+      <div className="mx-auto mt-6 max-w-2xl text-center">
+        <p className="flex items-center justify-center gap-2 text-[11px] font-semibold tracking-[0.22em] text-blue-700 uppercase dark:text-blue-300">
+          <span
+            aria-hidden="true"
+            className="inline-block size-1.5 rounded-full bg-blue-500"
+          />
+          Selected Bank
+        </p>
+        <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight sm:text-5xl">
+          {bank.name}
+        </h1>
+        <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+          选择章节与题型，开始一轮练习。
+        </p>
+      </div>
 
-          {activeSession && (
-            <div className="mt-5 rounded-[1.5rem] border border-amber-200/80 bg-amber-50/70 p-4 shadow-sm backdrop-blur dark:border-amber-900 dark:bg-amber-950/30">
-              <p className="text-sm font-medium text-amber-900 dark:text-amber-200">
-                有一轮未完成的练习
-              </p>
-              <p className="mt-1 text-xs text-amber-800/80 dark:text-amber-300/80">
-                {formatStartedAt(activeSession.startedAt)} 开始，已答{' '}
-                {Object.keys(activeSession.answers).length} /{' '}
-                {activeSession.questionIds.length}
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => navigate(`/practice/${activeSession.id}`)}
-                  className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full bg-blue-600 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
-                >
-                  <Play className="size-4" aria-hidden="true" />
-                  继续上次
-                </button>
-                <button
-                  type="button"
-                  onClick={handleRestart}
-                  disabled={pending}
-                  className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border border-amber-300/80 bg-white/60 px-4 text-sm font-medium text-amber-900 hover:bg-white disabled:opacity-60 dark:border-amber-800 dark:bg-slate-900/40 dark:text-amber-200 dark:hover:bg-slate-900/70"
-                >
-                  <RotateCcw className="size-4" aria-hidden="true" />
-                  重新开始
-                </button>
-              </div>
-            </div>
-          )}
+      <aside className="mx-auto mt-7 max-w-2xl rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-5 shadow-soft backdrop-blur-sm sm:p-6 dark:border-slate-700/70 dark:bg-slate-900/80">
+        <h2 className="flex items-center justify-center gap-2 font-display text-xl font-semibold">
+          <SlidersHorizontal className="size-4 text-blue-600 dark:text-blue-300" aria-hidden="true" />
+          练习设置
+        </h2>
 
-        </div>
+        {activeSession && (
+          <button
+            type="button"
+            onClick={() => navigate(`/practice/${activeSession.id}`)}
+            className="mt-5 flex min-h-12 w-full flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-2xl border border-amber-300/80 bg-amber-50/70 px-4 py-2.5 text-left transition-colors hover:border-amber-400 hover:bg-amber-100/80 dark:border-amber-800 dark:bg-amber-950/30 dark:hover:border-amber-700 dark:hover:bg-amber-950/50"
+          >
+            <span className="inline-flex items-center gap-2 text-sm font-medium text-amber-900 dark:text-amber-200">
+              <Play className="size-4" aria-hidden="true" />
+              继续上次练习
+            </span>
+            <span className="text-xs text-amber-800/80 dark:text-amber-300/80">
+              {formatStartedAt(activeSession.startedAt)} · 已答{' '}
+              {Object.keys(activeSession.answers).length} /{' '}
+              {activeSession.questionIds.length}
+            </span>
+          </button>
+        )}
 
-        <aside className="rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-5 shadow-soft backdrop-blur-sm sm:p-6 dark:border-slate-700/70 dark:bg-slate-900/80 lg:sticky lg:top-24">
-          <h2 className="flex items-center gap-2 font-display text-xl font-semibold">
-            <SlidersHorizontal className="size-4 text-blue-600 dark:text-blue-300" aria-hidden="true" />
-            练习设置
-          </h2>
-          <label
+        <label
             htmlFor="chapter-filter"
             className="mt-5 block text-sm font-medium"
           >
@@ -267,8 +241,7 @@ export default function BankDetailPage() {
             )}
             开始练习
           </button>
-        </aside>
-      </div>
+      </aside>
     </section>
   )
 }

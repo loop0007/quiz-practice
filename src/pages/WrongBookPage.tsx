@@ -6,11 +6,13 @@ import {
   BookOpenCheck,
   CheckCircle2,
   CheckSquare,
+  ChevronDown,
   ListChecks,
   Loader2,
   Trash2,
   XCircle,
 } from 'lucide-react'
+import CollapsibleGroup from '@/components/CollapsibleGroup'
 import MarkdownContent from '@/components/MarkdownContent'
 import SelectionCheckbox from '@/components/SelectionCheckbox'
 import { banks, getQuestion } from '@/lib/banks'
@@ -88,7 +90,7 @@ function AnswerKeys({
       : 'border-green-200 bg-green-50 text-green-700 dark:border-green-900 dark:bg-green-950/40 dark:text-green-300'
 
   return (
-    <ul className="mt-1 space-y-1.5">
+    <ul className="mt-0.5 space-y-1">
       {keys.map((key) => {
         const option = question.options.find((item) => item.key === key)
         return (
@@ -131,7 +133,7 @@ function WrongItem({
 
   if (!question) {
     return (
-      <article className="rounded-[var(--radius-card)] border border-amber-200 bg-amber-50/60 p-5 shadow-sm backdrop-blur-sm dark:border-amber-900 dark:bg-amber-950/30">
+      <article className="rounded-[var(--radius-card)] border border-amber-200 bg-amber-50/60 p-3.5 shadow-sm backdrop-blur-sm sm:p-4 dark:border-amber-900 dark:bg-amber-950/30">
         <header className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             {selectable && (
@@ -159,7 +161,7 @@ function WrongItem({
         <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
           记录 ID：{entry.questionId}
         </p>
-        <div className="mt-3 text-sm">
+        <div className="mt-2 text-sm">
           <span className="font-medium text-slate-600 dark:text-slate-300">你的答案：</span>
           <span className="text-red-700 dark:text-red-300">
             {entry.selected.join('、') || '未作答'}
@@ -175,8 +177,8 @@ function WrongItem({
   }
 
   return (
-    <article className="rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-5 shadow-soft backdrop-blur-sm dark:border-slate-700/70 dark:bg-slate-900/80">
-      <header className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-slate-200 pb-2.5 dark:border-slate-700">
+    <article className="hover-lift rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-3.5 shadow-soft backdrop-blur-sm sm:p-4 dark:border-slate-700/70 dark:bg-slate-900/80">
+      <header className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-slate-200 pb-2 dark:border-slate-700">
         <div className="flex items-center gap-2">
           {selectable && (
             <SelectionCheckbox
@@ -197,11 +199,11 @@ function WrongItem({
         </span>
       </header>
 
-      <MarkdownContent className="mt-3 text-sm leading-relaxed">
+      <MarkdownContent className="mt-2 text-sm leading-relaxed">
         {question.stem}
       </MarkdownContent>
 
-      <div className="mt-3 grid gap-3 rounded-2xl bg-slate-50/90 p-3.5 sm:grid-cols-2 dark:bg-slate-950/50">
+      <div className="mt-2 grid gap-2 rounded-2xl bg-slate-50/90 p-2.5 sm:grid-cols-2 dark:bg-slate-950/50">
         <div>
           <p className="flex items-center gap-1 text-xs font-medium text-red-700 dark:text-red-300">
             <XCircle className="size-3.5" aria-hidden="true" />
@@ -218,7 +220,7 @@ function WrongItem({
         </div>
       </div>
 
-      <div className="mt-3 border-t border-slate-200 pt-3 dark:border-slate-700">
+      <div className="mt-2 border-t border-slate-200 pt-2 dark:border-slate-700">
         <p className="text-xs font-medium text-slate-500 dark:text-slate-400">解析</p>
         {question.explanation ? (
           <MarkdownContent className="mt-1 text-sm text-slate-700 dark:text-slate-200">
@@ -230,7 +232,7 @@ function WrongItem({
       </div>
 
       {entry.wrongCount > 1 && (
-        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+        <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
           累计答错 {entry.wrongCount} 次，最近一次 {formatTime(entry.lastWrongAt)}
         </p>
       )}
@@ -248,6 +250,7 @@ export default function WrongBookPage() {
   const [batchMode, setBatchMode] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [batchPending, setBatchPending] = useState(false)
+  const [expandedBanks, setExpandedBanks] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     let cancelled = false
@@ -275,6 +278,32 @@ export default function WrongBookPage() {
     [entries],
   )
   const allSelected = allIds.length > 0 && selectedIds.size === allIds.length
+  const allGroupsExpanded =
+    groups.length > 0 && groups.every((group) => expandedBanks.has(group.bankId))
+
+  function toggleGroup(bankId: string) {
+    setExpandedBanks((previous) => {
+      const next = new Set(previous)
+      if (next.has(bankId)) next.delete(bankId)
+      else next.add(bankId)
+      return next
+    })
+  }
+
+  function toggleAllGroups() {
+    setExpandedBanks(
+      allGroupsExpanded ? new Set() : new Set(groups.map((group) => group.bankId)),
+    )
+  }
+
+  function toggleBatchMode() {
+    // 进入批量管理时展开全部分组，避免隐藏的题目无法勾选。
+    if (!batchMode) {
+      setExpandedBanks(new Set(groups.map((group) => group.bankId)))
+    }
+    setBatchMode(!batchMode)
+    setSelectedIds(new Set())
+  }
 
   function toggleSelect(questionId: string) {
     setSelectedIds((previous) => {
@@ -356,22 +385,37 @@ export default function WrongBookPage() {
 
   if (!entries || entries.length === 0) {
     return (
-      <section className="rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-10 text-center shadow-soft backdrop-blur-sm dark:border-slate-700/70 dark:bg-slate-900/80">
-        <BookOpenCheck
-          className="mx-auto size-10 text-green-600 dark:text-green-400"
-          aria-hidden="true"
-        />
-        <h1 className="mt-3 font-display text-xl font-semibold">错题本是空的</h1>
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-          练习中答错的题会自动收进这里，方便以后集中复习。
-        </p>
-        <Link
-          to="/banks"
-          className="mt-5 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-blue-600 px-5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
-        >
-          <ArrowLeft className="size-4" aria-hidden="true" />
-          去刷题
-        </Link>
+      <section>
+        <header className="mb-5">
+          <p className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.22em] text-blue-700 uppercase dark:text-blue-300">
+            <span
+              aria-hidden="true"
+              className="inline-block size-1.5 rounded-full bg-blue-500"
+            />
+            Review · Mistakes
+          </p>
+          <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight sm:text-5xl">
+            错题本
+          </h1>
+        </header>
+
+        <div className="rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-10 text-center shadow-soft backdrop-blur-sm dark:border-slate-700/70 dark:bg-slate-900/80">
+          <BookOpenCheck
+            className="mx-auto size-10 text-green-600 dark:text-green-400"
+            aria-hidden="true"
+          />
+          <h2 className="mt-3 font-display text-xl font-semibold">错题本是空的</h2>
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+            练习中答错的题会自动收进这里，方便以后集中复习。
+          </p>
+          <Link
+            to="/banks"
+            className="mt-5 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-blue-600 px-5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+          >
+            <ArrowLeft className="size-4" aria-hidden="true" />
+            去刷题
+          </Link>
+        </div>
       </section>
     )
   }
@@ -397,10 +441,18 @@ export default function WrongBookPage() {
           </span>
           <button
             type="button"
-            onClick={() => {
-              setBatchMode((mode) => !mode)
-              setSelectedIds(new Set())
-            }}
+            onClick={toggleAllGroups}
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-slate-200/90 bg-white/70 px-4 text-sm font-medium transition-colors hover:bg-white hover:text-blue-700 dark:border-slate-700 dark:bg-slate-900/60 dark:hover:bg-slate-800 dark:hover:text-blue-300"
+          >
+            <ChevronDown
+              className={`size-4 transition-transform ${allGroupsExpanded ? 'rotate-180' : ''}`}
+              aria-hidden="true"
+            />
+            {allGroupsExpanded ? '收起全部' : '展开全部'}
+          </button>
+          <button
+            type="button"
+            onClick={toggleBatchMode}
             aria-pressed={batchMode}
             className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-slate-200/90 bg-white/70 px-4 text-sm font-medium transition-colors hover:bg-white hover:text-blue-700 dark:border-slate-700 dark:bg-slate-900/60 dark:hover:bg-slate-800 dark:hover:text-blue-300"
           >
@@ -420,23 +472,20 @@ export default function WrongBookPage() {
         </div>
       )}
 
-      <div className="mt-5 space-y-6">
+      <div className="mt-3 space-y-2.5">
         {groups.map((group) => {
           const assembleIds = getWrongBookQuestionIds(group.entries, group.bankId)
 
           return (
-            <section key={group.bankId} aria-labelledby={`bank-${group.bankId}`}>
-              <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2 px-1">
-                <h2
-                  id={`bank-${group.bankId}`}
-                  className="flex items-baseline gap-2"
-                >
-                  <span className="text-sm font-semibold">{group.name}</span>
-                  <span className="text-xs tabular-nums text-slate-500 dark:text-slate-400">
-                    {group.entries.length} 题
-                  </span>
-                </h2>
-                {assembleIds.length > 0 && (
+            <CollapsibleGroup
+              key={group.bankId}
+              headingId={`bank-${group.bankId}`}
+              title={group.name}
+              countText={`${group.entries.length} 题`}
+              expanded={expandedBanks.has(group.bankId)}
+              onToggle={() => toggleGroup(group.bankId)}
+              action={
+                assembleIds.length > 0 ? (
                   <button
                     type="button"
                     onClick={() => void handleAssemble(group)}
@@ -450,20 +499,19 @@ export default function WrongBookPage() {
                     )}
                     错题组卷（{assembleIds.length} 题）
                   </button>
-                )}
-              </div>
-              <div className="space-y-3">
-                {group.entries.map((entry) => (
-                  <WrongItem
-                    key={entry.questionId}
-                    entry={entry}
-                    selectable={batchMode}
-                    selected={selectedIds.has(entry.questionId)}
-                    onToggle={() => toggleSelect(entry.questionId)}
-                  />
-                ))}
-              </div>
-            </section>
+                ) : null
+              }
+            >
+              {group.entries.map((entry) => (
+                <WrongItem
+                  key={entry.questionId}
+                  entry={entry}
+                  selectable={batchMode}
+                  selected={selectedIds.has(entry.questionId)}
+                  onToggle={() => toggleSelect(entry.questionId)}
+                />
+              ))}
+            </CollapsibleGroup>
           )
         })}
       </div>

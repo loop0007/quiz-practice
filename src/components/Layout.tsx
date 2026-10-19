@@ -3,16 +3,25 @@ import { Link, Outlet, useLocation } from 'react-router-dom'
 import {
   BookOpenCheck,
   CircleHelp,
+  Download,
   Menu,
   MessageSquarePlus,
   Palette,
   X,
 } from 'lucide-react'
 import { getWallpaper } from '@/lib/db'
+import {
+  getInstallPrompt,
+  isInstalled,
+  subscribeInstallPrompt,
+  type BeforeInstallPromptEvent,
+} from '@/lib/install'
 import { applyWallpaper, readStoredWallpaper } from '@/lib/wallpaper'
 import AppearanceDialog from './AppearanceDialog'
+import BackgroundEffects from './effects/BackgroundEffects'
 import FeedbackDialog from './FeedbackDialog'
 import HelpDialog from './HelpDialog'
+import InstallDialog from './InstallDialog'
 import ThemeToggle from './ThemeToggle'
 
 export default function Layout() {
@@ -21,7 +30,20 @@ export default function Layout() {
   const [appearanceOpen, setAppearanceOpen] = useState(false)
   const [feedbackOpen, setFeedbackOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
+  const [installOpen, setInstallOpen] = useState(false)
+  const [installPrompt, setInstallPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null)
+  const [installed, setInstalled] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    setInstallPrompt(getInstallPrompt())
+    setInstalled(isInstalled())
+    return subscribeInstallPrompt(() => {
+      setInstallPrompt(getInstallPrompt())
+      setInstalled(isInstalled())
+    })
+  }, [])
 
   useEffect(() => {
     setMenuOpen(false)
@@ -99,7 +121,10 @@ export default function Layout() {
         <div className="absolute -left-48 top-1/3 size-[28rem] rounded-full bg-amber-200/35 blur-3xl dark:bg-amber-950/20" />
       </div>
 
-      <header className="sticky top-0 z-40 px-3 pt-3 sm:px-4">
+      {/* 动态特效层位于壁纸之上、正文之下；关闭或减少动态效果时不渲染。 */}
+      <BackgroundEffects />
+
+      <header className="app-topbar sticky top-0 z-40 px-3 pt-3 sm:px-4">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-2 rounded-full border border-slate-200/80 bg-white/80 px-3 shadow-soft backdrop-blur-xl sm:px-5 dark:border-slate-700/70 dark:bg-slate-900/75">
           <Link
             to="/"
@@ -195,6 +220,19 @@ export default function Layout() {
                         <CircleHelp className="size-4" aria-hidden="true" />
                         使用说明
                       </button>
+                      {!installed && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setMenuOpen(false)
+                            setInstallOpen(true)
+                          }}
+                          className="inline-flex min-h-11 items-center gap-2 rounded-2xl px-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+                        >
+                          <Download className="size-4" aria-hidden="true" />
+                          下载为应用
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={() => {
@@ -236,9 +274,21 @@ export default function Layout() {
       <main
         id="main-content"
         tabIndex={-1}
-        className="mx-auto max-w-5xl px-4 py-7 focus:outline-none sm:px-6 sm:py-10"
+        className="relative z-10 mx-auto max-w-5xl px-4 py-7 focus:outline-none sm:px-6 sm:py-10"
       >
-        <Outlet />
+        {/* 路由切换时重新挂载容器以重播动画；首页沿用标题错峰动画，答题页因含 fixed 底栏只淡入。 */}
+        <div
+          key={pathname}
+          className={
+            pathname === '/'
+              ? undefined
+              : pathname.startsWith('/practice')
+                ? 'animate-page-fade'
+                : 'animate-page-in'
+          }
+        >
+          <Outlet />
+        </div>
       </main>
 
       {appearanceOpen && (
@@ -246,6 +296,12 @@ export default function Layout() {
       )}
       {feedbackOpen && <FeedbackDialog onClose={() => setFeedbackOpen(false)} />}
       {helpOpen && <HelpDialog onClose={() => setHelpOpen(false)} />}
+      {installOpen && (
+        <InstallDialog
+          canInstall={installPrompt !== null}
+          onClose={() => setInstallOpen(false)}
+        />
+      )}
     </div>
   )
 }

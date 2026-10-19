@@ -53,6 +53,12 @@
   --shadow-soft: 0 22px 60px -32px rgb(74 52 28 / 0.32);
   --shadow-lift: 0 28px 70px -34px rgb(74 52 28 / 0.42);
   --animate-float-slow: float-slow 10s ease-in-out infinite;
+  /* backwards 让结束帧回到元素默认样式，避免长期保留 GPU 位移层。 */
+  --animate-fade-in-up: fade-in-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  /* 页面切换复用同一组 keyframes，时长更短，避免每次导航等待过久。 */
+  --animate-page-in: fade-in-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  /* 答题页含 fixed 底部操作栏，只淡入不位移，避免动画期间 fixed 参照系改变。 */
+  --animate-page-fade: page-fade 0.3s ease-out backwards;
   --spacing-safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
@@ -63,6 +69,27 @@
   }
   50% {
     transform: translate3d(0, -12px, 0);
+  }
+}
+
+/* 首屏文字与行动按钮：轻微上移并淡入，延迟由元素上的 animation-delay 控制。 */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes page-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
@@ -95,6 +122,23 @@ html.dark body {
 ::selection {
   background-color: var(--color-brand-bright);
   color: #fffdf7;
+}
+
+/* 悬停上浮：卡片抬起 4px 并增强阴影，移开后沿同一缓动平滑回落。 */
+.hover-lift {
+  transition:
+    transform 250ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 250ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 250ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hover-lift:hover {
+    position: relative;
+    z-index: 1;
+    transform: translateY(-3px);
+    box-shadow: 0 20px 35px -5px rgb(74 52 28 / 0.3);
+  }
 }
 
 /* StyleKit 式细网格：只作背景纹理，不参与布局与交互。 */
@@ -153,11 +197,12 @@ html.dark.has-wallpaper body::before {
     var(--wallpaper-image);
 }
 
-html.has-wallpaper header > div {
+/* 只加不透明底给顶部导航，页面内 <header> 的标题区保持透明，避免壁纸下出现黑框。 */
+html.has-wallpaper header.app-topbar > div {
   background-color: rgb(255 252 245 / 0.82);
 }
 
-html.dark.has-wallpaper header > div {
+html.dark.has-wallpaper header.app-topbar > div {
   background-color: rgb(32 28 23 / 0.82);
 }
 
@@ -177,8 +222,16 @@ html.dark.has-wallpaper header > div {
   ::before,
   ::after {
     animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  /* 减少动态效果时保留阴影反馈，但不做位移与过渡。 */
+  .hover-lift,
+  .hover-lift:hover {
+    transition: none !important;
+    transform: none !important;
   }
 }

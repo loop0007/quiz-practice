@@ -1,6 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="在线刷题">
-  <rect width="64" height="64" rx="14" fill="#2563eb"/>
-  <path d="M18 18h18a6 6 0 0 1 6 6v22H24a6 6 0 0 1-6-6V18Z" fill="none" stroke="#fff" stroke-width="4" stroke-linejoin="round"/>
-  <path d="M42 24h4a2 2 0 0 1 2 2v22H30" fill="none" stroke="#fff" stroke-width="4" stroke-linejoin="round"/>
-  <path d="m25 31 4 4 8-8" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="32" cy="32" r="32" fill="#c2410c"/>
+  <g transform="translate(16 16) scale(1.3333)" fill="none" stroke="#fffcf5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 5v16"/>
+    <path d="m16 12 2 2 4-4"/>
+    <path d="M22 6V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2h4.001A2 2 0 0022 17v-1.344"/>
+  </g>
 </svg>

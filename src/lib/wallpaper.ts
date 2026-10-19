@@ -2,7 +2,9 @@
  * E5 壁纸：只把 CSS 变量与 has-wallpaper 类写到根元素，不改动页面结构。
  * 选择存 localStorage；自定义图片由 db 层存 IndexedDB，避免占用 localStorage 配额。
  */
-export type WallpaperId = 'none' | 'aurora' | 'dusk' | 'meadow' | 'custom'
+import skyWallpaper from '@/assets/wallpaper-sky.jpg?url'
+
+export type WallpaperId = 'none' | 'aurora' | 'dusk' | 'meadow' | 'sky' | 'custom'
 
 export interface WallpaperPreset {
   id: Exclude<WallpaperId, 'none' | 'custom'>
@@ -14,6 +16,11 @@ export const WALLPAPER_STORAGE_KEY = 'wallpaper'
 export const MAX_WALLPAPER_BYTES = 5 * 1024 * 1024
 
 export const WALLPAPER_PRESETS: WallpaperPreset[] = [
+  {
+    id: 'sky',
+    label: '云霞',
+    css: `url("${skyWallpaper}")`,
+  },
   {
     id: 'aurora',
     label: '晨曦',

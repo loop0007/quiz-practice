@@ -7,6 +7,7 @@ import {
 } from 'react'
 import { Check, ImagePlus, Loader2, Trash2, X } from 'lucide-react'
 import { getWallpaper, removeWallpaper, saveWallpaper } from '@/lib/db'
+import { EFFECT_PRESETS } from '@/lib/effects'
 import {
   applyWallpaper,
   readStoredWallpaper,
@@ -14,6 +15,8 @@ import {
   WALLPAPER_PRESETS,
   type WallpaperId,
 } from '@/lib/wallpaper'
+import { useEffectStore } from '@/store/useEffectStore'
+import EffectPreview from './effects/EffectPreview'
 
 interface AppearanceDialogProps {
   onClose: () => void
@@ -43,6 +46,8 @@ export default function AppearanceDialog({ onClose }: AppearanceDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [selected, setSelected] = useState<WallpaperId>(readStoredWallpaper)
+  const effect = useEffectStore((state) => state.effect)
+  const setEffect = useEffectStore((state) => state.setEffect)
   const [customDataUrl, setCustomDataUrl] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -128,7 +133,7 @@ export default function AppearanceDialog({ onClose }: AppearanceDialogProps) {
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose()
       }}
-      className="m-auto w-[min(92vw,30rem)] rounded-[1.75rem] border border-slate-200 bg-white/95 p-0 text-slate-900 shadow-2xl backdrop:bg-slate-950/45 backdrop:backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/95 dark:text-slate-100"
+      className="m-auto max-h-[90dvh] w-[min(92vw,30rem)] overflow-y-auto overscroll-contain rounded-[1.75rem] border border-slate-200 bg-white/95 p-0 text-slate-900 shadow-2xl backdrop:bg-slate-950/45 backdrop:backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/95 dark:text-slate-100"
     >
       <div className="flex items-start justify-between gap-3 border-b border-slate-200/80 px-5 py-4 dark:border-slate-700">
         <div>
@@ -136,7 +141,7 @@ export default function AppearanceDialog({ onClose }: AppearanceDialogProps) {
             外观
           </h2>
           <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-            壁纸只保存在本机浏览器，不影响答题记录
+            壁纸与特效只保存在本机浏览器，不影响答题记录
           </p>
         </div>
         <button
@@ -280,6 +285,40 @@ export default function AppearanceDialog({ onClose }: AppearanceDialogProps) {
             {error}
           </p>
         )}
+
+        <div className="mt-5 border-t border-slate-200/80 pt-5 dark:border-slate-700">
+          <h3 className="text-sm font-medium">动态特效</h3>
+          <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+            可叠加在任意壁纸上，同一时间只启用一种；开启系统“减少动态效果”时不播放。
+          </p>
+
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {EFFECT_PRESETS.map((preset) => {
+              const active = effect === preset.id
+              return (
+                <button
+                  key={preset.id}
+                  type="button"
+                  onClick={() => setEffect(preset.id)}
+                  aria-pressed={active}
+                  title={preset.description}
+                  className={optionClass(active)}
+                >
+                  <EffectPreview id={preset.id} />
+                  <span className="flex w-full items-center justify-between gap-1 px-2 py-1.5 text-xs font-medium">
+                    {preset.label}
+                    {active && (
+                      <Check
+                        className="size-3.5 shrink-0 text-blue-600 dark:text-blue-400"
+                        aria-hidden="true"
+                      />
+                    )}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
 
         <div className="mt-4 flex justify-end">
           <button

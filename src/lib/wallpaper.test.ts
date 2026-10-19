@@ -13,6 +13,7 @@ describe('壁纸选择', () => {
     expect(parseWallpaperId('aurora')).toBe('aurora')
     expect(parseWallpaperId('dusk')).toBe('dusk')
     expect(parseWallpaperId('meadow')).toBe('meadow')
+    expect(parseWallpaperId('sky')).toBe('sky')
     expect(parseWallpaperId('custom')).toBe('custom')
     expect(parseWallpaperId(null)).toBe('none')
     expect(parseWallpaperId('')).toBe('none')

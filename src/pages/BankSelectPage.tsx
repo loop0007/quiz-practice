@@ -44,13 +44,10 @@ export default function BankSelectPage() {
           <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight sm:text-5xl">
             题库
           </h1>
-          <p className="mt-2 max-w-xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-            两套本地题库，覆盖 Java 与 Web 前端。按章节筛选、逐题判分、错题重练，学习记录只留在你的浏览器里。
-          </p>
         </div>
         <Link
           to="/"
-          className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-slate-200/90 bg-white/70 px-4 text-sm font-medium shadow-sm backdrop-blur transition-colors hover:border-blue-300 hover:bg-white hover:text-blue-700 dark:border-slate-700 dark:bg-slate-900/60 dark:hover:border-blue-700 dark:hover:text-blue-300"
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-slate-200/90 bg-white/70 px-4 text-sm font-medium backdrop-blur transition-colors hover:border-blue-300 hover:bg-white hover:text-blue-700 dark:border-slate-700 dark:bg-slate-900/60 dark:hover:border-blue-700 dark:hover:text-blue-300"
         >
           返回首页
         </Link>
@@ -64,7 +61,7 @@ export default function BankSelectPage() {
             aria-label={`进入${bank.name}`}
             className="group block rounded-[var(--radius-card)] focus-visible:outline-offset-4"
           >
-            <article className="relative flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-5 shadow-soft backdrop-blur-sm transition duration-300 group-hover:-translate-y-1 group-hover:border-blue-300/80 group-hover:shadow-lift sm:p-6 dark:border-slate-700/70 dark:bg-slate-900/80 dark:group-hover:border-blue-700">
+            <article className="hover-lift relative flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] border border-slate-200/80 bg-white/85 p-5 shadow-soft backdrop-blur-sm group-hover:border-blue-300/80 sm:p-6 dark:border-slate-700/70 dark:bg-slate-900/80 dark:group-hover:border-blue-700">
               <span
                 aria-hidden="true"
                 className="editorial-ornament pointer-events-none absolute -right-1 -top-7 text-[7.5rem]"

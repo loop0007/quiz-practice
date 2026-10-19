@@ -46,14 +46,24 @@ export default function HomePage() {
     <section>
       <div className="relative grid gap-9 pb-10 pt-4 lg:grid-cols-[minmax(0,1.08fr)_minmax(18rem,0.92fr)] lg:items-center lg:gap-12 lg:pb-16 lg:pt-8">
         <div>
-          <p className="flex flex-wrap items-center gap-2 text-[11px] font-semibold tracking-[0.22em] text-blue-700 uppercase dark:text-blue-300">
+          {/* 首屏文案与按钮以约 70–90ms 的延迟差依次淡入上移。 */}
+          <p
+            className="animate-fade-in-up flex flex-wrap items-center gap-2 text-[11px] font-semibold tracking-[0.22em] text-blue-700 uppercase dark:text-blue-300"
+            style={{ animationDelay: '40ms' }}
+          >
             <Sparkles className="size-3.5" aria-hidden="true" />
             Java · Web · Learn by doing
           </p>
-          <h1 className="mt-4 max-w-2xl font-display text-[clamp(2.6rem,6.5vw,4.6rem)] leading-[1.04] font-semibold tracking-tight text-balance">
+          <h1
+            className="animate-fade-in-up mt-4 max-w-2xl font-display text-[clamp(2.6rem,6.5vw,4.6rem)] leading-[1.04] font-semibold tracking-tight text-balance"
+            style={{ animationDelay: '120ms' }}
+          >
             把刷题，变成每天的小进步
           </h1>
-          <div className="mt-7 flex flex-wrap items-center gap-2.5">
+          <div
+            className="animate-fade-in-up mt-7 flex flex-wrap items-center gap-2.5"
+            style={{ animationDelay: '210ms' }}
+          >
             <Link
               to="/banks"
               className="inline-flex min-h-12 items-center gap-2 rounded-full bg-blue-600 px-6 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700"
